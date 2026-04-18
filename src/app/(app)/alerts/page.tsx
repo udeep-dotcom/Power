@@ -3,7 +3,7 @@ import { useState } from "react";
 import TopBar from "@/components/layout/TopBar";
 import { alerts, projects } from "@/lib/data";
 import { getSeverityColor, cn } from "@/lib/utils";
-import { AlertTriangle, CheckCircle2, Bell, Wrench, Zap, Info, Shield, Filter } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Bell, Wrench, Zap, Shield, Send, Loader } from "lucide-react";
 
 type Filter = "all" | "active" | "resolved";
 type TypeFilter = "all" | "critical" | "warning" | "info";
@@ -19,6 +19,25 @@ export default function AlertsPage() {
   const [filter, setFilter] = useState<Filter>("active");
   const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
   const [dismissed, setDismissed] = useState<Set<string>>(new Set());
+  const [notifying, setNotifying] = useState<string | null>(null);
+  const [notifyResults, setNotifyResults] = useState<Record<string, { sent: number; message: string }>>({});
+
+  async function triggerNotification(alertId: string) {
+    setNotifying(alertId);
+    try {
+      const res = await fetch("/api/notifications/trigger", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ alertId }),
+      });
+      const data = await res.json();
+      setNotifyResults(prev => ({ ...prev, [alertId]: { sent: data.sent ?? 0, message: data.message } }));
+    } catch {
+      setNotifyResults(prev => ({ ...prev, [alertId]: { sent: 0, message: "Failed to send notifications" } }));
+    } finally {
+      setNotifying(null);
+    }
+  }
 
   const visible = alerts.filter(a => {
     if (dismissed.has(a.id)) return false;
@@ -146,15 +165,36 @@ export default function AlertsPage() {
                     </div>
 
                     <p className="text-sm text-gray-300 leading-relaxed">{a.message}</p>
+
+                    {/* Notification result */}
+                    {notifyResults[a.id] && (
+                      <div className="mt-2 text-xs text-green-400 flex items-center gap-1">
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        {notifyResults[a.id].message}
+                      </div>
+                    )}
                   </div>
 
                   {!a.resolved && (
-                    <button
-                      onClick={() => setDismissed(prev => new Set(prev).add(a.id))}
-                      className="text-xs text-gray-500 hover:text-white bg-[#162035] border border-[#1e3a5f] rounded-lg px-3 py-1.5 shrink-0 transition-colors"
-                    >
-                      Dismiss
-                    </button>
+                    <div className="flex flex-col gap-1.5 shrink-0">
+                      <button
+                        onClick={() => triggerNotification(a.id)}
+                        disabled={notifying === a.id}
+                        className="text-xs text-blue-400 hover:text-blue-300 bg-blue-500/10 border border-blue-500/20 rounded-lg px-3 py-1.5 flex items-center gap-1.5 transition-colors disabled:opacity-50"
+                      >
+                        {notifying === a.id
+                          ? <Loader className="w-3 h-3 animate-spin" />
+                          : <Send className="w-3 h-3" />
+                        }
+                        Notify
+                      </button>
+                      <button
+                        onClick={() => setDismissed(prev => new Set(prev).add(a.id))}
+                        className="text-xs text-gray-500 hover:text-white bg-[#162035] border border-[#1e3a5f] rounded-lg px-3 py-1.5 transition-colors"
+                      >
+                        Dismiss
+                      </button>
+                    </div>
                   )}
                   {a.resolved && (
                     <div className="flex items-center gap-1 text-xs text-green-400 shrink-0">

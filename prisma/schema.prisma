@@ -1,0 +1,220 @@
+// Nepal Hydropower Reporting System — Prisma Schema
+// Default: SQLite (zero-config dev). Change provider to "postgresql" for production.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────────────
+// Auth
+// ─────────────────────────────────────────────────
+
+model Company {
+  id        String    @id @default(cuid())
+  name      String
+  createdAt DateTime  @default(now())
+  users     User[]
+  projects  Project[]
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      String   @default("ENGINEER")
+  companyId String
+  company   Company  @relation(fields: [companyId], references: [id])
+  createdAt DateTime @default(now())
+  sessions  Session[]
+  accounts  Account[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ─────────────────────────────────────────────────
+// Hydropower Projects
+// ─────────────────────────────────────────────────
+
+model Project {
+  id                String   @id @default(cuid())
+  name              String
+  location          String
+  river             String
+  installedCapacity Float
+  type              String   @default("Run-of-River")
+  status            String   @default("operational")
+  operator          String
+  commissionDate    String
+  licenseExpiry     String
+  neaTariffWet      Float
+  neaTariffDry      Float
+  designFlow        Float
+  headHeight        Float
+  turbines          Int
+  color             String   @default("#3b82f6")
+  companyId         String
+  company           Company  @relation(fields: [companyId], references: [id])
+  createdAt         DateTime @default(now())
+
+  dailyGeneration   DailyGeneration[]
+  monthlyGeneration MonthlyGeneration[]
+  alerts            Alert[]
+  maintenanceLogs   MaintenanceLog[]
+  neaSubmissions    NeaSubmission[]
+}
+
+// ─────────────────────────────────────────────────
+// Generation Data
+// ─────────────────────────────────────────────────
+
+model DailyGeneration {
+  id                String   @id @default(cuid())
+  projectId         String
+  project           Project  @relation(fields: [projectId], references: [id])
+  date              String
+  plannedGeneration Float
+  actualGeneration  Float
+  gridAvailability  Float
+  spillHours        Int      @default(0)
+  discharge         Float?
+  headLevel         Float?
+  revenue           Float
+  createdAt         DateTime @default(now())
+
+  @@unique([projectId, date])
+}
+
+model MonthlyGeneration {
+  id                String   @id @default(cuid())
+  projectId         String
+  project           Project  @relation(fields: [projectId], references: [id])
+  year              Int
+  month             Int
+  plannedGeneration Float
+  actualGeneration  Float
+  plf               Float
+  gridAvailability  Float
+  spillHours        Int      @default(0)
+  revenue           Float
+  isWetSeason       Boolean
+  createdAt         DateTime @default(now())
+
+  @@unique([projectId, year, month])
+}
+
+// ─────────────────────────────────────────────────
+// Alerts
+// ─────────────────────────────────────────────────
+
+model Alert {
+  id           String    @id @default(cuid())
+  projectId    String
+  project      Project   @relation(fields: [projectId], references: [id])
+  type         String    // maintenance | underperformance | grid | compliance
+  severity     String    // critical | warning | info
+  title        String
+  message      String
+  resolved     Boolean   @default(false)
+  resolvedAt   DateTime?
+  notified     Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+
+  notifications NotificationLog[]
+}
+
+// ─────────────────────────────────────────────────
+// Maintenance
+// ─────────────────────────────────────────────────
+
+model MaintenanceLog {
+  id             String    @id @default(cuid())
+  projectId      String
+  project        Project   @relation(fields: [projectId], references: [id])
+  date           String
+  completedDate  String?
+  type           String    // preventive | corrective
+  component      String
+  description    String
+  duration       Int?
+  estimatedDays  Int
+  technician     String
+  status         String    @default("scheduled")
+  cost           Float     @default(0)
+  generationLoss Float     @default(0)
+  createdAt      DateTime  @default(now())
+}
+
+// ─────────────────────────────────────────────────
+// NEA Submissions
+// ─────────────────────────────────────────────────
+
+model NeaSubmission {
+  id          String   @id @default(cuid())
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id])
+  year        Int
+  month       Int
+  status      String   @default("draft")   // draft | submitted | acknowledged | rejected
+  submittedAt DateTime?
+  referenceNo String?
+  reportData  String   // JSON string
+  remarks     String?
+  createdAt   DateTime @default(now())
+
+  @@unique([projectId, year, month])
+}
+
+// ─────────────────────────────────────────────────
+// Notifications
+// ─────────────────────────────────────────────────
+
+model NotificationLog {
+  id        String   @id @default(cuid())
+  alertId   String
+  alert     Alert    @relation(fields: [alertId], references: [id])
+  channel   String   // email | sms
+  recipient String
+  subject   String?
+  body      String
+  status    String   // sent | failed | pending
+  error     String?
+  createdAt DateTime @default(now())
+}

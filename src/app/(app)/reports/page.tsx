@@ -3,16 +3,46 @@ import { useState } from "react";
 import TopBar from "@/components/layout/TopBar";
 import { projects, monthlyGeneration, getProjectStats, getPortfolioSummary } from "@/lib/data";
 import { formatMWh, formatNPR, getPLFColor, cn } from "@/lib/utils";
-import { FileText, Download, Calendar, Filter, BarChart3, DollarSign, Zap, Droplets } from "lucide-react";
+import { FileText, Download, Calendar, Filter, BarChart3, DollarSign, Zap, Droplets, Send, CheckCircle2, XCircle, Loader } from "lucide-react";
 import * as XLSX from "xlsx";
 
 type ReportType = "monthly" | "annual" | "portfolio";
+type NeaStatus = "idle" | "submitting" | "success" | "error";
 
 export default function ReportsPage() {
   const [reportType, setReportType] = useState<ReportType>("monthly");
   const [selectedProject, setSelectedProject] = useState("p1");
   const [selectedMonth, setSelectedMonth] = useState("3"); // March
   const [selectedYear, setSelectedYear] = useState("2026");
+  const [neaStatus, setNeaStatus] = useState<NeaStatus>("idle");
+  const [neaResult, setNeaResult] = useState<{ referenceNo?: string; message: string } | null>(null);
+
+  async function submitToNEA() {
+    setNeaStatus("submitting");
+    setNeaResult(null);
+    try {
+      const res = await fetch("/api/nea/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          projectId: selectedProject,
+          year: parseInt(selectedYear),
+          month: parseInt(selectedMonth),
+        }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setNeaStatus("success");
+        setNeaResult({ referenceNo: data.referenceNo, message: data.message });
+      } else {
+        setNeaStatus("error");
+        setNeaResult({ message: data.message ?? data.error ?? "Submission failed" });
+      }
+    } catch {
+      setNeaStatus("error");
+      setNeaResult({ message: "Network error. Please try again." });
+    }
+  }
 
   const months = [
     "January", "February", "March", "April", "May", "June",
@@ -169,14 +199,54 @@ export default function ReportsPage() {
             <option value="2026">2026</option>
             <option value="2025">2025</option>
           </select>
-          <button
-            onClick={exportExcel}
-            className="ml-auto btn-primary text-sm font-medium px-4 py-2 rounded-xl text-white flex items-center gap-2"
-          >
-            <Download className="w-4 h-4" />
-            Export Excel
-          </button>
+          <div className="ml-auto flex items-center gap-2">
+            <button
+              onClick={exportExcel}
+              className="btn-secondary text-sm font-medium px-4 py-2 rounded-xl text-blue-400 flex items-center gap-2"
+            >
+              <Download className="w-4 h-4" />
+              Export Excel
+            </button>
+            {reportType === "monthly" && (
+              <button
+                onClick={submitToNEA}
+                disabled={neaStatus === "submitting"}
+                className="btn-primary text-sm font-medium px-4 py-2 rounded-xl text-white flex items-center gap-2 disabled:opacity-60"
+              >
+                {neaStatus === "submitting"
+                  ? <><Loader className="w-4 h-4 animate-spin" /> Submitting…</>
+                  : <><Send className="w-4 h-4" /> Submit to NEA</>
+                }
+              </button>
+            )}
+          </div>
         </div>
+
+        {/* NEA submission result */}
+        {neaResult && (
+          <div className={cn(
+            "rounded-xl px-4 py-3 flex items-start gap-3",
+            neaStatus === "success"
+              ? "bg-green-500/10 border border-green-500/20"
+              : "bg-red-500/10 border border-red-500/20"
+          )}>
+            {neaStatus === "success"
+              ? <CheckCircle2 className="w-4 h-4 text-green-400 shrink-0 mt-0.5" />
+              : <XCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+            }
+            <div>
+              <p className={cn("text-sm font-medium", neaStatus === "success" ? "text-green-400" : "text-red-400")}>
+                {neaStatus === "success" ? "Report submitted to NEA successfully" : "Submission failed"}
+              </p>
+              {neaResult.referenceNo && (
+                <p className="text-xs text-gray-400 mt-0.5">
+                  Reference No: <span className="text-white font-mono">{neaResult.referenceNo}</span>
+                </p>
+              )}
+              <p className="text-xs text-gray-500 mt-0.5">{neaResult.message}</p>
+            </div>
+          </div>
+        )}
 
         {/* Monthly Report Preview */}
         {reportType === "monthly" && monthlyData && (
