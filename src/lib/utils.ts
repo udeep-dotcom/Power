@@ -5,61 +5,60 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function getLevelTitle(level: number): string {
-  if (level < 5) return "Recruit";
-  if (level < 10) return "Athlete";
-  if (level < 15) return "Warrior";
-  if (level < 20) return "Champion";
-  if (level < 25) return "Legend";
-  return "Elite";
+export function formatMWh(mwh: number): string {
+  if (mwh >= 1_000_000) return `${(mwh / 1_000_000).toFixed(2)} TWh`;
+  if (mwh >= 1_000) return `${(mwh / 1_000).toFixed(2)} GWh`;
+  return `${mwh.toFixed(0)} MWh`;
 }
 
-export function getLevelColor(level: number): string {
-  if (level < 5) return "text-gray-400";
-  if (level < 10) return "text-green-400";
-  if (level < 15) return "text-blue-400";
-  if (level < 20) return "text-purple-400";
-  if (level < 25) return "text-yellow-400";
-  return "text-red-400";
+export function formatNPR(amount: number): string {
+  if (amount >= 1_000_000_000) return `NPR ${(amount / 1_000_000_000).toFixed(2)}B`;
+  if (amount >= 1_000_000) return `NPR ${(amount / 1_000_000).toFixed(2)}M`;
+  if (amount >= 1_000) return `NPR ${(amount / 1_000).toFixed(0)}K`;
+  return `NPR ${amount.toFixed(0)}`;
 }
 
 export function formatNumber(num: number): string {
-  if (num >= 1000) return `${(num / 1000).toFixed(1)}k`;
+  if (num >= 1_000_000) return `${(num / 1_000_000).toFixed(1)}M`;
+  if (num >= 1_000) return `${(num / 1_000).toFixed(1)}K`;
   return num.toString();
 }
 
-export function getDifficultyColor(difficulty: string): string {
-  switch (difficulty) {
-    case "beginner": return "text-green-400 bg-green-400/10";
-    case "intermediate": return "text-yellow-400 bg-yellow-400/10";
-    case "advanced": return "text-red-400 bg-red-400/10";
-    default: return "text-gray-400 bg-gray-400/10";
+export function getSeverityColor(severity: string) {
+  switch (severity) {
+    case "critical": return "text-red-400 bg-red-500/10 border-red-500/20";
+    case "warning": return "text-amber-400 bg-amber-500/10 border-amber-500/20";
+    case "info": return "text-blue-400 bg-blue-500/10 border-blue-500/20";
+    case "resolved": return "text-green-400 bg-green-500/10 border-green-500/20";
+    default: return "text-gray-400 bg-gray-500/10 border-gray-500/20";
   }
 }
 
-export function getCategoryColor(category: string): string {
-  switch (category) {
-    case "strength": return "text-blue-400 bg-blue-400/10";
-    case "cardio": return "text-red-400 bg-red-400/10";
-    case "crossfit": return "text-orange-400 bg-orange-400/10";
-    case "yoga": return "text-purple-400 bg-purple-400/10";
-    case "boxing": return "text-yellow-400 bg-yellow-400/10";
-    default: return "text-gray-400 bg-gray-400/10";
+export function getStatusColor(status: string) {
+  switch (status) {
+    case "operational": return "text-green-400 bg-green-500/10 border-green-500/20";
+    case "under-maintenance": return "text-amber-400 bg-amber-500/10 border-amber-500/20";
+    case "offline": return "text-red-400 bg-red-500/10 border-red-500/20";
+    default: return "text-gray-400 bg-gray-500/10 border-gray-500/20";
   }
+}
+
+export function getPLFColor(plf: number): string {
+  if (plf >= 70) return "text-green-400";
+  if (plf >= 50) return "text-blue-400";
+  if (plf >= 30) return "text-amber-400";
+  return "text-red-400";
 }
 
 export function getInitials(name: string): string {
   return name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
 }
 
-export function calculateMacroCalories(protein: number, carbs: number, fat: number): number {
-  return protein * 4 + carbs * 4 + fat * 9;
+export function isSeason(month: number): "wet" | "dry" {
+  return month >= 6 && month <= 11 ? "wet" : "dry";
 }
 
-export function getStreakEmoji(streak: number): string {
-  if (streak >= 30) return "🔥🔥🔥";
-  if (streak >= 14) return "🔥🔥";
-  if (streak >= 7) return "🔥";
-  if (streak >= 3) return "⚡";
-  return "💪";
+export function formatDate(dateStr: string): string {
+  const d = new Date(dateStr);
+  return d.toLocaleDateString("en-NP", { day: "numeric", month: "short", year: "numeric" });
 }

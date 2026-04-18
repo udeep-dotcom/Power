@@ -1,392 +1,353 @@
-// Mock data for AFIT Studios platform
+// Nepal Hydropower Reporting System - Mock Data
 
 export const currentUser = {
   id: "user_1",
-  name: "Alex Johnson",
-  email: "alex@afits.com",
-  avatar: "/avatars/alex.jpg",
-  role: "member" as const,
-  level: 12,
-  xp: 2840,
-  xpToNext: 3000,
-  streak: 14,
-  longestStreak: 21,
-  badges: ["bronze_warrior", "nutrition_pro", "social_butterfly", "7day_streak"],
-  points: 4820,
-  rank: 3,
-  joinDate: "2024-01-15",
-  goal: "muscle_gain" as const,
-  weight: 78,
-  height: 180,
-  calorieGoal: 2800,
-  stats: {
-    totalWorkouts: 142,
-    totalCheckins: 98,
-    thisWeekCheckins: 4,
-    avgWeeklyCheckins: 4.2,
-  },
+  name: "Rajesh Sharma",
+  email: "rajesh@nephydro.com.np",
+  role: "Project Manager" as const,
+  company: "Nepal Hydropower Pvt. Ltd.",
+  projects: ["p1", "p2", "p3", "p4"],
 };
 
-export const badges = [
-  { id: "bronze_warrior", name: "Bronze Warrior", icon: "🥉", desc: "Complete 10 workouts", earned: true },
-  { id: "silver_warrior", name: "Silver Warrior", icon: "🥈", desc: "Complete 50 workouts", earned: false },
-  { id: "gold_warrior", name: "Gold Warrior", icon: "🥇", desc: "Complete 100 workouts", earned: false },
-  { id: "elite", name: "Elite Member", icon: "💎", desc: "Complete 200 workouts", earned: false },
-  { id: "nutrition_pro", name: "Nutrition Pro", icon: "🥗", desc: "Log meals for 30 days", earned: true },
-  { id: "social_butterfly", name: "Social Butterfly", icon: "🦋", desc: "Make 20 community posts", earned: true },
-  { id: "7day_streak", name: "7-Day Streak", icon: "🔥", desc: "Check in 7 days in a row", earned: true },
-  { id: "30day_streak", name: "30-Day Streak", icon: "⚡", desc: "Check in 30 days in a row", earned: false },
-  { id: "early_bird", name: "Early Bird", icon: "🌅", desc: "Work out before 7am 10 times", earned: false },
-  { id: "night_owl", name: "Night Owl", icon: "🦉", desc: "Work out after 9pm 10 times", earned: false },
-];
-
-export const leaderboard = [
-  { rank: 1, name: "Marcus Williams", avatar: "", points: 7240, streak: 28, level: 18, change: "up" },
-  { rank: 2, name: "Sarah Chen", avatar: "", points: 6180, streak: 22, level: 16, change: "up" },
-  { rank: 3, name: "Alex Johnson", avatar: "", points: 4820, streak: 14, level: 12, change: "same", isYou: true },
-  { rank: 4, name: "Jordan Lee", avatar: "", points: 4350, streak: 11, level: 11, change: "down" },
-  { rank: 5, name: "Priya Sharma", avatar: "", points: 3990, streak: 9, level: 10, change: "up" },
-  { rank: 6, name: "Tyler Brooks", avatar: "", points: 3640, streak: 7, level: 9, change: "down" },
-  { rank: 7, name: "Emma Davis", avatar: "", points: 3210, streak: 5, level: 8, change: "up" },
-  { rank: 8, name: "Kai Nakamura", avatar: "", points: 2980, streak: 4, level: 8, change: "same" },
-  { rank: 9, name: "Aisha Okafor", avatar: "", points: 2760, streak: 3, level: 7, change: "up" },
-  { rank: 10, name: "Ryan Patel", avatar: "", points: 2540, streak: 6, level: 7, change: "down" },
-];
-
-export const workouts = [
-  {
-    id: "w1",
-    title: "Full Body Strength",
-    category: "strength",
-    difficulty: "intermediate",
-    duration: 45,
-    calories: 320,
-    exercises: 8,
-    goal: ["muscle_gain", "tone"],
-    image: "/workouts/strength.jpg",
-    trainer: "Marcus W.",
-    description: "A comprehensive full-body strength routine targeting all major muscle groups.",
-    tags: ["compound", "dumbbells", "barbell"],
-    exercises_list: [
-      { name: "Barbell Squat", sets: 4, reps: "8-10", rest: "90s" },
-      { name: "Bench Press", sets: 4, reps: "8-10", rest: "90s" },
-      { name: "Deadlift", sets: 3, reps: "6-8", rest: "120s" },
-      { name: "Pull-ups", sets: 3, reps: "8-12", rest: "60s" },
-      { name: "Overhead Press", sets: 3, reps: "8-10", rest: "90s" },
-      { name: "Bent-over Row", sets: 3, reps: "10-12", rest: "60s" },
-      { name: "Dips", sets: 3, reps: "10-15", rest: "60s" },
-      { name: "Plank", sets: 3, reps: "60s hold", rest: "45s" },
-    ],
-  },
-  {
-    id: "w2",
-    title: "HIIT Cardio Blast",
-    category: "cardio",
-    difficulty: "advanced",
-    duration: 30,
-    calories: 480,
-    exercises: 6,
-    goal: ["fat_loss", "endurance"],
-    image: "/workouts/hiit.jpg",
-    trainer: "Sarah C.",
-    description: "High-intensity intervals designed to maximize fat burn and cardiovascular fitness.",
-    tags: ["bodyweight", "intervals", "no equipment"],
-    exercises_list: [
-      { name: "Burpees", sets: 5, reps: "30s on/15s off", rest: "" },
-      { name: "Mountain Climbers", sets: 5, reps: "30s on/15s off", rest: "" },
-      { name: "Jump Squats", sets: 5, reps: "30s on/15s off", rest: "" },
-      { name: "High Knees", sets: 5, reps: "30s on/15s off", rest: "" },
-      { name: "Box Jumps", sets: 4, reps: "10 reps", rest: "45s" },
-      { name: "Sprint Intervals", sets: 6, reps: "20s on/10s off", rest: "" },
-    ],
-  },
-  {
-    id: "w3",
-    title: "CrossFit WOD",
-    category: "crossfit",
-    difficulty: "advanced",
-    duration: 40,
-    calories: 420,
-    exercises: 5,
-    goal: ["endurance", "muscle_gain"],
-    image: "/workouts/crossfit.jpg",
-    trainer: "Jordan L.",
-    description: "Workout of the Day — functional movements performed at high intensity.",
-    tags: ["functional", "kettlebell", "olympic"],
-    exercises_list: [
-      { name: "Kettlebell Swings", sets: 3, reps: "21-15-9", rest: "minimal" },
-      { name: "Box Jumps", sets: 3, reps: "21-15-9", rest: "minimal" },
-      { name: "Push Press", sets: 3, reps: "21-15-9", rest: "minimal" },
-      { name: "Pull-ups", sets: 3, reps: "21-15-9", rest: "minimal" },
-      { name: "Double-unders", sets: 3, reps: "50-40-30", rest: "minimal" },
-    ],
-  },
-  {
-    id: "w4",
-    title: "Yoga Flow",
-    category: "yoga",
-    difficulty: "beginner",
-    duration: 60,
-    calories: 180,
-    exercises: 12,
-    goal: ["flexibility", "recovery"],
-    image: "/workouts/yoga.jpg",
-    trainer: "Priya S.",
-    description: "A gentle vinyasa flow to improve mobility, flexibility, and mindfulness.",
-    tags: ["flexibility", "mindfulness", "recovery"],
-    exercises_list: [
-      { name: "Sun Salutation A", sets: 3, reps: "5 breaths each", rest: "" },
-      { name: "Warrior I", sets: 2, reps: "8 breaths each side", rest: "" },
-      { name: "Warrior II", sets: 2, reps: "8 breaths each side", rest: "" },
-      { name: "Triangle Pose", sets: 2, reps: "8 breaths each side", rest: "" },
-      { name: "Pigeon Pose", sets: 1, reps: "2 min each side", rest: "" },
-      { name: "Seated Forward Fold", sets: 1, reps: "2 min hold", rest: "" },
-    ],
-  },
-  {
-    id: "w5",
-    title: "Upper Body Pump",
-    category: "strength",
-    difficulty: "intermediate",
-    duration: 50,
-    calories: 280,
-    exercises: 9,
-    goal: ["muscle_gain", "tone"],
-    image: "/workouts/upper.jpg",
-    trainer: "Marcus W.",
-    description: "Focus on chest, back, shoulders, and arms for maximum upper body development.",
-    tags: ["chest", "back", "arms", "shoulders"],
-    exercises_list: [
-      { name: "Incline Bench Press", sets: 4, reps: "10-12", rest: "75s" },
-      { name: "Cable Flyes", sets: 3, reps: "12-15", rest: "60s" },
-      { name: "Lat Pulldown", sets: 4, reps: "10-12", rest: "75s" },
-      { name: "Seated Row", sets: 3, reps: "12-15", rest: "60s" },
-      { name: "Lateral Raises", sets: 3, reps: "15-20", rest: "45s" },
-      { name: "Bicep Curls", sets: 3, reps: "12-15", rest: "45s" },
-      { name: "Tricep Pushdown", sets: 3, reps: "12-15", rest: "45s" },
-      { name: "Face Pulls", sets: 3, reps: "15-20", rest: "45s" },
-      { name: "Hammer Curls", sets: 3, reps: "12-15", rest: "45s" },
-    ],
-  },
-  {
-    id: "w6",
-    title: "Leg Day Power",
-    category: "strength",
-    difficulty: "advanced",
-    duration: 55,
-    calories: 380,
-    exercises: 7,
-    goal: ["muscle_gain", "endurance"],
-    image: "/workouts/legs.jpg",
-    trainer: "Tyler B.",
-    description: "Build powerful legs with this comprehensive squat and lunge focused session.",
-    tags: ["legs", "glutes", "quads", "hamstrings"],
-    exercises_list: [
-      { name: "Back Squat", sets: 5, reps: "5", rest: "120s" },
-      { name: "Romanian Deadlift", sets: 4, reps: "8-10", rest: "90s" },
-      { name: "Leg Press", sets: 3, reps: "12-15", rest: "75s" },
-      { name: "Walking Lunges", sets: 3, reps: "12 each leg", rest: "60s" },
-      { name: "Leg Curl", sets: 3, reps: "12-15", rest: "60s" },
-      { name: "Calf Raises", sets: 4, reps: "20-25", rest: "45s" },
-      { name: "Glute Bridge", sets: 3, reps: "15-20", rest: "45s" },
-    ],
-  },
-];
-
-export const feedPosts = [
+export const projects = [
   {
     id: "p1",
-    user: { name: "Marcus Williams", avatar: "", level: 18 },
-    type: "workout",
-    content: "Just crushed my personal best on deadlifts! 180kg for 3 reps 🔥 The grind never stops.",
-    image: "/feed/deadlift.jpg",
-    workout: "Full Body Strength",
-    stats: { duration: "52 min", calories: "420 kcal" },
-    likes: 42,
-    comments: 8,
-    time: "2 hours ago",
-    liked: false,
+    name: "Upper Seti Hydropower",
+    location: "Pokhara, Kaski",
+    river: "Seti Gandaki",
+    installedCapacity: 42.5,
+    type: "Run-of-River",
+    status: "operational" as const,
+    operator: "Butwal Power Company",
+    commissionDate: "2018-03-15",
+    licenseExpiry: "2048-03-14",
+    neaTariff: { wet: 5.08, dry: 7.90 },
+    coordinates: { lat: 28.25, lng: 83.97 },
+    designFlow: 28.4,
+    headHeight: 175,
+    turbines: 3,
+    color: "#3b82f6",
   },
   {
     id: "p2",
-    user: { name: "Sarah Chen", avatar: "", level: 16 },
-    type: "progress",
-    content: "3 months transformation! Down 8kg and feeling stronger than ever. Consistency is everything 💪",
-    image: "/feed/progress.jpg",
-    likes: 127,
-    comments: 24,
-    time: "5 hours ago",
-    liked: true,
+    name: "Solu Khola Hydropower",
+    location: "Solukhumbu",
+    river: "Solu Khola",
+    installedCapacity: 86.0,
+    type: "Run-of-River",
+    status: "operational" as const,
+    operator: "Solu Energy Ltd.",
+    commissionDate: "2021-07-01",
+    licenseExpiry: "2051-06-30",
+    neaTariff: { wet: 5.08, dry: 8.40 },
+    coordinates: { lat: 27.52, lng: 86.61 },
+    designFlow: 45.2,
+    headHeight: 580,
+    turbines: 4,
+    color: "#06b6d4",
   },
   {
     id: "p3",
-    user: { name: "AFIT Studios", avatar: "", level: 0, isAdmin: true },
-    type: "announcement",
-    content: "🎉 New class alert! We're launching **Aerial Yoga** starting next Monday. Limited spots — book now via the Schedule tab!",
-    likes: 89,
-    comments: 31,
-    time: "8 hours ago",
-    liked: false,
+    name: "Trishuli 3A",
+    location: "Dhading",
+    river: "Trishuli",
+    installedCapacity: 60.0,
+    type: "Run-of-River",
+    status: "operational" as const,
+    operator: "Trishuli Jalavidhyut Company",
+    commissionDate: "2016-09-22",
+    licenseExpiry: "2046-09-21",
+    neaTariff: { wet: 4.80, dry: 7.00 },
+    coordinates: { lat: 27.97, lng: 84.75 },
+    designFlow: 38.0,
+    headHeight: 195,
+    turbines: 2,
+    color: "#8b5cf6",
   },
   {
     id: "p4",
-    user: { name: "Priya Sharma", avatar: "", level: 10 },
-    type: "nutrition",
-    content: "Post-workout meal prep Sunday done! High protein, balanced macros for the week ahead 🥗",
-    image: "/feed/meal.jpg",
-    likes: 58,
-    comments: 12,
-    time: "1 day ago",
-    liked: false,
+    name: "Likhu Khola",
+    location: "Ramechhap",
+    river: "Likhu Khola",
+    installedCapacity: 82.4,
+    type: "Run-of-River",
+    status: "under-maintenance" as const,
+    operator: "Likhu Hydropower Ltd.",
+    commissionDate: "2022-12-01",
+    licenseExpiry: "2052-11-30",
+    neaTariff: { wet: 5.08, dry: 8.40 },
+    coordinates: { lat: 27.42, lng: 86.10 },
+    designFlow: 52.1,
+    headHeight: 305,
+    turbines: 4,
+    color: "#f59e0b",
+  },
+];
+
+// Monthly generation data for past 24 months (per project)
+function genMonthly(projectId: string, capacityMW: number) {
+  const records = [];
+  // Wet season = Jun-Nov, Dry season = Dec-May
+  const seasonFactors = [0.52, 0.48, 0.55, 0.60, 0.72, 0.88, 0.95, 0.97, 0.93, 0.85, 0.70, 0.55];
+  const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  let year = 2025;
+  let monthIdx = 2; // start March 2025, go back to April 2024
+
+  // Generate April 2024 - March 2026 (24 months)
+  for (let i = 0; i < 24; i++) {
+    const m = (monthIdx + i) % 12;
+    const y = year + Math.floor((monthIdx + i) / 12);
+    const daysInMonth = new Date(y, m + 1, 0).getDate();
+    const maxGen = capacityMW * 24 * daysInMonth; // MWh if running at 100%
+    const factor = seasonFactors[m] * (0.9 + Math.random() * 0.1);
+    const planned = maxGen * seasonFactors[m] * 0.88;
+    const actual = maxGen * factor * (projectId === "p4" && m >= 0 && y >= 2026 ? 0 : 1);
+    const gridAvail = 92 + Math.random() * 7;
+    const spillHours = m >= 5 && m <= 8 ? Math.round(Math.random() * 48) : Math.round(Math.random() * 6);
+    const isWet = m >= 5 && m <= 10;
+    const proj = projects.find(p => p.id === projectId)!;
+    const tariff = isWet ? proj.neaTariff.wet : proj.neaTariff.dry;
+    records.push({
+      id: `${projectId}-${y}-${m + 1}`,
+      projectId,
+      year: y,
+      month: m + 1,
+      monthName: months[m],
+      daysInMonth,
+      plannedGeneration: Math.round(planned),
+      actualGeneration: Math.round(actual),
+      plf: parseFloat(((actual / maxGen) * 100).toFixed(1)),
+      gridAvailability: parseFloat(gridAvail.toFixed(1)),
+      spillHours,
+      revenue: Math.round(actual * tariff * 1000), // NPR (actual is MWh, tariff is per kWh)
+      isWetSeason: isWet,
+    });
+  }
+  return records;
+}
+
+export const monthlyGeneration = [
+  ...genMonthly("p1", 42.5),
+  ...genMonthly("p2", 86.0),
+  ...genMonthly("p3", 60.0),
+  ...genMonthly("p4", 82.4),
+];
+
+// Daily generation for current month (April 2026)
+export const dailyGeneration = (() => {
+  const records = [];
+  const today = 18; // April 18, 2026
+  for (const proj of projects) {
+    const isWet = false; // April is dry season
+    const tariff = isWet ? proj.neaTariff.wet : proj.neaTariff.dry;
+    for (let d = 1; d <= today; d++) {
+      const maxGen = proj.installedCapacity * 24;
+      const factor = 0.58 + Math.random() * 0.15;
+      const actual = proj.status === "under-maintenance" && d > 10 ? 0 : maxGen * factor;
+      const planned = maxGen * 0.65;
+      records.push({
+        id: `${proj.id}-2026-4-${d}`,
+        projectId: proj.id,
+        date: `2026-04-${String(d).padStart(2, "0")}`,
+        day: d,
+        plannedGeneration: parseFloat(planned.toFixed(1)),
+        actualGeneration: parseFloat(actual.toFixed(1)),
+        gridAvailability: parseFloat((92 + Math.random() * 7).toFixed(1)),
+        spillHours: Math.round(Math.random() * 2),
+        discharge: parseFloat((proj.designFlow * (0.55 + Math.random() * 0.25)).toFixed(1)),
+        headLevel: parseFloat((proj.headHeight * (0.92 + Math.random() * 0.08)).toFixed(1)),
+        revenue: Math.round(actual * tariff * 1000),
+      });
+    }
+  }
+  return records;
+})();
+
+export const alerts = [
+  {
+    id: "a1",
+    projectId: "p4",
+    type: "maintenance",
+    severity: "critical" as const,
+    title: "Turbine #2 Offline",
+    message: "Turbine unit #2 at Likhu Khola tripped due to bearing overheating. Estimated repair: 5 days.",
+    date: "2026-04-11",
+    resolved: false,
   },
   {
-    id: "p5",
-    user: { name: "Jordan Lee", avatar: "", level: 11 },
-    type: "checkin",
-    content: "Day 11 check-in! Keeping the streak alive. Who else is doing the 30-day challenge? 🏋️",
-    streak: 11,
-    likes: 34,
-    comments: 7,
-    time: "1 day ago",
-    liked: false,
-  },
-];
-
-export const classes = [
-  { id: "c1", name: "Morning HIIT", trainer: "Sarah Chen", time: "07:00 AM", duration: 45, spots: 3, capacity: 15, date: "Mon, Wed, Fri", category: "cardio", level: "all" },
-  { id: "c2", name: "Power Yoga", trainer: "Priya Sharma", time: "09:00 AM", duration: 60, spots: 7, capacity: 12, date: "Daily", category: "yoga", level: "all" },
-  { id: "c3", name: "CrossFit WOD", trainer: "Jordan Lee", time: "06:00 AM", duration: 60, spots: 2, capacity: 10, date: "Mon-Sat", category: "crossfit", level: "advanced" },
-  { id: "c4", name: "Strength Fundamentals", trainer: "Marcus Williams", time: "05:00 PM", duration: 50, spots: 5, capacity: 12, date: "Tue, Thu", category: "strength", level: "beginner" },
-  { id: "c5", name: "Spin Class", trainer: "Tyler Brooks", time: "07:00 PM", duration: 45, spots: 4, capacity: 20, date: "Mon, Wed, Fri", category: "cardio", level: "all" },
-  { id: "c6", name: "Boxing Cardio", trainer: "Emma Davis", time: "06:00 PM", duration: 55, spots: 8, capacity: 15, date: "Tue, Thu, Sat", category: "boxing", level: "intermediate" },
-];
-
-export const trainers = [
-  { id: "t1", name: "Marcus Williams", specialty: "Strength & Powerlifting", rating: 4.9, reviews: 134, clients: 28, experience: "8 years", bio: "Former competitive powerlifter turned personal trainer. Specializing in building strength from the ground up.", available: true },
-  { id: "t2", name: "Sarah Chen", specialty: "HIIT & Cardio", rating: 4.8, reviews: 98, clients: 24, experience: "6 years", bio: "Certified personal trainer with a passion for high-intensity training and athletic performance.", available: true },
-  { id: "t3", name: "Priya Sharma", specialty: "Yoga & Mobility", rating: 5.0, reviews: 76, clients: 18, experience: "10 years", bio: "200-hour RYT certified yoga instructor with expertise in Vinyasa and restorative yoga.", available: false },
-  { id: "t4", name: "Jordan Lee", specialty: "CrossFit & Functional", rating: 4.7, reviews: 62, clients: 20, experience: "5 years", bio: "Level 2 CrossFit coach focused on functional movement patterns and Olympic lifting.", available: true },
-  { id: "t5", name: "Tyler Brooks", specialty: "Cycling & Endurance", rating: 4.6, reviews: 45, clients: 16, experience: "4 years", bio: "Competitive cyclist and endurance coach helping members build cardiovascular foundation.", available: true },
-];
-
-export const challenges = [
-  { id: "ch1", title: "30-Day Transformation", duration: 30, enrolled: 142, progress: 12, goal: "Complete 25 workouts in 30 days", reward: "Elite badge + 1 free PT session", category: "overall", active: true, image: "🏆" },
-  { id: "ch2", title: "7-Day Cardio Week", duration: 7, enrolled: 89, progress: 5, goal: "7 cardio sessions in 7 days", reward: "Cardio King badge + 500 points", category: "cardio", active: true, image: "❤️" },
-  { id: "ch3", title: "Protein Power Month", duration: 30, enrolled: 67, progress: 0, goal: "Hit protein goals 25/30 days", reward: "Nutrition Pro+ badge", category: "nutrition", active: false, image: "🥩" },
-  { id: "ch4", title: "Flexibility February", duration: 28, enrolled: 54, progress: 0, goal: "Complete 20 yoga/mobility sessions", reward: "Zen Master badge", category: "yoga", active: false, image: "🧘" },
-];
-
-export const meals = [
-  {
-    time: "Breakfast",
-    items: [
-      { name: "Greek Yogurt Parfait", calories: 320, protein: 28, carbs: 38, fat: 6 },
-      { name: "Banana", calories: 105, protein: 1, carbs: 27, fat: 0 },
-    ]
+    id: "a2",
+    projectId: "p1",
+    type: "underperformance",
+    severity: "warning" as const,
+    title: "Generation Below Target",
+    message: "Upper Seti generation is 18% below monthly target. Check intake gate and water level sensors.",
+    date: "2026-04-15",
+    resolved: false,
   },
   {
-    time: "Lunch",
-    items: [
-      { name: "Grilled Chicken Bowl", calories: 580, protein: 52, carbs: 45, fat: 18 },
-    ]
+    id: "a3",
+    projectId: "p2",
+    type: "grid",
+    severity: "info" as const,
+    title: "Grid Outage — NEA Scheduled",
+    message: "NEA has scheduled 4-hour grid maintenance on April 20. Expected generation loss: ~344 MWh.",
+    date: "2026-04-17",
+    resolved: false,
   },
   {
-    time: "Pre-Workout",
-    items: [
-      { name: "Whey Protein Shake", calories: 160, protein: 30, carbs: 8, fat: 2 },
-    ]
+    id: "a4",
+    projectId: "p3",
+    type: "underperformance",
+    severity: "warning" as const,
+    title: "Low Water Level",
+    message: "Trishuli 3A intake water level dropped to 82% of design head. Monitor sediment trap.",
+    date: "2026-04-16",
+    resolved: false,
+  },
+  {
+    id: "a5",
+    projectId: "p1",
+    type: "compliance",
+    severity: "info" as const,
+    title: "Monthly Report Due",
+    message: "NEA monthly generation report for March 2026 is due by April 25. Please prepare submission.",
+    date: "2026-04-18",
+    resolved: false,
+  },
+  {
+    id: "a6",
+    projectId: "p2",
+    type: "maintenance",
+    severity: "resolved" as const,
+    title: "Penstock Inspection Complete",
+    message: "Annual penstock inspection completed successfully. No defects found. Next inspection: April 2027.",
+    date: "2026-04-05",
+    resolved: true,
+  },
+  {
+    id: "a7",
+    projectId: "p3",
+    type: "grid",
+    severity: "resolved" as const,
+    title: "Grid Disturbance Resolved",
+    message: "NEA 132kV transmission line restored after 6-hour outage. Plant reconnected and ramping up.",
+    date: "2026-04-08",
+    resolved: true,
   },
 ];
 
-export const weeklyStats = [
-  { day: "Mon", calories: 2740, protein: 168, checkin: true },
-  { day: "Tue", calories: 2890, protein: 185, checkin: true },
-  { day: "Wed", calories: 2650, protein: 162, checkin: true },
-  { day: "Thu", calories: 3010, protein: 192, checkin: false },
-  { day: "Fri", calories: 2800, protein: 175, checkin: true },
-  { day: "Sat", calories: 2480, protein: 155, checkin: false },
-  { day: "Sun", calories: 2920, protein: 180, checkin: true },
-];
-
-export const messages = [
+export const maintenanceLogs = [
   {
     id: "m1",
-    user: "Marcus Williams",
-    avatar: "",
-    lastMessage: "Great session today! See you Thursday 💪",
-    time: "10:32 AM",
-    unread: 2,
-    online: true,
+    projectId: "p4",
+    date: "2026-04-11",
+    completedDate: null,
+    type: "corrective",
+    component: "Turbine Unit #2",
+    description: "Bearing overheating caused emergency shutdown. Replacing thrust bearing assembly.",
+    duration: null,
+    estimatedDays: 5,
+    technician: "Hari Bahadur Thapa",
+    status: "in-progress" as const,
+    cost: 2850000,
+    generationLoss: 1978,
   },
   {
     id: "m2",
-    user: "CrossFit Group",
-    avatar: "",
-    lastMessage: "Sarah: Who's coming to Saturday WOD?",
-    time: "Yesterday",
-    unread: 5,
-    online: false,
-    isGroup: true,
+    projectId: "p2",
+    date: "2026-04-03",
+    completedDate: "2026-04-05",
+    type: "preventive",
+    component: "Penstock & Intake Gates",
+    description: "Annual inspection of penstock for corrosion, cracks. Gate seals checked and lubricated.",
+    duration: 48,
+    estimatedDays: 2,
+    technician: "Binod Gurung",
+    status: "completed" as const,
+    cost: 180000,
+    generationLoss: 0,
   },
   {
     id: "m3",
-    user: "Priya Sharma",
-    avatar: "",
-    lastMessage: "I've updated your yoga plan for next week",
-    time: "Yesterday",
-    unread: 0,
-    online: false,
+    projectId: "p1",
+    date: "2026-03-20",
+    completedDate: "2026-03-21",
+    type: "preventive",
+    component: "Governor System",
+    description: "Governor calibration and hydraulic oil change on all 3 turbine units.",
+    duration: 18,
+    estimatedDays: 1,
+    technician: "Suman Tamang",
+    status: "completed" as const,
+    cost: 95000,
+    generationLoss: 918,
   },
   {
     id: "m4",
-    user: "HIIT Class - March",
-    avatar: "",
-    lastMessage: "Admin: Class rescheduled to 7:15 AM",
-    time: "Mon",
-    unread: 1,
-    online: false,
-    isGroup: true,
+    projectId: "p3",
+    date: "2026-03-10",
+    completedDate: "2026-03-12",
+    type: "corrective",
+    component: "Transformer Unit #1",
+    description: "Oil leak detected at main power transformer. Oil replaced and seal repaired.",
+    duration: 36,
+    estimatedDays: 2,
+    technician: "Prakash Adhikari",
+    status: "completed" as const,
+    cost: 420000,
+    generationLoss: 2160,
+  },
+  {
+    id: "m5",
+    projectId: "p1",
+    date: "2026-04-25",
+    completedDate: null,
+    type: "preventive",
+    component: "Desanding Basin",
+    description: "Pre-monsoon desanding basin flush and inspection before wet season begins.",
+    duration: null,
+    estimatedDays: 1,
+    technician: "Suman Tamang",
+    status: "scheduled" as const,
+    cost: 45000,
+    generationLoss: 0,
+  },
+  {
+    id: "m6",
+    projectId: "p2",
+    date: "2026-05-15",
+    completedDate: null,
+    type: "preventive",
+    component: "All Turbines",
+    description: "Pre-monsoon turbine runner inspection and blade cleaning for high-flow season.",
+    duration: null,
+    estimatedDays: 3,
+    technician: "Binod Gurung",
+    status: "scheduled" as const,
+    cost: 320000,
+    generationLoss: 0,
   },
 ];
 
-export const chatMessages = [
-  { id: 1, sender: "Marcus Williams", text: "Hey! How did the workout go?", time: "10:15 AM", isMe: false },
-  { id: 2, sender: "Me", text: "Crushed it! Hit a new PR on bench 🔥", time: "10:18 AM", isMe: true },
-  { id: 3, sender: "Marcus Williams", text: "Nice work! What weight?", time: "10:20 AM", isMe: false },
-  { id: 4, sender: "Me", text: "100kg x 5 reps. Been working towards this for months", time: "10:22 AM", isMe: true },
-  { id: 5, sender: "Marcus Williams", text: "That's incredible progress! Great session today! See you Thursday 💪", time: "10:32 AM", isMe: false },
-];
+// Summary stats computed from data
+export function getProjectStats(projectId: string) {
+  const proj = projects.find(p => p.id === projectId)!;
+  const monthly = monthlyGeneration.filter(r => r.projectId === projectId);
+  const lastMonth = monthly[monthly.length - 1];
+  const ytd = monthly.filter(r => r.year === 2026);
+  const totalGenYTD = ytd.reduce((s, r) => s + r.actualGeneration, 0);
+  const totalRevYTD = ytd.reduce((s, r) => s + r.revenue, 0);
+  const avgPLF = ytd.length ? ytd.reduce((s, r) => s + r.plf, 0) / ytd.length : 0;
+  return { proj, lastMonth, totalGenYTD, totalRevYTD, avgPLF };
+}
 
-export const adminStats = {
-  totalMembers: 847,
-  activeToday: 124,
-  newThisWeek: 18,
-  retentionRate: 87,
-  monthlyRevenue: 42800,
-  peakHours: [
-    { hour: "6 AM", count: 45 },
-    { hour: "7 AM", count: 78 },
-    { hour: "8 AM", count: 92 },
-    { hour: "9 AM", count: 67 },
-    { hour: "12 PM", count: 54 },
-    { hour: "5 PM", count: 88 },
-    { hour: "6 PM", count: 110 },
-    { hour: "7 PM", count: 95 },
-    { hour: "8 PM", count: 62 },
-  ],
-  memberGrowth: [
-    { month: "Oct", count: 680 },
-    { month: "Nov", count: 720 },
-    { month: "Dec", count: 755 },
-    { month: "Jan", count: 790 },
-    { month: "Feb", count: 820 },
-    { month: "Mar", count: 847 },
-  ],
-};
-
-export const progressLogs = [
-  { date: "2026-01-01", weight: 82, chest: 102, waist: 88, hips: 98 },
-  { date: "2026-02-01", weight: 80.5, chest: 103, waist: 86, hips: 97 },
-  { date: "2026-03-01", weight: 79, chest: 104, waist: 84, hips: 96 },
-  { date: "2026-03-24", weight: 78, chest: 105, waist: 83, hips: 96 },
-];
+export function getPortfolioSummary() {
+  const allMonthly = monthlyGeneration;
+  const ytd = allMonthly.filter(r => r.year === 2026);
+  const totalCapacity = projects.reduce((s, p) => s + p.installedCapacity, 0);
+  const totalGenYTD = ytd.reduce((s, r) => s + r.actualGeneration, 0);
+  const totalRevYTD = ytd.reduce((s, r) => s + r.revenue, 0);
+  const avgPLF = ytd.length ? ytd.reduce((s, r) => s + r.plf, 0) / ytd.length : 0;
+  const activeAlerts = alerts.filter(a => !a.resolved).length;
+  return { totalCapacity, totalGenYTD, totalRevYTD, avgPLF, activeAlerts };
+}

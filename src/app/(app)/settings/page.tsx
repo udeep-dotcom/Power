@@ -42,7 +42,7 @@ export default function SettingsPage() {
             <div>
               <p className="font-semibold text-white">{currentUser.name}</p>
               <p className="text-sm text-gray-400">{currentUser.email}</p>
-              <p className="text-xs text-green-400">Level {currentUser.level} Member</p>
+              <p className="text-xs text-blue-400">{currentUser.role}</p>
             </div>
           </div>
           <button className="w-full py-2.5 rounded-xl border border-[#2a2a2a] text-sm text-gray-300 hover:border-green-500/30 hover:text-green-400 transition-all font-medium">
