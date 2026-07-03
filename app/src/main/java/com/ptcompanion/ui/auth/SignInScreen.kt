@@ -78,6 +78,13 @@ fun SignInScreen(
                     Text("Sign in")
                 }
             }
+            Spacer(Modifier.padding(top = 12.dp))
+            Text("or", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Spacer(Modifier.padding(top = 12.dp))
+            GoogleSignInButton(
+                label = "Continue with Google",
+                onIdToken = { idToken -> viewModel.continueWithGoogle(idToken, onSignedIn) },
+            )
         }
     }
 }

@@ -17,7 +17,14 @@ interface AuthRepository {
 
     suspend fun signInWithEmail(email: String, password: String): Result<Unit>
 
-    suspend fun signInWithGoogleIdToken(idToken: String): Result<Unit>
+    /**
+     * Signs in with a Google ID token obtained via Credential Manager. If this uid has
+     * neither a trainer nor a client profile yet - i.e. this is a brand-new account -
+     * a trainer profile is created automatically, since Google sign-in is the trainer
+     * self-serve entry point in this app (clients always join via invite code, never
+     * Google sign-in, so there is no ambiguity about which role to create).
+     */
+    suspend fun continueWithGoogle(idToken: String, fallbackDisplayName: String?): Result<Unit>
 
     /**
      * Client sign-up: creates the Auth account, then atomically redeems [inviteCode] to

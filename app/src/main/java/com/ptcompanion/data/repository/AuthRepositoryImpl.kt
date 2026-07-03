@@ -72,11 +72,23 @@ class AuthRepositoryImpl @Inject constructor(
         Unit
     }
 
-    override suspend fun signInWithGoogleIdToken(idToken: String): Result<Unit> = runCatching {
-        val credential = GoogleAuthProvider.getCredential(idToken, null)
-        auth.signInWithCredential(credential).await()
-        Unit
-    }
+    override suspend fun continueWithGoogle(idToken: String, fallbackDisplayName: String?): Result<Unit> =
+        runCatching {
+            val credential = GoogleAuthProvider.getCredential(idToken, null)
+            val result = auth.signInWithCredential(credential).await()
+            val user = result.user ?: error("Google sign-in did not return a user")
+
+            if (resolveRole(user.uid) == null) {
+                val dto = TrainerDto(
+                    trainerId = user.uid,
+                    displayName = user.displayName ?: fallbackDisplayName ?: user.email.orEmpty(),
+                    email = user.email.orEmpty(),
+                    plan = "free",
+                    createdAt = Instant.now().toString(),
+                )
+                firestore.collection(FirestoreSchema.TRAINERS).document(user.uid).set(dto).await()
+            }
+        }
 
     override suspend fun signUpClient(
         email: String,

@@ -98,11 +98,18 @@ see "What wasn't verified" below.
 
 ### 3. Google Sign-In
 
-`AuthRepository.signInWithGoogleIdToken` is implemented at the repository layer, but the
-Credential Manager UI flow to obtain a Google ID token isn't wired into the sign-up screen in
-this pass - it needs a real OAuth client ID from the Firebase console for this specific app,
-which doesn't exist until you set up your own project. Email/password (the other option the
-brief lists) is fully implemented for both trainer sign-up and sign-in.
+Fully wired end to end (Credential Manager -> Firebase Auth -> auto-created trainer profile
+on first sign-in, since Google sign-in is the trainer entry point - clients always join via
+invite code) on both the trainer sign-up and sign-in screens. It needs one piece of
+per-project setup you'll only have once you create your own Firebase project: a **Web**
+OAuth client (`client_type: 3` in `google-services.json` - see
+`app/google-services.json.example`), which the `google-services` Gradle plugin turns into
+`R.string.default_web_client_id` automatically. In the Firebase console this is
+Authentication -> Sign-in method -> Google -> enable, which provisions that Web client for
+you; nothing else to configure. Until a real `google-services.json` with that entry is
+present, the app will fail to resolve that string resource if the Google Sign-In button is
+tapped - everything else in the app is unaffected. Email/password (the other option the
+brief lists) is fully implemented for both trainer sign-up and sign-in regardless.
 
 ## Running the Firestore rules tests (45 tests)
 

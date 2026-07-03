@@ -13,7 +13,12 @@
           "package_name": "com.ptcompanion"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "000000000000-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "REPLACE_ME"

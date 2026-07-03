@@ -41,4 +41,14 @@ class SignInViewModel @Inject constructor(
                 .onFailure { state = state.copy(errorMessage = it.message ?: "Sign-in failed") }
         }
     }
+
+    fun continueWithGoogle(idToken: String, onSuccess: () -> Unit) {
+        state = state.copy(isSubmitting = true, errorMessage = null)
+        viewModelScope.launch {
+            val result = authRepository.continueWithGoogle(idToken, fallbackDisplayName = null)
+            state = state.copy(isSubmitting = false)
+            result.onSuccess { onSuccess() }
+                .onFailure { state = state.copy(errorMessage = it.message ?: "Google sign-in failed") }
+        }
+    }
 }
