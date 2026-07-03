@@ -1,0 +1,36 @@
+*.iml
+.gradle/
+/local.properties
+/.idea/
+.DS_Store
+/build/
+/captures/
+.externalNativeBuild/
+.cxx/
+*.apk
+*.ap_
+*.aab
+
+# Keystores
+*.jks
+*.keystore
+
+# Firebase / Google Services - real credentials must not be committed
+app/google-services.json
+
+# Room schemas (generated)
+app/schemas/
+
+# Node (firebase-tests, scripts)
+node_modules/
+npm-debug.log*
+
+# Firebase emulator
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+.firebase/
+firebase-export-*/
+
+# Local env
+.env

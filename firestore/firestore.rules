@@ -1,0 +1,177 @@
+rules_version = '2';
+
+// Multi-tenant data model: every trainer-owned document is a flat top-level
+// collection carrying a `trainerId` field (the trainer's Firebase Auth uid).
+// Client-owned documents additionally carry `clientUserId` (the client's own uid).
+// These rules are the actual tenant boundary - the app never relies on
+// client-side filtering to hide other tenants' data.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isTrainer(trainerId) {
+      return isSignedIn() && request.auth.uid == trainerId;
+    }
+
+    function isClient(clientUserId) {
+      return isSignedIn() && request.auth.uid == clientUserId;
+    }
+
+    function clientDoc(clientUserId) {
+      return get(/databases/$(database)/documents/clients/$(clientUserId));
+    }
+
+    // Resolves the trainer that owns a given client, by reading the client's
+    // own profile doc - never trusts a trainerId supplied on the incoming write.
+    function ownerTrainerId(clientUserId) {
+      return clientDoc(clientUserId).data.trainerId;
+    }
+
+    function isOwningTrainerOf(clientUserId) {
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/clients/$(clientUserId))
+        && ownerTrainerId(clientUserId) == request.auth.uid;
+    }
+
+    function unchanged(field) {
+      return !request.resource.data.diff(resource.data).affectedKeys().hasAny([field]);
+    }
+
+    // --- Trainer profile: /trainers/{trainerId} ---------------------------
+    // A trainer may only ever read/write their own profile document. Self-serve
+    // sign-up creates this doc client-side immediately after Firebase Auth
+    // account creation.
+    match /trainers/{trainerId} {
+      allow read: if isTrainer(trainerId);
+      allow create: if isTrainer(trainerId)
+        && request.resource.data.trainerId == trainerId
+        && request.resource.data.plan == 'free';
+      allow update: if isTrainer(trainerId) && unchanged('trainerId');
+      allow delete: if false;
+    }
+
+    // --- Client profile: /clients/{clientUserId} ---------------------------
+    // Created only through invite-code redemption (see /inviteCodes below).
+    // The client can read/edit their own profile; the owning trainer can read
+    // the whole roster and may only update `activeProgramId` (assigning a
+    // program). trainerId/clientUserId are immutable once the doc exists.
+    match /clients/{clientUserId} {
+      // Reads (including roster list queries) check trainerId directly off the
+      // document being read rather than via isOwningTrainerOf()'s get(), since
+      // a self-referential get() during a list-query evaluation is unreliable.
+      allow read: if isClient(clientUserId) || isTrainer(resource.data.trainerId);
+
+      allow create: if isClient(clientUserId)
+        && request.resource.data.clientUserId == clientUserId
+        && exists(/databases/$(database)/documents/inviteCodes/$(request.resource.data.redeemedInviteCode))
+        && get(/databases/$(database)/documents/inviteCodes/$(request.resource.data.redeemedInviteCode)).data.used == false
+        && get(/databases/$(database)/documents/inviteCodes/$(request.resource.data.redeemedInviteCode)).data.trainerId == request.resource.data.trainerId;
+
+      allow update: if (isClient(clientUserId) && unchanged('trainerId') && unchanged('clientUserId'))
+        || (
+          isTrainer(resource.data.trainerId)
+          && unchanged('trainerId')
+          && unchanged('clientUserId')
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['activeProgramId'])
+        );
+
+      allow delete: if false;
+    }
+
+    // --- Invite codes: /inviteCodes/{code} ---------------------------------
+    // A trainer creates codes for their own roster. Any signed-in user may
+    // read a single *unused* code by its exact id (needed to validate before
+    // redeeming); once used, only the owning trainer can still read it. A
+    // code can be redeemed exactly once, by flipping `used` to true and
+    // stamping the redeeming client's uid - trainerId/code are immutable.
+    match /inviteCodes/{code} {
+      allow read: if isSignedIn()
+        && (resource.data.used == false || isTrainer(resource.data.trainerId));
+
+      allow create: if isTrainer(request.resource.data.trainerId)
+        && request.resource.data.code == code
+        && request.resource.data.used == false;
+
+      allow update: if isSignedIn()
+        && resource.data.used == false
+        && request.resource.data.used == true
+        && request.resource.data.usedByClientUserId == request.auth.uid
+        && unchanged('trainerId')
+        && unchanged('code');
+
+      allow delete: if false;
+    }
+
+    // --- Programs (templates and client-assigned copies): /programs/{id} --
+    // Only the owning trainer ever writes a program. A client may only read
+    // the copy assigned to them (clientUserId set); templates (clientUserId
+    // null) are trainer-only, never readable by any client.
+    match /programs/{programId} {
+      allow read: if isTrainer(resource.data.trainerId)
+        || (resource.data.clientUserId != null && isClient(resource.data.clientUserId));
+
+      allow create, update, delete: if isTrainer(request.resource.data.trainerId);
+    }
+
+    // --- Workout sessions: /sessions/{sessionId} ---------------------------
+    // Logged and owned by the client; the owning trainer has read-only access
+    // to review it. trainerId is cross-checked against the client's own
+    // profile doc, not trusted from the write payload.
+    match /sessions/{sessionId} {
+      allow read: if isTrainer(resource.data.trainerId) || isClient(resource.data.clientUserId);
+
+      allow create: if isClient(request.resource.data.clientUserId)
+        && request.resource.data.trainerId == ownerTrainerId(request.resource.data.clientUserId);
+
+      allow update: if isClient(resource.data.clientUserId)
+        && unchanged('trainerId')
+        && unchanged('clientUserId');
+
+      allow delete: if false;
+    }
+
+    // --- Weekly check-ins: /checkIns/{checkInId} ---------------------------
+    match /checkIns/{checkInId} {
+      allow read: if isTrainer(resource.data.trainerId) || isClient(resource.data.clientUserId);
+
+      allow create: if isClient(request.resource.data.clientUserId)
+        && request.resource.data.trainerId == ownerTrainerId(request.resource.data.clientUserId);
+
+      allow update: if isClient(resource.data.clientUserId)
+        && unchanged('trainerId')
+        && unchanged('clientUserId');
+
+      allow delete: if false;
+    }
+
+    // --- Body measurements: /bodyMeasurements/{entryId} --------------------
+    // Either the client or their own trainer may log an entry.
+    match /bodyMeasurements/{entryId} {
+      allow read: if isTrainer(resource.data.trainerId) || isClient(resource.data.clientUserId);
+
+      allow create: if (
+          isClient(request.resource.data.clientUserId)
+          || isOwningTrainerOf(request.resource.data.clientUserId)
+        )
+        && request.resource.data.trainerId == ownerTrainerId(request.resource.data.clientUserId);
+
+      allow update: if (isClient(resource.data.clientUserId) || isOwningTrainerOf(resource.data.clientUserId))
+        && unchanged('trainerId')
+        && unchanged('clientUserId');
+
+      allow delete: if false;
+    }
+
+    // --- Exercise library: /exerciseLibrary/{exerciseId} -------------------
+    // Shared, read-only reference data. Not tenant-scoped. Seeded by an
+    // admin script (scripts/seed-emulator.js / a real project's admin SDK),
+    // never writable from the app.
+    match /exerciseLibrary/{exerciseId} {
+      allow read: if isSignedIn();
+      allow write: if false;
+    }
+  }
+}
