@@ -53,9 +53,14 @@ explicit Phase 2/3 work with a note on what it needs.
   count, recent transactions.
 - Prompt-injection defense: every AI call's system prompt explicitly tells the
   model uploaded document text is data only, never instructions (Section 58).
-- 45 unit tests covering every deterministic module (number-to-words, currency
-  formatting/comparison, validation rules, the workflow state machine, and
-  field-mapping/conflict logic) — `npm test`.
+- Two working AI providers: direct Anthropic, and OpenRouter (one adapter,
+  any model OpenRouter serves via `AI_MODEL`, no code change to switch).
+  OpenRouter is the recommended default — see README.md for model choice.
+- 51 unit tests covering every deterministic module (number-to-words, currency
+  formatting/comparison, validation rules, the workflow state machine,
+  field-mapping/conflict logic) plus the OpenRouter provider's request
+  shape, retry-on-invalid-schema logic, and error handling against a mocked
+  HTTP layer — `npm test`.
 - A real, non-mocked Playwright smoke test of the browser flow (login →
   create transaction → upload both files → sign out → confirm the
   auth redirect) was run against a live dev server during development; see
@@ -78,7 +83,7 @@ Each of these needs real additional engineering, not a flag flip:
 | APPROVER role / multi-step approval (Section 60) | Only Operator → Generate exists | Add the role + an approval-required transition gate |
 | Golden-file regression tests (Section 55) & visual PDF regression testing (Section 56) | Needs a curated fixture set (real-shaped forms) that doesn't exist yet | Add fixtures + a comparison harness once real bank forms are available |
 | S3-compatible storage driver | Interface (`StorageDriver`) is defined; only the local-disk implementation exists | Implement `S3StorageDriver` against the same interface |
-| OpenAI / Gemini providers | `AIProvider` interface is defined; only Anthropic is implemented | Implement `providers/openai.ts` / `providers/gemini.ts` |
+| Direct OpenAI / Gemini providers | Both are reachable today via `AI_PROVIDER=openrouter` + `AI_MODEL="openai/..."` or `"google/..."`; a *direct* (non-OpenRouter) integration against their own SDKs isn't implemented | Implement `providers/openai.ts` / `providers/gemini.ts` against the official SDKs, mirroring `providers/anthropic.ts` |
 | Background job queue (Section 35) | Pipeline currently runs synchronously across three server actions, which is explicitly allowed for now | Move `runAnalysisPipeline` behind a queue (e.g. BullMQ) if document volume or size makes synchronous processing too slow |
 | Docker Compose | Not created this pass | `docker-compose.yml` with app + Postgres, once the Python service question (if any) is settled |
 
@@ -90,15 +95,15 @@ email ingestion — all listed in the spec's own Section 53 as third-phase work.
 
 ## 4. Honest limitations of what was tested
 
-This build environment has no outbound `ANTHROPIC_API_KEY` (or any other
-provider key) available, so the AI-dependent parts of the pipeline — form
-field detection, document extraction, and therefore field mapping and PDF
-generation — could not be exercised against a live model in this pass. What
-*was* verified:
+The AI-dependent parts of the pipeline — form field detection, document
+extraction, and therefore field mapping and PDF generation — have **not**
+been exercised against a live model end-to-end yet. What *was* verified:
 
-- All 45 unit tests pass (`npm test`) — every deterministic module (number
+- All 51 unit tests pass (`npm test`) — every deterministic module (number
   formatting, currency comparisons, SWIFT/account/currency validation, the
-  workflow state machine, field-mapping/conflict logic).
+  workflow state machine, field-mapping/conflict logic), plus the
+  OpenRouter provider's request shape, retry-on-invalid-schema logic, and
+  error handling — against a mocked HTTP layer, not a live call.
 - `npx tsc --noEmit`, `npx eslint .`, and `npx next build` all pass clean.
 - A real Playwright browser session against a live dev server: login, create
   a transaction, upload a blank-form PDF and a supporting-document PDF
@@ -106,13 +111,23 @@ generation — could not be exercised against a live model in this pass. What
   enables once both are present, navigate back to the dashboard, sign out,
   and confirm an unauthenticated request to `/dashboard` redirects to
   `/login`. Zero browser console/page errors were observed.
-- The AI request/response plumbing (schema-constrained tool call, retry
-  logic, Anthropic SDK usage) was code-reviewed but not run against the live
-  API.
+
+**Why the live call is still missing, specifically:** this project has so far
+only been built inside Claude Code's own cloud sandbox sessions. The first
+session had no outbound API key at all. The second had a real OpenRouter key
+but the sandbox's own egress network policy explicitly denies outbound
+connections to `openrouter.ai` (confirmed via the proxy status endpoint — a
+policy denial, not a missing allowlist entry, and not something to route
+around). `api.anthropic.com` happens to be allowlisted in that same sandbox,
+so an Anthropic-direct live test is possible there if a key is provided, but
+an OpenRouter live test is not — that will have to happen either on a
+developer machine (no such restriction) or in a Claude Code environment
+whose network policy allows it.
 
 To finish verifying the core workflow end-to-end (Section 73's "final system
-test"), set `ANTHROPIC_API_KEY` in `.env` and run the same flow with a real
-blank form and a real invoice — see README.md.
+test"), run the app somewhere without that restriction, set `OPENROUTER_API_KEY`
+(or `ANTHROPIC_API_KEY` with `AI_PROVIDER=anthropic`) in `.env`, and run the
+flow with a real blank form and a real invoice — see README.md.
 
 ## 5. Architecture
 
@@ -136,10 +151,14 @@ blank form and a real invoice — see README.md.
   ownership per request — not a real expiring URL, but not a public one
   either; note in Section 21's terms as a documented gap versus a true
   presigned-URL scheme.
-- **AI**: `AIProvider` interface (`src/lib/ai/provider.ts`) with an Anthropic
-  implementation. Structured output is enforced via a forced tool call whose
-  schema comes from Zod's native `z.toJSONSchema()`, validated again with Zod
-  on the way back, with one automatic repair retry on failure.
+- **AI**: `AIProvider` interface (`src/lib/ai/provider.ts`) with two
+  implementations — `providers/anthropic.ts` (Anthropic's Messages API
+  directly) and `providers/openrouter.ts` (OpenRouter's OpenAI-compatible
+  chat-completions endpoint via plain `fetch`, since OpenRouter has no
+  official SDK; this is the recommended default — see README.md). Both
+  enforce structured output via a forced tool/function call whose schema
+  comes from Zod's native `z.toJSONSchema()`, validated again with Zod on
+  the way back, with one automatic repair retry on failure.
 - **PDF pipeline**: `src/lib/pdf/` — `extractText.ts` (pdfjs-dist layout
   extraction), `analyzeForm.ts` (AI label detection + deterministic anchor
   resolution), `extractDocument.ts` (AI structured extraction from text or

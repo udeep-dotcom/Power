@@ -11,14 +11,15 @@ deliberately deferred to later phases.
 
 - Node.js 20.9+ (Node 22 recommended)
 - PostgreSQL 16
-- An Anthropic API key (or another provider once its adapter is implemented)
+- An OpenRouter API key (recommended — one key, any model) or an Anthropic
+  API key
 
 ## Setup
 
 ```bash
 npm install
 cp .env.example .env
-# edit .env: set DATABASE_URL, AUTH_SECRET, ANTHROPIC_API_KEY
+# edit .env: set DATABASE_URL, AUTH_SECRET, OPENROUTER_API_KEY
 
 npx prisma migrate dev
 npm run db:seed   # creates a default org + admin user (see output for credentials)
@@ -37,10 +38,17 @@ See `.env.example` for the full list. The important ones:
 
 - `DATABASE_URL` — PostgreSQL connection string.
 - `AUTH_SECRET` — random 32+ byte secret for session signing.
-- `AI_PROVIDER` / `AI_MODEL` / `ANTHROPIC_API_KEY` — AI provider config
-  (Section 27 of the spec). Only `anthropic` is implemented; `openai` and
-  `gemini` throw a clear "not implemented" error pointing at where to add
-  them (`src/lib/ai/providers/`).
+- `AI_PROVIDER` / `AI_MODEL` — AI provider config (Section 27 of the spec).
+  - `AI_PROVIDER=openrouter` (default) + `OPENROUTER_API_KEY`: routes
+    through [OpenRouter](https://openrouter.ai/models), so `AI_MODEL` can be
+    any model it serves — `"google/gemini-2.5-flash"` (recommended default),
+    `"google/gemini-2.5-flash-lite"` (cheapest), `"openai/gpt-4o-mini"`,
+    `"anthropic/claude-haiku-4.5"` — with no code change. Verify the exact
+    slug on OpenRouter's model list before switching, since they change.
+  - `AI_PROVIDER=anthropic` + `ANTHROPIC_API_KEY`: talks to Anthropic
+    directly instead.
+  - A *direct* (non-OpenRouter) OpenAI or Gemini integration isn't
+    implemented — route those through `openrouter` instead.
 - `STORAGE_DRIVER` / `LOCAL_STORAGE_DIR` — file storage (Section 26). Only
   `local` is implemented; `s3` throws a clear "not implemented" error.
 - `MAX_UPLOAD_SIZE_MB`, `DEFAULT_CONFIDENCE_THRESHOLD` — upload/validation
@@ -49,17 +57,23 @@ See `.env.example` for the full list. The important ones:
 ## Testing
 
 ```bash
-npm test        # vitest — 45 unit tests over every deterministic module
+npm test        # vitest — 51 unit tests over every deterministic module,
+                 # plus the OpenRouter provider's request/retry/error logic
+                 # against a mocked HTTP layer
 npx tsc --noEmit
 npx eslint .
 npx next build
 ```
 
-There is no live-API integration test in this repo yet: the AI-dependent
-parts of the pipeline (form field detection, document extraction) need a
-real `ANTHROPIC_API_KEY` to exercise, which wasn't available in the
-environment this was built in. See `PROJECT_PLAN.md` Section 4 for exactly
-what was and wasn't verified.
+There is no *live* end-to-end AI integration test verified in this repo yet.
+The provider code (both Anthropic and OpenRouter) is unit-tested against
+mocked responses, but a real call — the thing that actually proves form
+detection and document extraction work — hasn't been run successfully yet.
+The Claude Code sandbox sessions this was built in either had no API key, or
+(with a real OpenRouter key) had a network policy that blocks
+`openrouter.ai` outbound. Run the flow yourself with a real key — on your
+own machine there's no such restriction — before trusting the AI-dependent
+half of this app. See `PROJECT_PLAN.md` Section 4 for the full story.
 
 ## Using it
 
