@@ -116,6 +116,67 @@ export async function uploadDocumentAction(
   return { ok: true, warning };
 }
 
+/**
+ * Attaches a previously-used blank form (by referencing its existing storage
+ * key) to this transaction instead of requiring a fresh upload. Combined
+ * with the file-hash reuse in lib/pipeline.ts's analyzeForm(), this means a
+ * recurring form (the same bank RTGS form used every day) only ever gets
+ * analyzed by AI once — every later transaction that reuses it skips
+ * Section A's upload entirely and skips the AI form-analysis call too.
+ */
+export async function reuseBlankFormAction(
+  transactionId: string,
+  sourceDocumentId: string,
+): Promise<UploadResult> {
+  const session = await requireSession();
+  await getOwnedTransaction(transactionId, session.user.organizationId);
+
+  const source = await prisma.document.findFirst({
+    where: {
+      id: sourceDocumentId,
+      kind: "BLANK_FORM" as DocumentKind,
+      transaction: { organizationId: session.user.organizationId },
+    },
+  });
+  if (!source) return { ok: false, error: "That form could not be found" };
+
+  const existingBlankForm = await prisma.document.findFirst({
+    where: { transactionId, kind: "BLANK_FORM" as DocumentKind },
+  });
+  if (existingBlankForm) {
+    return { ok: false, error: "This transaction already has a blank form attached" };
+  }
+
+  await prisma.document.create({
+    data: {
+      transactionId,
+      kind: "BLANK_FORM",
+      originalName: source.originalName,
+      storageKey: source.storageKey,
+      mimeType: source.mimeType,
+      fileHash: source.fileHash,
+    },
+  });
+
+  const supportingCount = await prisma.document.count({
+    where: { transactionId, kind: "SUPPORTING" as DocumentKind },
+  });
+  const transaction = await prisma.transaction.findUniqueOrThrow({ where: { id: transactionId } });
+  if (transaction.status === "NEW" && supportingCount > 0) {
+    await prisma.transaction.update({ where: { id: transactionId }, data: { status: "FILES_UPLOADED" } });
+  }
+
+  await logAudit({
+    transactionId,
+    userId: session.user.id,
+    action: "BLANK_FORM_REUSED_FROM_LIBRARY",
+    detail: { sourceDocumentId, originalName: source.originalName },
+  });
+
+  revalidatePath(`/transactions/${transactionId}`);
+  return { ok: true };
+}
+
 export async function runFormAnalysisAction(transactionId: string): Promise<ActionResult> {
   const session = await requireSession();
   const transaction = await getOwnedTransaction(transactionId, session.user.organizationId);

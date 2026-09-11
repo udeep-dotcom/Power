@@ -51,6 +51,24 @@ explicit Phase 2/3 work with a note on what it needs.
   documented recovery path from FAILED.
 - Dashboard: forms today/this month, hours saved (estimated), needs-review
   count, recent transactions.
+- Full transaction history (`/transactions`): every form ever filled, with
+  search (document #, supplier, invoice #) and status filtering, paginated —
+  not just the dashboard's last-10 view (Section 24).
+- Blank-form reuse: uploading the same PDF file (by hash) again — or picking
+  it from the "reuse a form used before" list instead of uploading at all —
+  skips the AI form-analysis call entirely and reuses the previously-detected
+  fields. The single biggest cost/latency lever for an org that fills the
+  same handful of bank/customs forms every day; see Section 2 for how this
+  differs from the full template-matching system that's still Phase 2.
+- S3-compatible object storage (`STORAGE_DRIVER=s3`) — works against AWS S3,
+  Cloudflare R2, Supabase Storage, or MinIO. Required for any deployment
+  target without a persistent local disk (e.g. Vercel); the local driver
+  silently loses files there. Also the first storage driver to produce real
+  expiring URLs (15-minute presigned GetObject), improving on the local
+  driver's non-expiring authenticated route.
+- `scripts/create-user.ts` (`npm run user:create`) — onboard a named user
+  with a securely generated one-time password, for handing out logins to a
+  small set of testers without building an invite-email flow yet.
 - Prompt-injection defense: every AI call's system prompt explicitly tells the
   model uploaded document text is data only, never instructions (Section 58).
 - Two working AI providers: direct Anthropic, and OpenRouter (one adapter,
@@ -76,13 +94,12 @@ Each of these needs real additional engineering, not a flag flip:
 | Scanned PDFs / OCR (Case C) | No text layer to extract; needs a rasterizer (e.g. a canvas backend for pdf.js, or a dedicated OCR service) not available in this pass | Render page → image → OCR or vision pipeline |
 | Image blank forms (JPG/PNG, Case D) | Field-position detection would need vision-based bounding boxes converted into a synthesized PDF page; the `completeVision` hook already exists on the AI provider interface for this | Build the image→PDF background embedding + vision coordinate mapping |
 | DOCX/XLSX supporting documents | Explicitly listed as "where practical" in the spec; not wired up | Add a text-extraction adapter per format behind the existing extraction pipeline |
-| Template learning & auto-matching (Sections 14–16) | The `FormTemplate`/`TemplateField` tables exist in the schema but nothing populates or matches against them yet | Save a transaction's confirmed `FormField` set as a template; add fingerprint/perceptual-hash matching on upload |
+| Template learning & auto-matching (Sections 14–16) | A lightweight exact-file-hash reuse now exists (see Section 1) — that's not the same thing as Section 16's fuzzy matching (perceptual hash, OCR header recognition, logo recognition for a form that's been rescanned/re-exported and isn't byte-identical), and there's still no admin UI to review/correct/rename a template (Section 15) | Add fingerprint/perceptual-hash matching for near-duplicate (not just identical) files; build the template review/edit screen |
 | Company & supplier master data (Sections 17–18) | No UI/data model beyond what's needed for the MVP loop | Add `CompanyProfile`/`Supplier` models + admin screens; wire "compare against master data, flag differences" |
 | Admin settings screen (Section 46) | Config currently lives in `.env` only | Build an admin UI over the same env-backed settings, org-scoped |
 | Admin cost dashboard (Section 29) | `AIUsage` rows are already recorded with estimated cost per call; no UI reads them yet | A simple aggregation page over the existing `AIUsage` table |
 | APPROVER role / multi-step approval (Section 60) | Only Operator → Generate exists | Add the role + an approval-required transition gate |
 | Golden-file regression tests (Section 55) & visual PDF regression testing (Section 56) | Needs a curated fixture set (real-shaped forms) that doesn't exist yet | Add fixtures + a comparison harness once real bank forms are available |
-| S3-compatible storage driver | Interface (`StorageDriver`) is defined; only the local-disk implementation exists | Implement `S3StorageDriver` against the same interface |
 | Direct OpenAI / Gemini providers | Both are reachable today via `AI_PROVIDER=openrouter` + `AI_MODEL="openai/..."` or `"google/..."`; a *direct* (non-OpenRouter) integration against their own SDKs isn't implemented | Implement `providers/openai.ts` / `providers/gemini.ts` against the official SDKs, mirroring `providers/anthropic.ts` |
 | Background job queue (Section 35) | Pipeline currently runs synchronously across three server actions, which is explicitly allowed for now | Move `runAnalysisPipeline` behind a queue (e.g. BullMQ) if document volume or size makes synchronous processing too slow |
 | Docker Compose | Not created this pass | `docker-compose.yml` with app + Postgres, once the Python service question (if any) is settled |
@@ -92,6 +109,41 @@ Each of these needs real additional engineering, not a flag flip:
 Bank-specific and customs-specific template packs, advanced multi-level
 approval workflows, analytics, ERP integration APIs, a document inbox, and
 email ingestion — all listed in the spec's own Section 53 as third-phase work.
+
+## 3a. Deploying this (e.g. to Vercel)
+
+The code is deployment-ready in the sense that matters most: the storage
+layer no longer assumes a persistent local disk (`STORAGE_DRIVER=s3` works
+against S3/R2/Supabase Storage), which was a hard blocker for any serverless
+host. What's still true: **nothing has actually been deployed anywhere.**
+That requires accounts and provisioning that belong to whoever owns this
+project, not to a Claude Code session — specifically:
+
+1. **A Vercel project connected to this GitHub repo.** Only you can create
+   this (it's tied to your Vercel account/billing) — connect the repo at
+   vercel.com/new, pick this branch, and Vercel picks up the Next.js app
+   automatically. No code changes needed for this part.
+2. **A real, persistent PostgreSQL database** — the one in this session is
+   local to a disposable sandbox and disappears when it ends. Neon, Vercel
+   Postgres, and Supabase all offer a connection string in a couple of
+   minutes; set it as `DATABASE_URL` in Vercel's project settings.
+3. **An S3-compatible storage bucket** — Cloudflare R2 (has a free tier, S3
+   API-compatible) or Supabase Storage are both reasonable choices. Set
+   `STORAGE_DRIVER=s3`, `S3_BUCKET`, `S3_REGION`, `S3_ENDPOINT` (for R2 —
+   AWS S3 itself doesn't need this), `S3_ACCESS_KEY_ID`,
+   `S3_SECRET_ACCESS_KEY` in Vercel's project settings.
+4. **The rest of `.env.example`** — `AUTH_SECRET` (generate a real random
+   one, don't reuse the dev placeholder), `AI_PROVIDER`/`AI_MODEL`,
+   `OPENROUTER_API_KEY`.
+5. **Run migrations and seed against the production database** — `npx
+   prisma migrate deploy` (not `migrate dev`) with `DATABASE_URL` pointed at
+   the production database, then `npm run db:seed` or `npm run user:create`
+   for each real user.
+
+Once those exist, deploying is mechanical — hand over the Vercel project
+(or add me as a collaborator, or just paste me the resulting env values) and
+the rest is a normal `git push`-triggered deploy. I can't skip the account-
+creation steps for you; I can do everything after that.
 
 ## 4. Honest limitations of what was tested
 
@@ -111,6 +163,16 @@ been exercised against a live model end-to-end yet. What *was* verified:
   enables once both are present, navigate back to the dashboard, sign out,
   and confirm an unauthenticated request to `/dashboard` redirects to
   `/login`. Zero browser console/page errors were observed.
+- A second Playwright session against a live dev server covering the parts
+  added after the first pass: created a transaction, uploaded a blank form,
+  seeded a `FormField` row directly via SQL to stand in for a successful AI
+  analysis (since no live AI call was available — see below), created a
+  second transaction, confirmed the "reuse a form used before" picker showed
+  the first form and that clicking it attached the blank form with zero
+  upload, then confirmed the `/transactions` history page listed both
+  transactions and its search filter worked. Zero console errors. The
+  `npm run user:create` script was also run for real and its generated
+  password verified against the database.
 
 **Why the live call is still missing, specifically:** this project has so far
 only been built inside Claude Code's own cloud sandbox sessions. The first

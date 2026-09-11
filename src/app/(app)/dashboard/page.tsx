@@ -41,12 +41,17 @@ export default async function DashboardPage() {
 
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-semibold text-slate-900">Recent Transactions</h2>
-        <Link
-          href="/transactions/new"
-          className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
-        >
-          + Create Filled Form
-        </Link>
+        <div className="flex items-center gap-3">
+          <Link href="/transactions" className="text-sm text-slate-600 hover:underline">
+            View full history →
+          </Link>
+          <Link
+            href="/transactions/new"
+            className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
+          >
+            + Create Filled Form
+          </Link>
+        </div>
       </div>
 
       <div className="overflow-hidden rounded-lg border border-slate-200 bg-white">

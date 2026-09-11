@@ -49,10 +49,29 @@ See `.env.example` for the full list. The important ones:
     directly instead.
   - A *direct* (non-OpenRouter) OpenAI or Gemini integration isn't
     implemented — route those through `openrouter` instead.
-- `STORAGE_DRIVER` / `LOCAL_STORAGE_DIR` — file storage (Section 26). Only
-  `local` is implemented; `s3` throws a clear "not implemented" error.
+- `STORAGE_DRIVER` / `LOCAL_STORAGE_DIR` or `S3_*` — file storage
+  (Section 26). `local` (default) writes to disk — fine for dev, but loses
+  files on any host without a persistent filesystem. `s3` works against AWS
+  S3, Cloudflare R2, Supabase Storage, or MinIO — **required** for a
+  serverless deployment target like Vercel. See `.env.example` for the S3_*
+  variables and `PROJECT_PLAN.md` Section 3a for deployment steps.
 - `MAX_UPLOAD_SIZE_MB`, `DEFAULT_CONFIDENCE_THRESHOLD` — upload/validation
   limits.
+
+## Onboarding users
+
+There's no self-serve signup (this is an internal company tool). To create a
+login for a specific person:
+
+```bash
+npm run user:create -- "jane@company.com" "Jane Doe" OPERATOR
+```
+
+Prints a securely generated one-time password to the terminal — send it to
+them over a secure channel (not email in plaintext). Pass `ADMIN` as the
+third argument for an admin account. Re-run the same command for the same
+email to rotate their password (there's no self-serve password-change screen
+yet).
 
 ## Testing
 
@@ -79,7 +98,9 @@ half of this app. See `PROJECT_PLAN.md` Section 4 for the full story.
 
 1. Sign in, click **+ Create Filled Form**.
 2. Upload the blank form (digital PDF with a text layer — scanned PDFs and
-   image forms are a documented Phase 2 item, see `PROJECT_PLAN.md`).
+   image forms are a documented Phase 2 item, see `PROJECT_PLAN.md`), **or**,
+   if this exact form has been used before, pick it from the "reuse a form
+   used before" list instead — no upload, no re-analysis.
 3. Upload one or more supporting documents (PDF with a text layer, or a
    JPG/PNG photo — images are read via the AI provider's vision endpoint).
 4. Click **Start Analysis** and wait for the four processing stages.
@@ -87,13 +108,21 @@ half of this app. See `PROJECT_PLAN.md` Section 4 for the full story.
    "Information Required"; manual edits always win over AI values.
 6. Click **Generate Filled Form**, then download it.
 
-The transaction then shows up in the dashboard's history with its
-`DOC-YYYY-NNNNNN` document number.
+The transaction shows up in **History** (`/transactions`) with its
+`DOC-YYYY-NNNNNN` document number, searchable by document #, supplier, or
+invoice #, and filterable by status — the permanent record of every form
+ever filled.
 
 ## Known gaps (see PROJECT_PLAN.md for the full list)
 
 - Scanned PDFs and image-based blank forms are rejected with a clear message
   rather than silently mishandled.
-- Template learning/auto-matching, company/supplier master data, the admin
-  cost dashboard, and S3 storage are scaffolded (schema/interfaces exist)
-  but not wired up yet.
+- The blank-form reuse described above is an *exact file match* (same
+  bytes). A rescanned or re-exported version of the same form won't match —
+  that needs the fuzzy/fingerprint matching in Section 16, still Phase 2.
+- Template learning's admin review/edit screen, company/supplier master
+  data, and the admin cost dashboard are scaffolded (schema exists) but not
+  wired up yet.
+- Nothing is deployed anywhere yet — see `PROJECT_PLAN.md` Section 3a for
+  exactly what that needs from you (a Vercel project, a hosted Postgres, and
+  an S3-compatible bucket — none of which I can create on my own).

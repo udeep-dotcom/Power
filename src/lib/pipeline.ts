@@ -51,6 +51,58 @@ export async function analyzeForm(transactionId: string): Promise<void> {
     );
   }
 
+  // Cost/latency shortcut (lightweight stand-in for the full Section 14-16
+  // template system): the same handful of bank/customs forms get reused
+  // verbatim day after day. If this exact file (by hash) was already
+  // analyzed for an earlier transaction in this org, copy its detected
+  // fields instead of paying for another AI call. This is the highest-
+  // leverage cost lever available before real template fingerprint/fuzzy
+  // matching exists (that's still Phase 2 — this only fires on an exact
+  // byte-for-byte match).
+  const reused = await prisma.document.findFirst({
+    where: {
+      kind: "BLANK_FORM" as DocumentKind,
+      fileHash: blankForm.fileHash,
+      id: { not: blankForm.id },
+      transaction: { organizationId: transaction.organizationId },
+    },
+    orderBy: { createdAt: "desc" },
+    include: { transaction: { include: { formFields: true } } },
+  });
+
+  if (reused && reused.transaction.formFields.length > 0) {
+    await prisma.$transaction([
+      prisma.formField.deleteMany({ where: { transactionId } }),
+      prisma.formField.createMany({
+        data: reused.transaction.formFields.map((f) => ({
+          transactionId,
+          fieldKey: f.fieldKey,
+          label: f.label,
+          page: f.page,
+          x: f.x,
+          y: f.y,
+          width: f.width,
+          height: f.height,
+          fontSize: f.fontSize,
+          dataType: f.dataType,
+          dateFormat: f.dateFormat,
+          required: f.required,
+        })),
+      }),
+      prisma.transaction.update({ where: { id: transactionId }, data: { status: "FORM_ANALYZED" } }),
+    ]);
+
+    await logAudit({
+      transactionId,
+      action: "FORM_ANALYSIS_REUSED",
+      detail: {
+        reusedFromTransactionId: reused.transactionId,
+        fieldsReused: reused.transaction.formFields.length,
+      },
+    });
+    return;
+  }
+
   const buffer = await loadPdfBuffer(blankForm.storageKey);
   const layout = await extractPdfLayout(buffer);
 

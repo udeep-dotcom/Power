@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import type { TransactionStatus, FieldDataType, ValueSource, DocumentKind } from "@prisma/client";
 import {
   uploadDocumentAction,
+  reuseBlankFormAction,
   runFormAnalysisAction,
   runDocumentAnalysisAction,
   runFieldMappingAction,
@@ -35,6 +36,12 @@ interface FieldInfo {
   hasConflict: boolean;
 }
 
+interface KnownBlankForm {
+  id: string;
+  originalName: string;
+  lastUsedAt: string;
+}
+
 interface Props {
   transaction: {
     id: string;
@@ -45,6 +52,7 @@ interface Props {
   documents: DocumentInfo[];
   fields: FieldInfo[];
   generatedDocument: { url: string } | null;
+  knownBlankForms: KnownBlankForm[];
 }
 
 const PROCESSING_STAGES = [
@@ -54,7 +62,13 @@ const PROCESSING_STAGES = [
   "Matching fields",
 ] as const;
 
-export function TransactionWorkspace({ transaction, documents, fields, generatedDocument }: Props) {
+export function TransactionWorkspace({
+  transaction,
+  documents,
+  fields,
+  generatedDocument,
+  knownBlankForms,
+}: Props) {
   const router = useRouter();
   const [stageIndex, setStageIndex] = useState<number | null>(null);
   const [pipelineError, setPipelineError] = useState<string | null>(transaction.errorMessage);
@@ -140,6 +154,7 @@ export function TransactionWorkspace({ transaction, documents, fields, generated
             transactionId={transaction.id}
             existing={blankForm}
             accept="application/pdf"
+            knownForms={knownBlankForms}
           />
           <UploadCard
             title="B. Upload Supporting Documents"
@@ -201,6 +216,7 @@ function UploadCard({
   multipleExisting,
   accept,
   multiple,
+  knownForms,
 }: {
   title: string;
   description: string;
@@ -210,11 +226,25 @@ function UploadCard({
   multipleExisting?: DocumentInfo[];
   accept: string;
   multiple?: boolean;
+  knownForms?: KnownBlankForm[];
 }) {
   const router = useRouter();
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [warning, setWarning] = useState<string | null>(null);
+  const [reusing, setReusing] = useState<string | null>(null);
+
+  async function handleUseKnownForm(sourceDocumentId: string) {
+    setReusing(sourceDocumentId);
+    setError(null);
+    const result = await reuseBlankFormAction(transactionId, sourceDocumentId);
+    setReusing(null);
+    if (!result.ok) {
+      setError(result.error);
+      return;
+    }
+    router.refresh();
+  }
 
   async function handleFiles(fileList: FileList | null) {
     if (!fileList || fileList.length === 0) return;
@@ -250,8 +280,35 @@ function UploadCard({
         ))}
       </ul>
 
+      {items.length === 0 && knownForms && knownForms.length > 0 && (
+        <div className="mt-4 rounded-md border border-slate-200 bg-slate-50 p-3">
+          <p className="text-xs font-medium text-slate-600">
+            Or reuse a form used before — skips the AI reading step entirely:
+          </p>
+          <ul className="mt-2 space-y-1.5">
+            {knownForms.map((form) => (
+              <li key={form.id} className="flex items-center justify-between gap-2 text-sm">
+                <span className="truncate text-slate-700">{form.originalName}</span>
+                <button
+                  type="button"
+                  disabled={reusing === form.id}
+                  onClick={() => handleUseKnownForm(form.id)}
+                  className="shrink-0 rounded-md border border-slate-300 bg-white px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100 disabled:opacity-50"
+                >
+                  {reusing === form.id ? "Using…" : "Use this"}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       <label className="mt-4 flex cursor-pointer items-center justify-center rounded-md border border-dashed border-slate-300 px-4 py-6 text-sm text-slate-500 hover:border-slate-400">
-        {uploading ? "Uploading…" : "Click to choose file"}
+        {uploading
+          ? "Uploading…"
+          : items.length === 0 && knownForms && knownForms.length > 0
+            ? "Or click to upload a new file"
+            : "Click to choose file"}
         <input
           type="file"
           accept={accept}

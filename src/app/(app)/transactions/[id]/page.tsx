@@ -23,6 +23,21 @@ export default async function TransactionPage({ params }: { params: Promise<{ id
 
   const storage = getStorageDriver();
 
+  // Previously-analyzed blank forms this org can reuse without re-uploading
+  // (see reuseBlankFormAction + analyzeForm's file-hash reuse path).
+  const knownBlankForms =
+    tx.documents.some((d) => d.kind === "BLANK_FORM")
+      ? []
+      : await prisma.document.findMany({
+          where: {
+            kind: "BLANK_FORM",
+            transaction: { organizationId: session.user.organizationId, formFields: { some: {} } },
+          },
+          distinct: ["fileHash"],
+          orderBy: { createdAt: "desc" },
+          take: 20,
+        });
+
   const documents = await Promise.all(
     tx.documents.map(async (d) => ({
       id: d.id,
@@ -72,6 +87,11 @@ export default async function TransactionPage({ params }: { params: Promise<{ id
       documents={documents}
       fields={fields}
       generatedDocument={generatedDocument}
+      knownBlankForms={knownBlankForms.map((d) => ({
+        id: d.id,
+        originalName: d.originalName,
+        lastUsedAt: d.createdAt.toISOString(),
+      }))}
     />
   );
 }

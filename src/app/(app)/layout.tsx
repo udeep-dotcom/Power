@@ -17,6 +17,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
               <Link href="/dashboard" className="hover:text-slate-900">
                 Dashboard
               </Link>
+              <Link href="/transactions" className="hover:text-slate-900">
+                History
+              </Link>
               <Link href="/transactions/new" className="hover:text-slate-900">
                 + Create Filled Form
               </Link>

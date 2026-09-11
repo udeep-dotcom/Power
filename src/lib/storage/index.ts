@@ -1,5 +1,6 @@
 import { randomUUID } from "crypto";
 import { LocalStorageDriver } from "./local";
+import { S3StorageDriver } from "./s3";
 
 /**
  * Storage abstraction (Section 26). Development uses local disk;
@@ -27,11 +28,8 @@ export function getStorageDriver(): StorageDriver {
 
   const kind = process.env.STORAGE_DRIVER ?? "local";
   if (kind === "s3") {
-    throw new Error(
-      "STORAGE_DRIVER=s3 is not wired up yet. Implement an S3StorageDriver against " +
-        "the StorageDriver interface in src/lib/storage/index.ts (see S3_* env vars) " +
-        "before enabling it in production.",
-    );
+    driver = new S3StorageDriver();
+    return driver;
   }
 
   driver = new LocalStorageDriver(process.env.LOCAL_STORAGE_DIR ?? "./storage");
