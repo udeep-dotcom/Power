@@ -1,0 +1,273 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  OPERATOR
+}
+
+enum TransactionStatus {
+  NEW
+  FILES_UPLOADED
+  FORM_ANALYZED
+  DOCUMENTS_ANALYZED
+  MAPPING_COMPLETE
+  REVIEW_REQUIRED
+  APPROVED_FOR_GENERATION
+  GENERATED
+  ARCHIVED
+  FAILED
+}
+
+enum DocumentKind {
+  BLANK_FORM
+  SUPPORTING
+}
+
+enum FieldDataType {
+  TEXT
+  DATE
+  CURRENCY
+  NUMBER
+  ACCOUNT
+  SWIFT
+  CHECKBOX
+}
+
+enum ValueSource {
+  AI
+  MANUAL
+}
+
+model Organization {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now())
+
+  users        User[]
+  transactions Transaction[]
+  templates    FormTemplate[]
+}
+
+model User {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  email          String       @unique
+  passwordHash   String
+  name           String
+  role           UserRole     @default(OPERATOR)
+  createdAt      DateTime     @default(now())
+
+  transactions Transaction[] @relation("CreatedBy")
+  auditLogs    AuditLog[]
+
+  @@index([organizationId])
+}
+
+/// Reusable field layout for a known form (e.g. a specific bank's RTGS form).
+/// Scaffolded now for the Phase 2 template-matching system described in
+/// PROJECT_PLAN.md; not yet populated or matched against automatically.
+model FormTemplate {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  name           String
+  fingerprint    String? // hash/perceptual-hash used for future auto-matching
+  pageWidth      Float?
+  pageHeight     Float?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  fields       TemplateField[]
+  transactions Transaction[]
+
+  @@index([organizationId])
+}
+
+model TemplateField {
+  id            String        @id @default(cuid())
+  templateId    String
+  template      FormTemplate  @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  fieldKey      String
+  label         String
+  page          Int
+  x             Float
+  y             Float
+  width         Float
+  height        Float
+  fontSize      Float         @default(10)
+  alignment     String        @default("left")
+  maxChars      Int?
+  required      Boolean       @default(false)
+  dataType      FieldDataType @default(TEXT)
+  dateFormat    String?
+
+  @@index([templateId])
+}
+
+model Transaction {
+  id              String            @id @default(cuid())
+  documentNumber  String            @unique // human-readable, e.g. DOC-2026-000001
+  organizationId  String
+  organization    Organization      @relation(fields: [organizationId], references: [id])
+  createdById     String
+  createdBy       User              @relation("CreatedBy", fields: [createdById], references: [id])
+  templateId      String?
+  template        FormTemplate?     @relation(fields: [templateId], references: [id])
+  status          TransactionStatus @default(NEW)
+  formType        String?
+  supplierName    String?
+  invoiceNumber   String?
+  amount          Decimal?          @db.Decimal(18, 2)
+  currency        String?
+  errorMessage    String?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  documents          Document[]
+  formFields         FormField[]
+  extractedValues    ExtractedValue[]
+  formValues         FormValue[]
+  generatedDocuments GeneratedDocument[]
+  auditLogs          AuditLog[]
+  aiUsage            AIUsage[]
+
+  @@index([organizationId])
+  @@index([status])
+}
+
+model Document {
+  id            String       @id @default(cuid())
+  transactionId String
+  transaction   Transaction  @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  kind          DocumentKind
+  originalName  String
+  storageKey    String
+  mimeType      String
+  fileHash      String
+  pageCount     Int?
+  createdAt     DateTime     @default(now())
+
+  extractedValues ExtractedValue[]
+
+  @@index([transactionId])
+  @@index([fileHash])
+}
+
+/// A field detected on the blank form (Section 6 / Section 13 Case B-D).
+model FormField {
+  id            String        @id @default(cuid())
+  transactionId String
+  transaction   Transaction   @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  fieldKey      String // normalized semantic key, e.g. "beneficiary_name"
+  label         String // label text as read from the form
+  page          Int
+  x             Float
+  y             Float
+  width         Float
+  height        Float
+  fontSize      Float         @default(10)
+  dataType      FieldDataType @default(TEXT)
+  dateFormat    String?
+  required      Boolean       @default(false)
+  createdAt     DateTime      @default(now())
+
+  formValues FormValue[]
+
+  @@index([transactionId])
+}
+
+/// A candidate value extracted from a supporting document, before mapping.
+model ExtractedValue {
+  id                String      @id @default(cuid())
+  transactionId     String
+  transaction       Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  documentId        String
+  document          Document    @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  fieldKey          String // normalized semantic key
+  value             String
+  sourceText        String? // raw snippet the value was taken from
+  sourcePage        Int?
+  confidence        Float
+  extractionMethod  String // e.g. "native-pdf-text", "llm-structured"
+  createdAt         DateTime    @default(now())
+
+  formValues FormValue[]
+
+  @@index([transactionId])
+  @@index([fieldKey])
+}
+
+/// The final value mapped onto a specific form field, after AI mapping and/or
+/// manual correction. User edits always take precedence over AI values
+/// (Section 11).
+model FormValue {
+  id               String          @id @default(cuid())
+  transactionId    String
+  transaction      Transaction     @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  formFieldId      String
+  formField        FormField       @relation(fields: [formFieldId], references: [id], onDelete: Cascade)
+  extractedValueId String?
+  extractedValue   ExtractedValue? @relation(fields: [extractedValueId], references: [id])
+  value            String
+  source           ValueSource
+  confidence       Float
+  confirmed        Boolean         @default(false)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  @@unique([transactionId, formFieldId])
+  @@index([transactionId])
+}
+
+model GeneratedDocument {
+  id            String      @id @default(cuid())
+  transactionId String
+  transaction   Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  storageKey    String
+  fileHash      String
+  createdAt     DateTime    @default(now())
+
+  @@index([transactionId])
+}
+
+model AuditLog {
+  id            String      @id @default(cuid())
+  transactionId String?
+  transaction   Transaction? @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  userId        String?
+  user          User?       @relation(fields: [userId], references: [id])
+  action        String
+  detail        Json?
+  createdAt     DateTime    @default(now())
+
+  @@index([transactionId])
+}
+
+model AIUsage {
+  id             String      @id @default(cuid())
+  transactionId  String?
+  transaction    Transaction? @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  provider       String
+  model          String
+  promptTokens   Int         @default(0)
+  completionTokens Int       @default(0)
+  costUsd        Decimal     @default(0) @db.Decimal(10, 4)
+  purpose        String // e.g. "form-analysis", "document-extraction", "field-mapping"
+  createdAt      DateTime    @default(now())
+
+  @@index([transactionId])
+}
