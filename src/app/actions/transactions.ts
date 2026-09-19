@@ -16,7 +16,7 @@ import {
 } from "@/lib/pipeline";
 import { overlayValuesOnPdf } from "@/lib/pdf/overlay";
 import { assertTransition } from "@/lib/workflow";
-import type { DocumentKind } from "@prisma/client";
+import type { DocumentKind, TransactionStatus } from "@prisma/client";
 
 type ActionResult = { ok: true } | { ok: false; error: string };
 type UploadResult = { ok: true; warning?: string } | { ok: false; error: string };
@@ -226,13 +226,24 @@ async function runPipelineStep(transactionId: string, step: () => Promise<void>)
   }
 }
 
+// Statuses where a field value is still open for review/correction — matches
+// TransactionWorkspace's own showReview gate. Enforced server-side too so a
+// direct call can't silently rewrite a field after the form has already
+// been generated (or archived), which would leave the stored "current"
+// value diverging from the PDF that was actually issued.
+const EDITABLE_STATUSES: TransactionStatus[] = ["REVIEW_REQUIRED", "APPROVED_FOR_GENERATION", "FAILED"];
+
 export async function updateFormValueAction(
   transactionId: string,
   formFieldId: string,
   value: string,
 ): Promise<ActionResult> {
   const session = await requireSession();
-  await getOwnedTransaction(transactionId, session.user.organizationId);
+  const transaction = await getOwnedTransaction(transactionId, session.user.organizationId);
+
+  if (!EDITABLE_STATUSES.includes(transaction.status)) {
+    return { ok: false, error: `Cannot edit field values while the transaction is ${transaction.status}` };
+  }
 
   const field = await prisma.formField.findFirst({ where: { id: formFieldId, transactionId } });
   if (!field) return { ok: false, error: "Field not found" };

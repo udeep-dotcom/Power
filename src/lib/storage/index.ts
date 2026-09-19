@@ -16,8 +16,20 @@ export interface StorageDriver {
   delete(key: string): Promise<void>;
 }
 
+/**
+ * The extension is later echoed back into a Content-Disposition response
+ * header (src/app/api/files/[...key]/route.ts) unescaped, so it's allow-
+ * listed to plain alphanumerics rather than trusting the client-supplied
+ * filename verbatim — an untrusted filename containing quotes/semicolons
+ * could otherwise inject extra header parameters.
+ */
+function sanitizeExtension(raw: string | undefined): string {
+  const cleaned = (raw ?? "").replace(/[^a-zA-Z0-9]/g, "").slice(0, 10);
+  return cleaned || "bin";
+}
+
 export function buildStorageKey(prefix: string, originalName: string): string {
-  const ext = originalName.includes(".") ? originalName.split(".").pop() : "bin";
+  const ext = sanitizeExtension(originalName.includes(".") ? originalName.split(".").pop() : undefined);
   return `${prefix}/${randomUUID()}.${ext}`;
 }
 

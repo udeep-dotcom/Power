@@ -1,9 +1,12 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/lib/auth/session";
 import { StatusBadge } from "@/components/ui/badges";
 import { formatAmount } from "@/lib/format/currency";
 import type { TransactionStatus, Prisma } from "@prisma/client";
+
+export const metadata: Metadata = { title: "Transaction History — FormFill" };
 
 const PAGE_SIZE = 25;
 
@@ -65,7 +68,7 @@ export default async function TransactionsPage({
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-lg font-semibold text-slate-900">Transaction History</h1>
         <Link
           href="/transactions/new"
@@ -81,7 +84,7 @@ export default async function TransactionsPage({
           name="q"
           defaultValue={q}
           placeholder="Search document #, supplier, invoice #"
-          className="w-72 rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-slate-500 focus:outline-none"
+          className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-slate-500 focus:outline-none sm:w-72"
         />
         <select
           name="status"
@@ -110,47 +113,49 @@ export default async function TransactionsPage({
       </form>
 
       <div className="overflow-hidden rounded-lg border border-slate-200 bg-white">
-        <table className="min-w-full divide-y divide-slate-200 text-sm">
-          <thead className="bg-slate-50 text-left text-xs font-medium uppercase tracking-wide text-slate-500">
-            <tr>
-              <th className="px-4 py-2">Document ID</th>
-              <th className="px-4 py-2">Date</th>
-              <th className="px-4 py-2">Supplier</th>
-              <th className="px-4 py-2">Invoice #</th>
-              <th className="px-4 py-2">Amount</th>
-              <th className="px-4 py-2">Created By</th>
-              <th className="px-4 py-2">Status</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100">
-            {transactions.length === 0 && (
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-slate-200 text-sm">
+            <thead className="bg-slate-50 text-left text-xs font-medium uppercase tracking-wide text-slate-500">
               <tr>
-                <td colSpan={7} className="px-4 py-6 text-center text-slate-400">
-                  No transactions match.
-                </td>
+                <th className="px-4 py-2">Document ID</th>
+                <th className="px-4 py-2">Date</th>
+                <th className="px-4 py-2">Supplier</th>
+                <th className="px-4 py-2">Invoice #</th>
+                <th className="px-4 py-2">Amount</th>
+                <th className="px-4 py-2">Created By</th>
+                <th className="px-4 py-2">Status</th>
               </tr>
-            )}
-            {transactions.map((tx) => (
-              <tr key={tx.id} className="hover:bg-slate-50">
-                <td className="px-4 py-2">
-                  <Link href={`/transactions/${tx.id}`} className="font-medium text-slate-900 hover:underline">
-                    {tx.documentNumber}
-                  </Link>
-                </td>
-                <td className="px-4 py-2 text-slate-600">{tx.createdAt.toISOString().slice(0, 10)}</td>
-                <td className="px-4 py-2 text-slate-600">{tx.supplierName ?? "—"}</td>
-                <td className="px-4 py-2 text-slate-600">{tx.invoiceNumber ?? "—"}</td>
-                <td className="px-4 py-2 text-slate-600">
-                  {tx.amount ? `${tx.currency ?? ""} ${formatAmount(tx.amount.toString())}` : "—"}
-                </td>
-                <td className="px-4 py-2 text-slate-600">{tx.createdBy.name}</td>
-                <td className="px-4 py-2">
-                  <StatusBadge status={tx.status} />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {transactions.length === 0 && (
+                <tr>
+                  <td colSpan={7} className="px-4 py-6 text-center text-slate-400">
+                    No transactions match.
+                  </td>
+                </tr>
+              )}
+              {transactions.map((tx) => (
+                <tr key={tx.id} className="hover:bg-slate-50">
+                  <td className="px-4 py-2">
+                    <Link href={`/transactions/${tx.id}`} className="font-medium text-slate-900 hover:underline">
+                      {tx.documentNumber}
+                    </Link>
+                  </td>
+                  <td className="px-4 py-2 text-slate-600">{tx.createdAt.toISOString().slice(0, 10)}</td>
+                  <td className="px-4 py-2 text-slate-600">{tx.supplierName ?? "—"}</td>
+                  <td className="px-4 py-2 text-slate-600">{tx.invoiceNumber ?? "—"}</td>
+                  <td className="px-4 py-2 text-slate-600">
+                    {tx.amount ? `${tx.currency ?? ""} ${formatAmount(tx.amount.toString())}` : "—"}
+                  </td>
+                  <td className="px-4 py-2 text-slate-600">{tx.createdBy.name}</td>
+                  <td className="px-4 py-2">
+                    <StatusBadge status={tx.status} />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {totalPages > 1 && (

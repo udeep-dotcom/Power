@@ -1,4 +1,7 @@
+import type { Metadata } from "next";
 import { createTransactionAction } from "@/app/actions/transactions";
+
+export const metadata: Metadata = { title: "Create Filled Form — FormFill" };
 
 export default function NewTransactionPage() {
   return (

@@ -1,8 +1,11 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/lib/auth/session";
 import { StatusBadge } from "@/components/ui/badges";
 import { formatAmount } from "@/lib/format/currency";
+
+export const metadata: Metadata = { title: "Dashboard — FormFill" };
 
 // TODO(Phase 2): make this an admin-configurable org setting (Section 46/48)
 // instead of a constant, once the admin settings screen exists.
@@ -39,9 +42,9 @@ export default async function DashboardPage() {
         <StatCard label="Needs Review" value={needsReview} highlight={needsReview > 0} />
       </div>
 
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-sm font-semibold text-slate-900">Recent Transactions</h2>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <Link href="/transactions" className="text-sm text-slate-600 hover:underline">
             View full history →
           </Link>
@@ -55,45 +58,47 @@ export default async function DashboardPage() {
       </div>
 
       <div className="overflow-hidden rounded-lg border border-slate-200 bg-white">
-        <table className="min-w-full divide-y divide-slate-200 text-sm">
-          <thead className="bg-slate-50 text-left text-xs font-medium uppercase tracking-wide text-slate-500">
-            <tr>
-              <th className="px-4 py-2">Document ID</th>
-              <th className="px-4 py-2">Supplier</th>
-              <th className="px-4 py-2">Invoice #</th>
-              <th className="px-4 py-2">Amount</th>
-              <th className="px-4 py-2">Created By</th>
-              <th className="px-4 py-2">Status</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100">
-            {recent.length === 0 && (
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-slate-200 text-sm">
+            <thead className="bg-slate-50 text-left text-xs font-medium uppercase tracking-wide text-slate-500">
               <tr>
-                <td colSpan={6} className="px-4 py-6 text-center text-slate-400">
-                  No transactions yet.
-                </td>
+                <th className="px-4 py-2">Document ID</th>
+                <th className="px-4 py-2">Supplier</th>
+                <th className="px-4 py-2">Invoice #</th>
+                <th className="px-4 py-2">Amount</th>
+                <th className="px-4 py-2">Created By</th>
+                <th className="px-4 py-2">Status</th>
               </tr>
-            )}
-            {recent.map((tx) => (
-              <tr key={tx.id} className="hover:bg-slate-50">
-                <td className="px-4 py-2">
-                  <Link href={`/transactions/${tx.id}`} className="font-medium text-slate-900 hover:underline">
-                    {tx.documentNumber}
-                  </Link>
-                </td>
-                <td className="px-4 py-2 text-slate-600">{tx.supplierName ?? "—"}</td>
-                <td className="px-4 py-2 text-slate-600">{tx.invoiceNumber ?? "—"}</td>
-                <td className="px-4 py-2 text-slate-600">
-                  {tx.amount ? `${tx.currency ?? ""} ${formatAmount(tx.amount.toString())}` : "—"}
-                </td>
-                <td className="px-4 py-2 text-slate-600">{tx.createdBy.name}</td>
-                <td className="px-4 py-2">
-                  <StatusBadge status={tx.status} />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {recent.length === 0 && (
+                <tr>
+                  <td colSpan={6} className="px-4 py-6 text-center text-slate-400">
+                    No transactions yet.
+                  </td>
+                </tr>
+              )}
+              {recent.map((tx) => (
+                <tr key={tx.id} className="hover:bg-slate-50">
+                  <td className="px-4 py-2">
+                    <Link href={`/transactions/${tx.id}`} className="font-medium text-slate-900 hover:underline">
+                      {tx.documentNumber}
+                    </Link>
+                  </td>
+                  <td className="px-4 py-2 text-slate-600">{tx.supplierName ?? "—"}</td>
+                  <td className="px-4 py-2 text-slate-600">{tx.invoiceNumber ?? "—"}</td>
+                  <td className="px-4 py-2 text-slate-600">
+                    {tx.amount ? `${tx.currency ?? ""} ${formatAmount(tx.amount.toString())}` : "—"}
+                  </td>
+                  <td className="px-4 py-2 text-slate-600">{tx.createdBy.name}</td>
+                  <td className="px-4 py-2">
+                    <StatusBadge status={tx.status} />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

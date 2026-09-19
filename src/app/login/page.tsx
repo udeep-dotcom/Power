@@ -1,4 +1,7 @@
+import type { Metadata } from "next";
 import { LoginForm } from "./LoginForm";
+
+export const metadata: Metadata = { title: "Sign In — FormFill" };
 
 export default async function LoginPage({
   searchParams,

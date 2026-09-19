@@ -76,7 +76,7 @@ yet).
 ## Testing
 
 ```bash
-npm test        # vitest — 51 unit tests over every deterministic module,
+npm test        # vitest — 56 unit tests over every deterministic module,
                  # plus the OpenRouter provider's request/retry/error logic
                  # against a mocked HTTP layer
 npx tsc --noEmit

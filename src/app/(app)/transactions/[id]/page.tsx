@@ -1,8 +1,23 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/lib/auth/session";
 import { getStorageDriver } from "@/lib/storage";
 import { TransactionWorkspace } from "./TransactionWorkspace";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const session = await requireSession();
+  const transaction = await prisma.transaction.findFirst({
+    where: { id, organizationId: session.user.organizationId },
+    select: { documentNumber: true },
+  });
+  return { title: transaction ? `${transaction.documentNumber} — FormFill` : "Transaction — FormFill" };
+}
 
 export default async function TransactionPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

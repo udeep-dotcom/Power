@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { TransactionStatus, FieldDataType, ValueSource, DocumentKind } from "@prisma/client";
 import {
@@ -110,10 +111,15 @@ export function TransactionWorkspace({
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-lg font-semibold text-slate-900">{transaction.documentNumber}</h1>
-          <StatusBadge status={transaction.status} />
+      <div>
+        <Link href="/transactions" className="text-sm text-slate-500 hover:underline">
+          ← All Transactions
+        </Link>
+        <div className="mt-2 flex items-center justify-between">
+          <div>
+            <h1 className="text-lg font-semibold text-slate-900">{transaction.documentNumber}</h1>
+            <StatusBadge status={transaction.status} />
+          </div>
         </div>
       </div>
 
@@ -193,14 +199,25 @@ export function TransactionWorkspace({
       {showGenerated && generatedDocument && (
         <div className="rounded-lg border border-green-200 bg-green-50 p-6">
           <p className="text-sm font-medium text-green-800">Form generated successfully.</p>
-          <a
-            href={generatedDocument.url}
-            target="_blank"
-            rel="noreferrer"
-            className="mt-3 inline-block rounded-md bg-green-700 px-4 py-2 text-sm font-medium text-white hover:bg-green-800"
-          >
-            Download Filled Form
-          </a>
+          <div className="mt-3 flex flex-wrap items-center gap-3">
+            <a
+              href={generatedDocument.url}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-block rounded-md bg-green-700 px-4 py-2 text-sm font-medium text-white hover:bg-green-800"
+            >
+              Download Filled Form
+            </a>
+            <Link
+              href="/transactions/new"
+              className="inline-block rounded-md border border-green-300 bg-white px-4 py-2 text-sm font-medium text-green-800 hover:bg-green-50"
+            >
+              Fill Another Form
+            </Link>
+            <Link href="/transactions" className="text-sm text-green-700 hover:underline">
+              Back to History
+            </Link>
+          </div>
         </div>
       )}
     </div>
@@ -366,51 +383,53 @@ function ReviewTable({
   return (
     <div className="space-y-4">
       <div className="overflow-hidden rounded-lg border border-slate-200 bg-white">
-        <table className="min-w-full divide-y divide-slate-200 text-sm">
-          <thead className="bg-slate-50 text-left text-xs font-medium uppercase tracking-wide text-slate-500">
-            <tr>
-              <th className="px-4 py-2">Form Field</th>
-              <th className="px-4 py-2">Proposed Value</th>
-              <th className="px-4 py-2">Source</th>
-              <th className="px-4 py-2">Confidence</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100">
-            {fields.map((f) => (
-              <tr key={f.id} className={f.hasConflict ? "bg-amber-50" : undefined}>
-                <td className="px-4 py-2 align-top">
-                  <div className="font-medium text-slate-900">{f.label}</div>
-                  {f.required && !f.value.trim() && (
-                    <div className="text-xs text-red-600">Information Required</div>
-                  )}
-                  {f.hasConflict && (
-                    <div className="text-xs text-amber-700">Conflicting values found across documents</div>
-                  )}
-                </td>
-                <td className="px-4 py-2 align-top">
-                  <input
-                    className="w-full rounded-md border border-slate-300 px-2 py-1 text-sm focus:border-slate-500 focus:outline-none"
-                    value={values[f.id] ?? ""}
-                    onChange={(e) => setValues((prev) => ({ ...prev, [f.id]: e.target.value }))}
-                    onBlur={() => handleBlur(f.id)}
-                  />
-                  {savingId === f.id && <span className="text-xs text-slate-400">Saving…</span>}
-                </td>
-                <td className="px-4 py-2 align-top text-slate-600">
-                  {f.source === "MANUAL" ? "Manual" : f.hasMappedValue ? "AI" : "—"}
-                </td>
-                <td className="px-4 py-2 align-top">
-                  {f.hasMappedValue ? <ConfidenceBadge confidence={f.confidence} /> : "—"}
-                </td>
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-slate-200 text-sm">
+            <thead className="bg-slate-50 text-left text-xs font-medium uppercase tracking-wide text-slate-500">
+              <tr>
+                <th className="px-4 py-2">Form Field</th>
+                <th className="px-4 py-2">Proposed Value</th>
+                <th className="px-4 py-2">Source</th>
+                <th className="px-4 py-2">Confidence</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {fields.map((f) => (
+                <tr key={f.id} className={f.hasConflict ? "bg-amber-50" : undefined}>
+                  <td className="px-4 py-2 align-top">
+                    <div className="font-medium text-slate-900">{f.label}</div>
+                    {f.required && !f.value.trim() && (
+                      <div className="text-xs text-red-600">Information Required</div>
+                    )}
+                    {f.hasConflict && (
+                      <div className="text-xs text-amber-700">Conflicting values found across documents</div>
+                    )}
+                  </td>
+                  <td className="px-4 py-2 align-top">
+                    <input
+                      className="w-full min-w-[12rem] rounded-md border border-slate-300 px-2 py-1 text-sm focus:border-slate-500 focus:outline-none"
+                      value={values[f.id] ?? ""}
+                      onChange={(e) => setValues((prev) => ({ ...prev, [f.id]: e.target.value }))}
+                      onBlur={() => handleBlur(f.id)}
+                    />
+                    {savingId === f.id && <span className="text-xs text-slate-400">Saving…</span>}
+                  </td>
+                  <td className="px-4 py-2 align-top text-slate-600">
+                    {f.source === "MANUAL" ? "Manual" : f.hasMappedValue ? "AI" : "—"}
+                  </td>
+                  <td className="px-4 py-2 align-top">
+                    {f.hasMappedValue ? <ConfidenceBadge confidence={f.confidence} /> : "—"}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {error && <div className="rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>}
 
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center gap-3">
         <button
           type="button"
           disabled={generating || status === "GENERATED"}

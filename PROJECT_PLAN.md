@@ -74,11 +74,11 @@ explicit Phase 2/3 work with a note on what it needs.
 - Two working AI providers: direct Anthropic, and OpenRouter (one adapter,
   any model OpenRouter serves via `AI_MODEL`, no code change to switch).
   OpenRouter is the recommended default — see README.md for model choice.
-- 51 unit tests covering every deterministic module (number-to-words, currency
+- 56 unit tests covering every deterministic module (number-to-words, currency
   formatting/comparison, validation rules, the workflow state machine,
-  field-mapping/conflict logic) plus the OpenRouter provider's request
-  shape, retry-on-invalid-schema logic, and error handling against a mocked
-  HTTP layer — `npm test`.
+  field-mapping/conflict logic, storage-key extension sanitization) plus the
+  OpenRouter provider's request shape, retry-on-invalid-schema logic, and
+  error handling against a mocked HTTP layer — `npm test`.
 - A real, non-mocked Playwright smoke test of the browser flow (login →
   create transaction → upload both files → sign out → confirm the
   auth redirect) was run against a live dev server during development; see
@@ -145,17 +145,74 @@ Once those exist, deploying is mechanical — hand over the Vercel project
 the rest is a normal `git push`-triggered deploy. I can't skip the account-
 creation steps for you; I can do everything after that.
 
+## 3b. Security review (2026-09-19)
+
+A structured security review was run against the full codebase (branch diff
+vs. the empty `main`, so effectively a whole-app audit): an identification
+pass across auth, authorization/ownership checks, file upload/storage, the
+file-serving route, AI provider code, and secret handling, followed by an
+independent verification pass on each candidate finding to filter false
+positives.
+
+**Reviewed and confirmed NOT vulnerable:** SQL injection (Prisma only, no
+raw queries anywhere), authentication timing/enumeration (login does a dummy
+bcrypt compare on an unknown email), open redirect via the login
+`callbackUrl` (Auth.js's built-in same-origin check, unmodified), path
+traversal in the local storage driver (`path.resolve` + prefix check holds
+under crafted keys), cross-org data leakage (every transaction-scoped server
+action and query re-filters by `organizationId` before returning or acting
+on data), and no hardcoded secrets/eval/`dangerouslySetInnerHTML` anywhere.
+
+**Two real findings, both fixed:**
+
+1. **`updateFormValueAction` had no workflow-state check.** Every other
+   mutating server action in `src/app/actions/transactions.ts` is gated by
+   the state machine (`assertTransition`), but this one only checked
+   organization ownership — an authenticated org member could call it to
+   silently rewrite a field's stored value after the transaction reached
+   `GENERATED` or `ARCHIVED`, with no re-approval and no visible trace
+   beyond a generic audit log entry. The already-issued PDF itself couldn't
+   be altered, but the database's "current value" record could drift from
+   what was actually issued. **Fixed**: added an explicit
+   `EDITABLE_STATUSES` check (mirroring the UI's own `showReview` gate) so
+   the server now rejects edits outside `REVIEW_REQUIRED`,
+   `APPROVED_FOR_GENERATION`, and `FAILED`.
+2. **Unsanitized file extension could inject `Content-Disposition` header
+   parameters.** `buildStorageKey` took everything after the last `.` in the
+   client-supplied filename with no character allow-list, and that value
+   was later echoed unescaped into a download response header
+   (`src/app/api/files/[...key]/route.ts`). A filename like `a."; foo=bar`
+   could break out of the header's quoted `filename="..."` value. Capped at
+   filename/parameter spoofing for another org member previewing the file —
+   `Content-Type` comes from the magic-byte-validated MIME type, not the
+   filename, so it couldn't be overridden, and CR/LF (needed for full
+   response-splitting or reflected XSS) is blocked by Node's header
+   validation regardless. **Fixed on both ends**: `buildStorageKey` now
+   allow-lists the extension to `[A-Za-z0-9]{1,10}`, and the file route
+   independently builds a properly escaped/encoded `Content-Disposition`
+   value (ASCII-safe `filename` plus an RFC 5987 `filename*` for the full
+   name) regardless of what's in the stored key — defense in depth, since
+   the second fix alone would have been sufficient even without the first.
+
+Both were verified end-to-end by tracing the actual code path (not just
+pattern-matched) before fixing, and a regression test
+(`src/lib/__tests__/storage.test.ts`) locks in the extension sanitization.
+One pre-existing note, not a vulnerability: `requireAdmin()` exists in
+`src/lib/auth/session.ts` but nothing calls it yet, since no ADMIN-only
+feature exists to protect — worth remembering the day one is added.
+
 ## 4. Honest limitations of what was tested
 
 The AI-dependent parts of the pipeline — form field detection, document
 extraction, and therefore field mapping and PDF generation — have **not**
 been exercised against a live model end-to-end yet. What *was* verified:
 
-- All 51 unit tests pass (`npm test`) — every deterministic module (number
+- All 56 unit tests pass (`npm test`) — every deterministic module (number
   formatting, currency comparisons, SWIFT/account/currency validation, the
-  workflow state machine, field-mapping/conflict logic), plus the
-  OpenRouter provider's request shape, retry-on-invalid-schema logic, and
-  error handling — against a mocked HTTP layer, not a live call.
+  workflow state machine, field-mapping/conflict logic, storage-key
+  extension sanitization), plus the OpenRouter provider's request shape,
+  retry-on-invalid-schema logic, and error handling — against a mocked HTTP
+  layer, not a live call.
 - `npx tsc --noEmit`, `npx eslint .`, and `npx next build` all pass clean.
 - A real Playwright browser session against a live dev server: login, create
   a transaction, upload a blank-form PDF and a supporting-document PDF
@@ -173,6 +230,45 @@ been exercised against a live model end-to-end yet. What *was* verified:
   transactions and its search filter worked. Zero console errors. The
   `npm run user:create` script was also run for real and its generated
   password verified against the database.
+- A third Playwright pass at both desktop (1280px) and mobile (375px)
+  viewports, run after the security fixes and a UI/UX pass: confirmed the
+  custom not-found page renders for an unowned/nonexistent transaction,
+  confirmed the review table is genuinely inaccessible (no edit inputs
+  rendered) once a transaction reaches `GENERATED` — the client-side
+  confirmation of finding #1's fix — and confirmed zero horizontal page
+  overflow on mobile across the dashboard, history, and transaction detail
+  pages (this caught and led to fixing a real header-wrapping bug — see
+  Section 4a below).
+
+## 4a. UI/UX pass (2026-09-19)
+
+- **Fixed a real mobile bug, not just polish**: the header nav didn't wrap
+  below ~480px, which pushed the whole page wider than the viewport on
+  every single page (confirmed via `document.body.scrollWidth` in the
+  Playwright pass above — was 502px against a 375px viewport; is now
+  exactly 375px). Fixed by making the header's nav and user-info groups
+  wrap (`flex-wrap`) and hiding the verbose name/role text below `sm:`
+  (Sign Out stays reachable either way).
+- Wrapped every data table (dashboard, `/transactions`, the field-review
+  table) in its own `overflow-x-auto` container, so a table wider than the
+  viewport scrolls within its own box instead of the whole page doing so.
+- Added `loading.tsx` skeleton states for the dashboard, transaction
+  history, and transaction detail routes — previously a slow data fetch
+  showed a blank page.
+- Added a scoped `not-found.tsx` (inside the authenticated shell, so nav
+  stays visible) for an unowned/nonexistent transaction, a global
+  `not-found.tsx` for any other bad URL, and an `error.tsx` boundary that
+  shows a generic message plus Next's opaque error `digest` — deliberately
+  never the raw `error.message`, since that could leak internal details
+  (e.g. a Prisma connection string fragment) to the browser.
+- Added a "← All Transactions" back link on the transaction detail page,
+  and "Fill Another Form" / "Back to History" actions next to the download
+  link once a form is generated — there was previously no way back to
+  either without using the top nav.
+- Added per-page `<title>` metadata (dashboard, history, new-transaction,
+  login, and a dynamic one showing the actual document number on the
+  transaction detail page) — every page previously shared the root layout's
+  static title.
 
 **Why the live call is still missing, specifically:** this project has so far
 only been built inside Claude Code's own cloud sandbox sessions. The first
