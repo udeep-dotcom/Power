@@ -44,3 +44,8 @@ next-env.d.ts
 
 # local file storage (dev only; use S3-compatible storage in production)
 /storage
+
+# Real customer documents used for development/testing. These are genuine
+# business records — PIs, insurance policies and bank forms carry counterparty
+# bank account numbers and commercial terms. They must never be committed.
+/samples

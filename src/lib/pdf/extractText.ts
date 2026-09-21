@@ -1,10 +1,24 @@
 // pdfjs-dist ships as ESM; the legacy build works without DOM/canvas APIs,
 // which is what we need running inside Next.js's Node server runtime.
+//
+// pdfjs normally spins up its worker via a runtime-computed dynamic
+// `import("./pdf.worker.mjs")`. Turbopack/webpack can't resolve that string
+// (it resolves relative to the emitted server chunk, not the pdfjs-dist
+// package), which surfaces as "Cannot find module ... pdf.worker.mjs". We
+// avoid that path entirely by statically importing the worker module and
+// registering it as pdfjs' in-process ("fake") worker global — pdfjs checks
+// `globalThis.pdfjsWorker` before ever attempting the dynamic import.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let pdfjsPromise: Promise<any> | null = null;
 function loadPdfjs() {
   if (!pdfjsPromise) {
-    pdfjsPromise = import("pdfjs-dist/legacy/build/pdf.mjs");
+    pdfjsPromise = Promise.all([
+      import("pdfjs-dist/legacy/build/pdf.mjs"),
+      import("pdfjs-dist/legacy/build/pdf.worker.mjs"),
+    ]).then(([pdfjs, pdfjsWorker]) => {
+      (globalThis as unknown as { pdfjsWorker: unknown }).pdfjsWorker = pdfjsWorker;
+      return pdfjs;
+    });
   }
   return pdfjsPromise;
 }
@@ -72,11 +86,14 @@ export async function extractPdfLayout(buffer: Buffer): Promise<PdfPageLayout[]>
 export function layoutToPlainText(pages: PdfPageLayout[]): string {
   return pages
     .map((page) => {
-      const lineGroups = groupIntoLines(page.items);
-      const lines = lineGroups.map((line) => line.map((i) => i.text).join(" "));
+      const lines = groupIntoLines(page.items).map(renderLine);
       return `--- Page ${page.page} ---\n${lines.join("\n")}`;
     })
     .join("\n\n");
+}
+
+function renderLine(line: PdfTextItem[]): string {
+  return line.map((i) => i.text).join(" ");
 }
 
 /** Groups text items into visual lines by y-coordinate proximity, left-to-right. */

@@ -33,8 +33,17 @@ explicit Phase 2/3 work with a note on what it needs.
 - AI-assisted structured extraction from supporting documents into a shared
   semantic field vocabulary (Section 6), validated against a Zod schema with
   one automatic repair/retry on invalid output (Section 57).
-- Deterministic field mapping by matching normalized field keys — no AI call
-  needed at this step since both sides already agreed on vocabulary.
+- Field mapping by AI reconciliation (`src/lib/pdf/reconcileFields.ts`). This
+  was originally key equality, assuming both sides would independently settle
+  on the same vocabulary. Measured against a real ConnectIPS slip and a real
+  marine policy the overlap was **zero** — the form asks for `creditor_name`
+  while the policy offers `insurer_name` — so every field came out blank. The
+  semantic join is a genuine judgement call (the creditor is the insurer when
+  paying a premium, the supplier when paying an invoice), so the model makes
+  it. It only ever returns a pointer from a form field to one of the supplied
+  candidate keys, so values stay traceable to real document text and anything
+  referencing an unsupplied key is discarded. Conflict detection and
+  confidence capping remain deterministic on top of that.
 - Human verification screen: Field / Proposed Value / Source / Confidence,
   editable; manual edits always win over AI values (Section 11).
 - Conflict detection: if two documents disagree on a field, both are kept,
@@ -367,6 +376,15 @@ now), `Transaction`, `Document`, `FormField`, `ExtractedValue`, `FormValue`,
   Section 36's print-calibration system exists in the spec; it isn't built
   yet and should be one of the first Phase 2 additions once real forms are
   available to test against.
+- **Multi-column source documents.** `layoutToPlainText` flattens a page by
+  vertical position, so a two-column document interleaves. On the marine
+  policy this runs against, the insured block alternates with unrelated
+  right-column lines and extraction has intermittently merged two parties into
+  one name. A gutter-detection fix was built and **reverted**: the same
+  detection cuts through label/value tables, separating "TOTAL AMOUNT" from
+  its figure, which is worse for the most safety-critical field. Needs a
+  band-aware approach that can tell an independent column from a value column.
+
 - **AI cost at scale without templates.** Every transaction currently re-runs
   full form analysis even for a form used yesterday, because template
   matching isn't built yet. This is fine for MVP validation but should be the
@@ -377,3 +395,14 @@ now), `Transaction`, `Document`, `FormField`, `ExtractedValue`, `FormValue`,
   answer — deliberate, per Section 69, but it does mean the tool is currently
   narrower than "any bank form," which was flagged to the user before this
   build started.
+
+  This originally only covered scans with *no* text layer. A scan that was
+  already OCR'd elsewhere (by a scanner, phone app, or Acrobat) carries a
+  text layer of the OCR engine's guesses — "Currency:" arriving as
+  "Cunenc!,:" — which passed the has-a-text-layer check and filled forms
+  from misread labels. `src/lib/pdf/textQuality.ts` now scores how word-like
+  the extracted text is and rejects a garbled layer as firmly as a missing
+  one, before any AI call is billed. It's a deterministic heuristic
+  calibrated on a small sample, not a guarantee: a high-quality OCR layer can
+  still score under the limit, so it should be revisited as real documents
+  accumulate.

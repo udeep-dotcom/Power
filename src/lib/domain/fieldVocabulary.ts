@@ -1,55 +1,81 @@
 /**
- * Semantic field-normalization layer (Section 6). Different forms and
- * documents use different wording for the same concept ("Beneficiary Name",
- * "Payee Name", "Supplier Name"); both form-field detection and
- * document extraction are asked to map onto this shared vocabulary so a
- * value extracted from an invoice lines up with the field it belongs in on
- * the form, without string-matching label text between documents.
+ * Semantic field-normalization layer (Section 6).
  *
- * This list is deliberately not exhaustive — the AI may propose a new
- * snake_case key for a concept not listed here, which is preserved as-is
- * (Section 6 requires understanding fields even where the exact concept
- * wasn't anticipated), but grounding the common ones improves consistency.
+ * Grounded in the documents this actually runs on: ConnectIPS / IPS / RTGS
+ * interbank fund transfer slips from Nepali banks, filled from marine
+ * insurance policies, proforma invoices, and supplier/customs paperwork.
+ *
+ * Two naming worlds meet here and they deliberately stay separate:
+ *
+ *  - The *form* speaks ISO 20022 payment language — Debtor (the applicant
+ *    paying) and Creditor (the beneficiary being paid).
+ *  - The *source documents* speak their own domain — an insurance policy has
+ *    an insurer and an insured, a proforma invoice has a supplier and a buyer.
+ *
+ * The two are joined by the reconciliation step (reconcileFields.ts), not by
+ * name equality, because which party becomes the Creditor depends on what is
+ * being paid: an insurance premium makes the insurer the creditor, a supplier
+ * payment makes the supplier the creditor. Listing both worlds here keeps each
+ * side's key names stable enough for that step to reason about.
  */
-export const CANONICAL_FIELD_KEYS = [
-  "beneficiary_name",
-  "beneficiary_address",
-  "beneficiary_account_number",
-  "beneficiary_bank_name",
-  "beneficiary_bank_address",
-  "beneficiary_bank_swift",
-  "intermediary_bank_swift",
-  "intermediary_bank_name",
-  "remitter_name",
-  "remitter_address",
-  "remitter_account_number",
-  "applicant_name",
+
+/** What a ConnectIPS / IPS / RTGS transfer slip asks for. */
+export const FORM_FIELD_KEYS = [
+  "debtor_name",
+  "debtor_account_number",
+  "debtor_bank_branch",
+  "debtor_contact_details",
+  "reference_number",
+  "transaction_purpose",
+  "currency",
+  "amount_in_figure",
+  "amount_in_words",
+  "creditor_name",
+  "creditor_account_number",
+  "creditor_code",
+  "creditor_bank_name",
+  "creditor_bank_branch",
+  "branch",
+  "date",
+  "signature",
+] as const;
+
+/** What the supporting documents typically carry. */
+export const SOURCE_FIELD_KEYS = [
+  // Insurance policy
+  "insurer_name",
+  "insurer_address",
+  "insured_name",
+  "insured_address",
+  "policy_number",
+  "acceptance_number",
+  "total_premium",
+  "value_added_tax",
+  "stamp_duty",
+  "total_amount_payable",
+  "sum_insured",
+  "policy_date",
+  // Proforma / commercial invoice
+  "supplier_name",
+  "supplier_address",
+  "supplier_bank_name",
+  "supplier_account_number",
+  "supplier_bank_swift",
+  "buyer_name",
   "invoice_number",
   "invoice_date",
   "invoice_amount",
-  "currency",
-  "payment_amount",
-  "payment_purpose",
-  "payment_reference",
-  "value_date",
-  "amount_in_words",
-  "supplier_name",
-  "supplier_address",
-  "supplier_country",
-  "purchase_order_number",
-  "shipment_reference",
-  "bill_of_lading_number",
-  "lc_number",
-  "customs_declaration_number",
-  "importer_code",
-  "contact_person",
+  "goods_description",
+  // Shared / other
+  "pan_number",
   "contact_phone",
   "contact_email",
-  "company_pan_vat",
-  "bank_charges_option",
-  "signature",
-  "date",
+  "lc_number",
+  "customs_office",
+  "bill_of_lading_number",
 ] as const;
+
+export const CANONICAL_FIELD_KEYS = [...FORM_FIELD_KEYS, ...SOURCE_FIELD_KEYS] as const;
 
 export type CanonicalFieldKey = (typeof CANONICAL_FIELD_KEYS)[number];
 

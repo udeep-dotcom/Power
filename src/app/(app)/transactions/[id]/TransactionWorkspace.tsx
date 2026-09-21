@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { TransactionStatus, FieldDataType, ValueSource, DocumentKind } from "@prisma/client";
@@ -353,16 +353,36 @@ function ReviewTable({
   const router = useRouter();
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [values, setValues] = useState<Record<string, string>>(
-    Object.fromEntries(fields.map((f) => [f.id, f.value])),
-  );
-  const [savingId, setSavingId] = useState<string | null>(null);
 
-  async function handleBlur(fieldId: string) {
-    const value = values[fieldId] ?? "";
-    setSavingId(fieldId);
-    await updateFormValueAction(transactionId, fieldId, value);
-    setSavingId(null);
+  // A slip that prints a Bank Copy and a Customer Copy carries every field
+  // twice. They are one field to the person reviewing, so they are shown once
+  // and the edit is written to every copy.
+  const groups = useMemo(() => {
+    const byKey = new Map<string, { field: FieldInfo; ids: string[] }>();
+    for (const f of fields) {
+      const existing = byKey.get(f.fieldKey);
+      if (existing) {
+        existing.ids.push(f.id);
+        if (!existing.field.value.trim() && f.value.trim()) existing.field = f;
+      } else {
+        byKey.set(f.fieldKey, { field: f, ids: [f.id] });
+      }
+    }
+    return [...byKey.values()];
+  }, [fields]);
+
+  const [values, setValues] = useState<Record<string, string>>(
+    Object.fromEntries(groups.map((g) => [g.field.fieldKey, g.field.value])),
+  );
+  const [savingKey, setSavingKey] = useState<string | null>(null);
+
+  async function handleBlur(fieldKey: string, ids: string[]) {
+    const value = values[fieldKey] ?? "";
+    setSavingKey(fieldKey);
+    for (const id of ids) {
+      await updateFormValueAction(transactionId, id, value);
+    }
+    setSavingKey(null);
     router.refresh();
   }
 
@@ -378,7 +398,7 @@ function ReviewTable({
     router.refresh();
   }
 
-  const missingRequired = fields.filter((f) => f.required && !f.value.trim());
+  const missingRequired = groups.filter((g) => g.field.required && !g.field.value.trim());
 
   return (
     <div className="space-y-4">
@@ -394,10 +414,15 @@ function ReviewTable({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {fields.map((f) => (
-                <tr key={f.id} className={f.hasConflict ? "bg-amber-50" : undefined}>
+              {groups.map(({ field: f, ids }) => (
+                <tr key={f.fieldKey} className={f.hasConflict ? "bg-amber-50" : undefined}>
                   <td className="px-4 py-2 align-top">
                     <div className="font-medium text-slate-900">{f.label}</div>
+                    {ids.length > 1 && (
+                      <div className="text-xs text-slate-500">
+                        Appears {ids.length}× on the form — filled in every copy
+                      </div>
+                    )}
                     {f.required && !f.value.trim() && (
                       <div className="text-xs text-red-600">Information Required</div>
                     )}
@@ -408,11 +433,11 @@ function ReviewTable({
                   <td className="px-4 py-2 align-top">
                     <input
                       className="w-full min-w-[12rem] rounded-md border border-slate-300 px-2 py-1 text-sm focus:border-slate-500 focus:outline-none"
-                      value={values[f.id] ?? ""}
-                      onChange={(e) => setValues((prev) => ({ ...prev, [f.id]: e.target.value }))}
-                      onBlur={() => handleBlur(f.id)}
+                      value={values[f.fieldKey] ?? ""}
+                      onChange={(e) => setValues((prev) => ({ ...prev, [f.fieldKey]: e.target.value }))}
+                      onBlur={() => handleBlur(f.fieldKey, ids)}
                     />
-                    {savingId === f.id && <span className="text-xs text-slate-400">Saving…</span>}
+                    {savingKey === f.fieldKey && <span className="text-xs text-slate-400">Saving…</span>}
                   </td>
                   <td className="px-4 py-2 align-top text-slate-600">
                     {f.source === "MANUAL" ? "Manual" : f.hasMappedValue ? "AI" : "—"}

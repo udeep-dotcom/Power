@@ -291,10 +291,10 @@ export async function generateFormAction(transactionId: string): Promise<ActionR
   ]);
 
   if (requiredMissing.length > 0) {
-    return {
-      ok: false,
-      error: `Missing required fields: ${requiredMissing.map((f) => f.label).join(", ")}`,
-    };
+    // A field printed on both the Bank Copy and the Customer Copy has a row
+    // per copy; the person reading this sees one field, so name it once.
+    const labels = [...new Set(requiredMissing.map((f) => f.label))];
+    return { ok: false, error: `Missing required fields: ${labels.join(", ")}` };
   }
 
   const blankForm = await prisma.document.findFirst({

@@ -13,6 +13,38 @@ export interface OverlayField {
 
 const MIN_FONT_SIZE = 6;
 
+/** CP1252 places these in 0x80–0x9F, where Latin-1 has control codes. */
+const CP1252_EXTRAS = new Set([
+  0x20ac, 0x201a, 0x0192, 0x201e, 0x2026, 0x2020, 0x2021, 0x02c6, 0x2030, 0x0160, 0x2039, 0x0152,
+  0x017d, 0x2018, 0x2019, 0x201c, 0x201d, 0x2022, 0x2013, 0x2014, 0x02dc, 0x2122, 0x0161, 0x203a,
+  0x0153, 0x017e, 0x0178,
+]);
+
+/**
+ * Makes a value safe for the standard PDF font, which encodes WinAnsi only.
+ *
+ * Extracted values are whatever the document happened to contain. A party name
+ * read across two lines arrives with a newline in it, and pdf-lib throws
+ * outright on any character it cannot encode — so one multi-line address, or a
+ * single Devanagari character on a Nepali document, failed the entire form
+ * generation rather than that one field.
+ *
+ * Line breaks become spaces (a form box is a single line anyway) and anything
+ * still unencodable is dropped, so an awkward character costs a character
+ * rather than the whole document.
+ */
+export function sanitizeForPdfText(value: string): string {
+  const collapsed = value.replace(/\s+/g, " ").trim();
+  let out = "";
+  for (const char of collapsed) {
+    const code = char.codePointAt(0)!;
+    if (code >= 0x20 && code <= 0x7e) out += char;
+    else if (code >= 0xa0 && code <= 0xff) out += char;
+    else if (CP1252_EXTRAS.has(code)) out += char;
+  }
+  return out;
+}
+
 /**
  * Overlays mapped values onto the original form at their detected
  * coordinates (Section 13, Case B). The original PDF bytes are untouched
@@ -41,7 +73,10 @@ export async function overlayValuesOnPdf(originalPdf: Buffer, fields: OverlayFie
       continue;
     }
 
-    const { text, fontSize } = fitTextToWidth(field.value, field.width, field.fontSize, font);
+    const safeValue = sanitizeForPdfText(field.value);
+    if (safeValue === "") continue;
+
+    const { text, fontSize } = fitTextToWidth(safeValue, field.width, field.fontSize, font);
     page.drawText(text, {
       x: field.x,
       y: field.y,
