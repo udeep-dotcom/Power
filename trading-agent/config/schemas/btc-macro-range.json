@@ -1,0 +1,57 @@
+{
+  "schema_id": "btc-macro-range",
+  "version": 1,
+  "symbol": "BTC-PERP",
+  "bias": "none",
+  "questions": {
+    "regime": {
+      "type": "choice",
+      "instructions": "Classify the current market regime for this instrument from the snapshot.",
+      "options": [
+        "trending",
+        "mean_reverting",
+        "high_vol",
+        "crisis"
+      ],
+      "criteria": {
+        "trending": "returns persistent in one direction, flow agrees with returns",
+        "mean_reverting": "returns oscillate, flow and book lean against recent moves",
+        "high_vol": "realized volatility or spread clearly elevated without crash dynamics",
+        "crisis": "disorderly: wide spread, one-sided flow, sharp drop, liquidity vanishing"
+      }
+    },
+    "direction": {
+      "type": "choice",
+      "instructions": "Which position, if any, has positive expectancy over the next few bars after paying the spread? Prefer neutral when evidence is mixed. Instrument BTC-PERP. Research thesis (may be wrong): BTC is range-bound near 80-88k into the Oct 27-28 FOMC with a hawkish Fed (Sept hike, Sept CPI 3.7% y/y). Liquidity anchor: the live loop must prove net-of-cost skill here before any altcoin. Thesis is invalidated by: Daily close below 78k; Stablecoin supply falls >2% in 14 days; Funding turns persistently negative alongside rising open interest. Judge only from the snapshot; the thesis is context, not a vote.",
+      "options": [
+        "long",
+        "short",
+        "neutral"
+      ]
+    },
+    "toxic_flow": {
+      "type": "noul",
+      "instructions": "Proposition: recent aggressive order flow is informed, so a new taker order in the direction of the flow would be adversely selected."
+    },
+    "setup_quality": {
+      "type": "score",
+      "instructions": "Rate how clean the setup is for the chosen direction: 0 = none, 1 = weak, 2 = tradeable, 3 = textbook. Instrument BTC-PERP. Research thesis (may be wrong): BTC is range-bound near 80-88k into the Oct 27-28 FOMC with a hawkish Fed (Sept hike, Sept CPI 3.7% y/y). Liquidity anchor: the live loop must prove net-of-cost skill here before any altcoin. Thesis is invalidated by: Daily close below 78k; Stablecoin supply falls >2% in 14 days; Funding turns persistently negative alongside rising open interest. Judge only from the snapshot; the thesis is context, not a vote.",
+      "scale": [
+        0,
+        1,
+        2,
+        3
+      ]
+    },
+    "risk_state": {
+      "type": "choice",
+      "instructions": "Given inventory, exposure, drawdown and daily PnL in the snapshot, is it safe to add risk? This is an advisory veto only; hard limits are enforced in code.",
+      "options": [
+        "safe",
+        "near_limit",
+        "reduce"
+      ]
+    }
+  },
+  "hash": "2cc62900d0c2bc28"
+}

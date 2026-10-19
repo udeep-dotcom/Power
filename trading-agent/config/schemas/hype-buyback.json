@@ -1,0 +1,57 @@
+{
+  "schema_id": "hype-buyback",
+  "version": 1,
+  "symbol": "HYPE-PERP",
+  "bias": "long",
+  "questions": {
+    "regime": {
+      "type": "choice",
+      "instructions": "Classify the current market regime for this instrument from the snapshot.",
+      "options": [
+        "trending",
+        "mean_reverting",
+        "high_vol",
+        "crisis"
+      ],
+      "criteria": {
+        "trending": "returns persistent in one direction, flow agrees with returns",
+        "mean_reverting": "returns oscillate, flow and book lean against recent moves",
+        "high_vol": "realized volatility or spread clearly elevated without crash dynamics",
+        "crisis": "disorderly: wide spread, one-sided flow, sharp drop, liquidity vanishing"
+      }
+    },
+    "direction": {
+      "type": "choice",
+      "instructions": "Which position, if any, has positive expectancy over the next few bars after paying the spread? Prefer neutral when evidence is mixed. Instrument HYPE-PERP. Research thesis (may be wrong): Hyperliquid routes most perp fees to open-market HYPE buybacks; it ranks among the top holder-revenue protocols on DefiLlama (page dated 2026-10-18). Value accrual is mechanical, not promised. Thesis is invalidated by: 30-day holder revenue down >50% vs prior 30 days; Exchange inflows from contributor wallets around unlock dates; Sustained loss of perp-DEX volume share. Judge only from the snapshot; the thesis is context, not a vote.",
+      "options": [
+        "long",
+        "short",
+        "neutral"
+      ]
+    },
+    "toxic_flow": {
+      "type": "noul",
+      "instructions": "Proposition: recent aggressive order flow is informed, so a new taker order in the direction of the flow would be adversely selected."
+    },
+    "setup_quality": {
+      "type": "score",
+      "instructions": "Rate how clean the setup is for the chosen direction: 0 = none, 1 = weak, 2 = tradeable, 3 = textbook. Instrument HYPE-PERP. Research thesis (may be wrong): Hyperliquid routes most perp fees to open-market HYPE buybacks; it ranks among the top holder-revenue protocols on DefiLlama (page dated 2026-10-18). Value accrual is mechanical, not promised. Thesis is invalidated by: 30-day holder revenue down >50% vs prior 30 days; Exchange inflows from contributor wallets around unlock dates; Sustained loss of perp-DEX volume share. Judge only from the snapshot; the thesis is context, not a vote.",
+      "scale": [
+        0,
+        1,
+        2,
+        3
+      ]
+    },
+    "risk_state": {
+      "type": "choice",
+      "instructions": "Given inventory, exposure, drawdown and daily PnL in the snapshot, is it safe to add risk? This is an advisory veto only; hard limits are enforced in code.",
+      "options": [
+        "safe",
+        "near_limit",
+        "reduce"
+      ]
+    }
+  },
+  "hash": "593171800c39633d"
+}

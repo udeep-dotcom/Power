@@ -1,0 +1,55 @@
+{
+  "_comment": "Research candidates as of 2026-10-19. NONE is verified against primary sources; every figure is from secondary reporting found via web search (direct page fetches failed in the build environment). status=candidate means paper/shadow only. See docs/01-research-2026-10-19.md for sources and labels.",
+  "finalists": [
+    {
+      "id": "btc-macro-range",
+      "symbol": "BTC-PERP",
+      "bias": "none",
+      "status": "candidate",
+      "thesis": "BTC is range-bound near 80-88k into the Oct 27-28 FOMC with a hawkish Fed (Sept hike, Sept CPI 3.7% y/y). Liquidity anchor: the live loop must prove net-of-cost skill here before any altcoin.",
+      "catalysts": ["FOMC 2026-10-27/28 (confirmed date, outcome unknown)"],
+      "bear_case": ["A hike plus hawkish guidance breaks the 80k support", "ETF outflows continue (weekly net outflow reported ~228m)", "Stablecoin supply flat to down: no new marginal buyer"],
+      "invalidation": ["Daily close below 78k", "Stablecoin supply falls >2% in 14 days", "Funding turns persistently negative alongside rising open interest"]
+    },
+    {
+      "id": "hype-buyback",
+      "symbol": "HYPE-PERP",
+      "bias": "long",
+      "status": "candidate",
+      "thesis": "Hyperliquid routes most perp fees to open-market HYPE buybacks; it ranks among the top holder-revenue protocols on DefiLlama (page dated 2026-10-18). Value accrual is mechanical, not promised.",
+      "catalysts": ["Continuous fee-funded buybacks (confirmed mechanism)", "Any volatility spike raises perp volume and therefore buybacks (speculative)"],
+      "bear_case": ["Monthly contributor unlocks reported ~9.9m HYPE through 2027 (data as of mid-2026; team reportedly cut some allocations)", "Reported buyback capacity 60-80m/month can be below unlock value", "Fees fall in quiet markets: the buyback is pro-cyclical", "Perp-DEX competition (e.g. Aster) and regulatory risk"],
+      "invalidation": ["30-day holder revenue down >50% vs prior 30 days", "Exchange inflows from contributor wallets around unlock dates", "Sustained loss of perp-DEX volume share"]
+    },
+    {
+      "id": "uni-fee-switch",
+      "symbol": "UNI-PERP",
+      "bias": "none",
+      "status": "candidate",
+      "thesis": "Uniswap fee switch live since Dec 2025 with a 100m UNI burn; value now accrues to the token. Watch-list only: reported annualized protocol revenue (26-58m, estimates differ) looks small against valuation and the price did not re-rate after activation.",
+      "catalysts": ["Fee switch extension to more pools/chains (reported March and June 2026)"],
+      "bear_case": ["Reported 20m UNI/year growth issuance can offset burns", "Price ~3.4-3.7 after activation suggests the market already priced it", "Fee revenue is cyclical with DEX volume"],
+      "invalidation": ["30-day holder revenue falls below the growth-budget issuance value", "Governance raises issuance or redirects fees away from burns"]
+    },
+    {
+      "id": "ena-trigger",
+      "symbol": "ENA-PERP",
+      "bias": "none",
+      "status": "candidate",
+      "thesis": "Ethena fee switch reportedly approved Sept 2026 but ENA buybacks only start when USDe supply reaches 7.5bn; USDe was reported ~5bn on 2026-10-07. Optionality on the trigger, not a confirmed catalyst.",
+      "catalysts": ["USDe supply crossing 7.5bn (SPECULATIVE; ~50% growth needed)"],
+      "bear_case": ["Low funding compresses USDe yield, which historically shrank supply (peak 14.7bn Oct 2025, -56% by Dec 2025 as reported)", "Scheduled unlocks around Nov 1-5 (sources disagree on date and size)", "Buyback split percentages are unsettled across sources"],
+      "invalidation": ["USDe supply falls below 4bn", "Governance changes the trigger or the revenue split"]
+    },
+    {
+      "id": "aster-unlock",
+      "symbol": "ASTER-PERP",
+      "bias": "short",
+      "status": "candidate",
+      "thesis": "Reported unlock of ~78m ASTER on 2026-11-17 (~3.9% of market cap per one source) into a market with altcoin weakness and BTC dominance near 58-60%. Supply-overhang trade.",
+      "catalysts": ["Unlock 2026-11-17 (single secondary source; verify on Tokenomist/CryptoRank)"],
+      "bear_case": ["Unlock shorts are a crowded, well-known trade: likely priced in", "Crowded shorts mean negative funding (shorts pay) and squeeze risk", "Unlock recipients may not sell (locked staking, OTC)"],
+      "invalidation": ["Unlock postponed or restructured", "Funding below -30% annualized (carry kills the trade)", "Price rises through the unlock window on rising open interest"]
+    }
+  ]
+}
