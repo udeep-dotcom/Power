@@ -5,6 +5,9 @@ import { writeFileSync } from 'node:fs';
 import { LETTERS } from '../src/data/alphabet.ts';
 import { STICKERS } from '../src/data/journey.ts';
 import { MATRAS } from '../src/data/barakhari.ts';
+import { WORD_TOPICS } from '../src/data/words.ts';
+import { NUMBERS } from '../src/data/numbers.ts';
+import { KIND_LABEL, STORIES } from '../src/data/stories.ts';
 import { DECKS, PROVINCES, QUIZ } from '../src/data/nepal.ts';
 
 const L: string[] = [];
@@ -52,7 +55,26 @@ L.push('', '## 5. बाह्रखरी vowel signs (12)', '', '| ✓ | Sign 
 for (const m of MATRAS) L.push(`| ☐ | ${m.sign ? '◌' + m.sign : '—'} | ${m.name.ne} | क${m.sign} |`);
 L.push('', '⚠ Traditional बाह्रखरी has 12 forms and leaves out ृ (ऋकार); confirm this matches the school curriculum.', '');
 
-L.push('', '## 6. Quiz (correct answer listed first)', '', '| ✓ | Question | Correct | Distractors |', '|---|---|---|---|');
+L.push('', '## 6. First words (शब्द)', '');
+L.push('⚠ Spellings with common variants to confirm: बुबा/बुवा, हजुरबा/हजुरबुबा, मम/मःम/मोमो, शुभ रात्रि.', '');
+for (const t of WORD_TOPICS) {
+  L.push(`### ${t.title.ne} / ${t.title.en}`, '', '| ✓ | Word | Roman | English | Picture |', '|---|---|---|---|---|');
+  for (const w of t.words) L.push(`| ☐ | ${w.ne} | ${w.roman} | ${w.en} | ${w.pic} |`);
+  L.push('');
+}
+L.push('## 7. Numbers (अङ्क)', '', '| ✓ | Numeral | Word | Roman |', '|---|---|---|---|');
+for (const n of NUMBERS) L.push(`| ☐ | ${n.digit} | ${n.ne} | ${n.roman} |`);
+L.push('', '## 8. Stories (कथा)', '');
+L.push('Check each sentence for accuracy, cultural sensitivity and child-appropriateness (ages 3–6). Legends are labelled as legends.', '');
+for (const st of STORIES) {
+  L.push(`### ${st.title.ne} / ${st.title.en} — ${KIND_LABEL[st.kind].en}`, '', '| ✓ | Page | Nepali | English |', '|---|---|---|---|');
+  st.pages.forEach((p, i) => L.push(`| ☐ | ${i + 1} | ${p.text.ne} | ${p.text.en} |`));
+  L.push('');
+}
+L.push('⚠ Dashain: the story leaves out animal sacrifice on purpose (audience 3–6). Some Indigenous communities do not celebrate Dashain; Lhosar, Chhath and Teej appear in the festival cards so the app does not present one community\'s festivals as everyone\'s.', '');
+L.push('⚠ Everest: Tenzing Norgay\'s nationality is a sensitive topic — the story deliberately says only "Tenzing Norgay Sherpa".', '');
+
+L.push('', '## 9. Quiz (correct answer listed first)', '', '| ✓ | Question | Correct | Distractors |', '|---|---|---|---|');
 for (const q of QUIZ) {
   const ok = q.options[q.answer];
   const rest = q.options.filter((_, i) => i !== q.answer).map((o) => o.label.ne).join(', ');

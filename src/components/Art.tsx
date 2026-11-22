@@ -17,9 +17,9 @@ function star(cx: number, cy: number, n: number, rOut: number, rIn: number, from
   }
   return pts.join(' ');
 }
-const FLAG_OUTLINE = '0,133.33 100,133.33 29.29,62.62 100,62.62 0,0';
-const SUN = star(25, 97.97, 12, 17, 10.6);
-const MOON_RAYS = star(25, 34.5, 8, 13.5, 8.6, 180, 180);
+export const FLAG_OUTLINE = '0,133.33 100,133.33 29.29,62.62 100,62.62 0,0';
+export const SUN = star(25, 97.97, 12, 17, 10.6);
+export const MOON_RAYS = star(25, 34.5, 8, 13.5, 8.6, 180, 180);
 
 export function NepalFlag({ size = 64, wave = false }: { size?: number; wave?: boolean }) {
   return (

@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from 'preact/hooks';
+import { Bi } from '../../components/Bi';
 import { Scenery } from '../../components/Scenery';
 import { Celebration, TopBar } from '../../components/UI';
 import { UI } from '../../data/i18n';
 import { GAME_META, UNITS, type GameType } from '../../data/journey';
 import { goBack } from '../../lib/router';
 import { completeNode, getState, learnedLetterIds, letterProgress, mastery, today, update } from '../../lib/store';
-import { shuffle, starsFromMistakes, tr } from '../../lib/util';
+import { shuffle, starsFromMistakes } from '../../lib/util';
 import { Balloon } from './Balloon';
 import { ChoiceGame } from './ChoiceGame';
 import { Memory } from './Memory';
@@ -30,7 +31,7 @@ export function GameScreen({ unitId }: { unitId: string }) {
   return (
     <div class={`screen game game-${unit.game}`}>
       <Scenery kind={unit.region} />
-      <TopBar title={tr(meta.name)} />
+      <TopBar title={<Bi t={meta.name} />} />
       <Game key={round} letters={unit.letters} onFinish={(m) => {
         const stars = starsFromMistakes(m);
         completeNode(`G:${unit.id}`, stars);
@@ -67,7 +68,7 @@ export function PracticeScreen() {
   return (
     <div class="screen game game-practice">
       <Scenery kind="home" />
-      <TopBar title={tr(UI.todaysPractice)} />
+      <TopBar title={<Bi t={UI.todaysPractice} />} />
       <ChoiceGame key={round} letters={letters} mode="mixed" onFinish={(m) => {
         const stars = starsFromMistakes(m);
         completeNode('P:practice', stars);

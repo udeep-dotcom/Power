@@ -16,6 +16,13 @@ import { StickerBook } from './screens/StickerBook';
 import { ParentZone } from './screens/ParentZone';
 import { Barakhari } from './screens/barakhari/Barakhari';
 import { MatraGame } from './screens/barakhari/MatraGame';
+import { WordGame, WordsHub, WordTopicScreen } from './screens/words/Words';
+import { CountGame, NumbersScreen } from './screens/numbers/Numbers';
+import { StoryReader, StoryShelf } from './screens/stories/Stories';
+import { MusicScreen, PlayHub } from './screens/play/Music';
+import { ColourPage, ColourPicker } from './screens/play/Colouring';
+import { BedTime } from './screens/BedTime';
+import { MusicDirector } from './lib/music';
 
 /*
  Routes
@@ -28,6 +35,10 @@ import { MatraGame } from './screens/barakhari/MatraGame';
    /chest/:unitId         sticker reward
    /barakhari[/:id]       बाह्रखरी explorer (optionally opened on a consonant)
    /barakhari-game        build-the-syllable game
+   /words, /words/:topic, /words/:topic/game     first words + listening game
+   /numbers, /numbers/game                       numerals १–१० + counting game
+   /stories, /stories/:id                        narrated picture stories
+   /play, /play/music, /play/colour[/:page]      instruments + colouring
    /nepal, /nepal/map, /nepal/deck/:id, /nepal/quiz
    /stickers, /parents
 */
@@ -38,7 +49,7 @@ export function App() {
   useEffect(() => () => stopSpeech(), [path]);
   const [a, b, c] = parts;
 
-  if (!started) return <div class="app-root"><Start onStart={() => setStarted(true)} /></div>;
+  if (!started) return <div class="app-root"><Start onStart={() => setStarted(true)} /><MusicDirector route="start" /></div>;
 
   let screen;
   if (!a) screen = <Home onSwitchPlayer={() => { navigate('/', { replace: true }); setStarted(false); }} />;
@@ -50,6 +61,17 @@ export function App() {
   else if (a === 'chest' && b) screen = <Chest key={path} unitId={b} />;
   else if (a === 'barakhari') screen = <Barakhari key={path} initial={b} />;
   else if (a === 'barakhari-game') screen = <MatraGame key={path} />;
+  else if (a === 'words' && b && c === 'game') screen = <WordGame key={path} topicId={b} />;
+  else if (a === 'words' && b) screen = <WordTopicScreen key={path} topicId={b} />;
+  else if (a === 'words') screen = <WordsHub />;
+  else if (a === 'numbers' && b === 'game') screen = <CountGame key={path} />;
+  else if (a === 'numbers') screen = <NumbersScreen />;
+  else if (a === 'stories' && b) screen = <StoryReader key={path} storyId={b} />;
+  else if (a === 'stories') screen = <StoryShelf />;
+  else if (a === 'play' && b === 'music') screen = <MusicScreen />;
+  else if (a === 'play' && b === 'colour' && c) screen = <ColourPage key={path} pageId={c} />;
+  else if (a === 'play' && b === 'colour') screen = <ColourPicker />;
+  else if (a === 'play') screen = <PlayHub />;
   else if (a === 'nepal' && b === 'map') screen = <MapScreen />;
   else if (a === 'nepal' && b === 'deck' && c) screen = <DeckScreen key={path} deckId={c} />;
   else if (a === 'nepal' && b === 'quiz') screen = <Quiz key={path} />;
@@ -58,5 +80,11 @@ export function App() {
   else if (a === 'parents') screen = <ParentZone />;
   else screen = <Home onSwitchPlayer={() => setStarted(false)} />;
 
-  return <div class="app-root" key={a ?? 'home'}>{screen}</div>;
+  return (
+    <>
+      <div class="app-root" key={a ?? 'home'}>{screen}</div>
+      <MusicDirector route={a ?? ''} />
+      <BedTime />
+    </>
+  );
 }

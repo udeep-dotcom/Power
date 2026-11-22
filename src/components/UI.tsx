@@ -1,10 +1,10 @@
 import type { ComponentChildren } from 'preact';
+import { Bi } from './Bi';
 import { useEffect, useState } from 'preact/hooks';
 import { UI, type T } from '../data/i18n';
 import { goBack } from '../lib/router';
 import { sfx } from '../lib/sfx';
 import { instruct } from '../lib/speech';
-import { useStore } from '../lib/store';
 import { pick, tr } from '../lib/util';
 import { Icon, Stars } from './Art';
 import { Habre, type Mood } from './Habre';
@@ -24,18 +24,32 @@ export function TopBar({ title, back = '/', right }: { title?: ComponentChildren
   );
 }
 
-/** Habre with a speech bubble. Tapping either replays the line. */
+/** Habre's mood for a moment after a right/wrong answer (sfx emits 'akshar:react'). */
+function useReaction(base: Mood): Mood {
+  const [m, setM] = useState<Mood | null>(null);
+  useEffect(() => {
+    let t: ReturnType<typeof setTimeout> | undefined;
+    const on = (e: Event) => {
+      setM((e as CustomEvent<Mood>).detail);
+      clearTimeout(t);
+      t = setTimeout(() => setM(null), 1300);
+    };
+    window.addEventListener('akshar:react', on);
+    return () => { window.removeEventListener('akshar:react', on); clearTimeout(t); };
+  }, []);
+  return m ?? base;
+}
+
+/** Habre with a speech bubble (Nepali first). Tapping either replays the line. */
 export function HabreSays({ text, mood = 'idle', size = 96, speakOnMount = true, clip, onReplay }: {
   text: T; mood?: Mood; size?: number; speakOnMount?: boolean; clip?: string; onReplay?: () => void;
 }) {
-  const s = useStore();
+  const shown = useReaction(mood);
   useEffect(() => { if (speakOnMount) void instruct(text, clip); }, [text.ne, speakOnMount]);
   return (
-    <button class="habre-says" onClick={() => { sfx.tap(); if (onReplay) onReplay(); else void instruct(text, clip); }} aria-label={text[s.lang]}>
-      <Habre size={size} mood={mood} />
-      <span class="bubble" key={text.ne}>
-        <span class={s.lang === 'ne' ? 'deva' : ''} lang={s.lang}>{text[s.lang]}</span>
-      </span>
+    <button class="habre-says" onClick={() => { sfx.tap(); if (onReplay) onReplay(); else void instruct(text, clip); }} aria-label={text.ne}>
+      <Habre size={size} mood={shown} key={shown} />
+      <span class="bubble" key={text.ne}><Bi t={text} /></span>
     </button>
   );
 }
@@ -44,7 +58,6 @@ export function HabreSays({ text, mood = 'idle', size = 96, speakOnMount = true,
 export function Celebration({ title, subtitle, stars, onNext, onAgain, children, nextLabel }: {
   title: T; subtitle?: T; stars?: number; onNext: () => void; onAgain?: () => void; children?: ComponentChildren; nextLabel?: T;
 }) {
-  const s = useStore();
   const [fire, setFire] = useState(0);
   useEffect(() => {
     sfx.fanfare();
@@ -57,8 +70,8 @@ export function Celebration({ title, subtitle, stars, onNext, onAgain, children,
       <Confetti fire={fire} />
       <div class="card celebrate">
         <Habre size={110} mood="happy" />
-        <h2 class={s.lang === 'ne' ? 'deva' : ''}>{tr(title)}</h2>
-        {subtitle && <p>{tr(subtitle)}</p>}
+        <h2><Bi t={title} /></h2>
+        {subtitle && <p><Bi t={subtitle} /></p>}
         {stars !== undefined && (
           <div class="big-stars">
             {[0, 1, 2].map((i) => <span key={i} style={{ display: 'inline-block', animationDelay: `${0.45 + i * 0.28}s` }} class="star-pop"><Stars n={i < stars ? 1 : 0} of={1} size={60} /></span>)}
@@ -66,8 +79,8 @@ export function Celebration({ title, subtitle, stars, onNext, onAgain, children,
         )}
         {children}
         <div class="actions">
-          {onAgain && <button class="btn white" onClick={() => { sfx.tap(); onAgain(); }}><Icon name="refresh" /> {tr(UI.again)}</button>}
-          <button class="btn big" onClick={() => { sfx.tap(); onNext(); }}>{tr(nextLabel ?? UI.next)} <Icon name="next" /></button>
+          {onAgain && <button class="btn white" onClick={() => { sfx.tap(); onAgain(); }}><Icon name="refresh" /> <Bi t={UI.again} /></button>}
+          <button class="btn big" onClick={() => { sfx.tap(); onNext(); }}><Bi t={nextLabel ?? UI.next} /> <Icon name="next" /></button>
         </div>
       </div>
     </div>

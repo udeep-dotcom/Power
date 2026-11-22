@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
+import { level } from '../lib/level';
+import { Bi } from './Bi';
 import { UI } from '../data/i18n';
 import { sfx } from '../lib/sfx';
 import { maskFromCanvas, scoreTrace, type Mask, type TraceScore } from '../lib/trace';
-import { haptic, tr } from '../lib/util';
+import { haptic } from '../lib/util';
 import { toAppPx } from '../lib/scale';
 import { Icon, Pic, Stars } from './Art';
 
@@ -123,7 +125,7 @@ export function TraceCanvas({ char, onResult }: { char: string; onResult: (s: Tr
 
   const evaluate = (final: boolean) => {
     if (!letterMask.current || !shadow.current || accepted.current) return;
-    const score = scoreTrace(letterMask.current, maskFromCanvas(shadow.current));
+    const score = scoreTrace(letterMask.current, maskFromCanvas(shadow.current), level().traceEase);
     (window as unknown as { __trace?: unknown }).__trace = score; // read by e2e tests
     if (score.stars > live) sfx.star(score.stars * 2);
     setLive(score.stars);
@@ -166,7 +168,7 @@ export function TraceCanvas({ char, onResult }: { char: string; onResult: (s: Tr
     const now = performance.now();
     if (now - lastLive.current > 180 && letterMask.current && shadow.current) {
       lastLive.current = now;
-      const st = scoreTrace(letterMask.current, maskFromCanvas(shadow.current)).stars;
+      const st = scoreTrace(letterMask.current, maskFromCanvas(shadow.current), level().traceEase).stars;
       if (st > live) { sfx.star(st * 2); setLive(st); }
     }
   };
@@ -206,13 +208,13 @@ export function TraceCanvas({ char, onResult }: { char: string; onResult: (s: Tr
           <canvas ref={ink} class="trace-ink" onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up} onPointerLeave={up} />
           <div class="sparkles" ref={sparkles} />
           {hint && <span class="trace-hint"><Pic pic="👆" size={56} /></span>}
-          {feedback === 'almost' && <span class="trace-feedback">{tr(UI.almost)}</span>}
+          {feedback === 'almost' && <span class="trace-feedback"><Bi t={UI.almost} /></span>}
         </div>
       </div>
       <div class={`trace-meter s${live}`} aria-label={`${live} / 3`}><Stars n={live} size={36} /></div>
       <div class="trace-actions">
-        <button class="btn white" onClick={() => { sfx.tap(); clear(); }} disabled={!drawn}><Icon name="refresh" /> {tr(UI.clear)}</button>
-        <button class={`btn big ${live > 0 ? 'pulse' : ''}`} onClick={() => evaluate(true)} disabled={!drawn}><Icon name="check" /> {tr(UI.done)}</button>
+        <button class="btn white" onClick={() => { sfx.tap(); clear(); }} disabled={!drawn}><Icon name="refresh" /> <Bi t={UI.clear} /></button>
+        <button class={`btn big ${live > 0 ? 'pulse' : ''}`} onClick={() => evaluate(true)} disabled={!drawn}><Icon name="check" /> <Bi t={UI.done} /></button>
       </div>
     </div>
   );

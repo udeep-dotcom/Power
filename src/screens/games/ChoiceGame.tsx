@@ -4,6 +4,7 @@
 // answer a sound they cannot hear.
 
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
+import { level } from '../../lib/level';
 import { Pic } from '../../components/Art';
 import { HabreSays, RoundDots, SpeakerButton } from '../../components/UI';
 import { BlankWord, speakLetterName, speakWord, Word } from '../../components/Word';
@@ -41,7 +42,7 @@ export function ChoiceGame({ letters, onFinish, mode: wanted }: GameProps & { mo
     const pool = withReview(letters, 3);
     const review = pool.filter((id) => !letters.includes(id));
     const ids = planTargets(letters, review);
-    const n = letters.length >= 5 ? 4 : 3;
+    const n = level().choices; // 2 choices at age 3 … 4 at age 6
     return ids.map((id, k) => {
       const t = LETTER_BY_ID[id];
       const m: Mode = wanted === 'mixed' ? (k % 2 ? 'picture' : 'listen') : wanted;

@@ -2,6 +2,7 @@
 // consonant + vowel sign = syllable assemble, and hear it.
 
 import { useEffect, useRef, useState } from 'preact/hooks';
+import { Bi } from '../../components/Bi';
 import { Pic } from '../../components/Art';
 import { Scenery } from '../../components/Scenery';
 import { HabreSays, TopBar } from '../../components/UI';
@@ -36,7 +37,7 @@ export function Barakhari({ initial }: { initial?: string }) {
   return (
     <div class="screen scroll bk-screen">
       <Scenery kind="pahad" />
-      <TopBar title={tr(UI.barakhari)} right={
+      <TopBar title={<Bi t={UI.barakhari} />} right={
         <button class="btn plum round" aria-label={tr(UI.bkPlay)} onClick={() => { sfx.tap(); navigate('/barakhari-game'); }}>
           <Pic pic="🎮" size={30} />
         </button>
@@ -60,7 +61,7 @@ export function Barakhari({ initial }: { initial?: string }) {
         <button class="eq-part eq-r deva" lang="ne" onClick={() => void say(syllable(c, m), `syl-${c.id}-${m.id}`)}>{syllable(c, m)}</button>
         {s.roman && <span class="eq-roman">{syllableRoman(c, m)}</span>}
       </div>
-      <p class="eq-caption">{tr(m.name)}</p>
+      <p class="eq-caption"><Bi t={m.name} /></p>
 
       <div class="bk-grid">
         {MATRAS.map((mm, i) => (

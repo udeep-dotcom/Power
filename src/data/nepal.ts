@@ -104,18 +104,19 @@ export const DECKS: Deck[] = [
   },
 ];
 
-export interface QuizQ { q: T; options: { pic: string; label: T }[]; answer: number }
+/** `easy` questions are answerable by a 3–4-year-old from everyday experience and pictures. */
+export interface QuizQ { q: T; options: { pic: string; label: T }[]; answer: number; easy?: boolean }
 
 const o = (pic: string, ne: string, en: string) => ({ pic, label: { ne, en } });
 
 /** Pool of questions; each quiz run draws 8 at random and shuffles the options. */
 export const QUIZ: QuizQ[] = [
   { q: { ne: 'संसारको सबैभन्दा अग्लो हिमाल कुन हो?', en: 'Which is the highest mountain in the world?' },
-    options: [o('🏔️', 'सगरमाथा', 'Sagarmatha'), o('⛰️', 'फूलचोकी', 'Phulchoki'), o('🏞️', 'राराताल', 'Rara Lake')], answer: 0 },
+    options: [o('🏔️', 'सगरमाथा', 'Sagarmatha'), o('⛰️', 'फूलचोकी', 'Phulchoki'), o('🏞️', 'राराताल', 'Rara Lake')], answer: 0, easy: true },
   { q: { ne: 'नेपालको राष्ट्रिय फूल कुन हो?', en: 'What is the national flower of Nepal?' },
-    options: [o('🌺', 'लालीगुराँस', 'Rhododendron'), o('🌻', 'सूर्यमुखी', 'Sunflower'), o('🌹', 'गुलाफ', 'Rose')], answer: 0 },
+    options: [o('🌺', 'लालीगुराँस', 'Rhododendron'), o('🌻', 'सूर्यमुखी', 'Sunflower'), o('🌹', 'गुलाफ', 'Rose')], answer: 0, easy: true },
   { q: { ne: 'नेपालको राष्ट्रिय जनावर कुन हो?', en: 'What is the national animal of Nepal?' },
-    options: [o('🐄', 'गाई', 'Cow'), o('🐅', 'बाघ', 'Tiger'), o('🐘', 'हात्ती', 'Elephant')], answer: 0 },
+    options: [o('🐄', 'गाई', 'Cow'), o('🐅', 'बाघ', 'Tiger'), o('🐘', 'हात्ती', 'Elephant')], answer: 0, easy: true },
   { q: { ne: 'नेपालको राजधानी कुन हो?', en: 'What is the capital of Nepal?' },
     options: [o('🛕', 'काठमाडौं', 'Kathmandu'), o('🛶', 'पोखरा', 'Pokhara'), o('🏭', 'विराटनगर', 'Biratnagar')], answer: 0 },
   { q: { ne: 'गौतम बुद्ध कहाँ जन्मनुभएको हो?', en: 'Where was Gautama Buddha born?' },
@@ -123,31 +124,31 @@ export const QUIZ: QuizQ[] = [
   { q: { ne: 'नेपालमा कतिवटा प्रदेश छन्?', en: 'How many provinces does Nepal have?' },
     options: [o('txt:७', 'सात', 'Seven'), o('txt:५', 'पाँच', 'Five'), o('txt:९', 'नौ', 'Nine')], answer: 0 },
   { q: { ne: 'नेपालको राष्ट्रिय रङ कुन हो?', en: 'What is the national colour of Nepal?' },
-    options: [o('swatch:#DC143C', 'सिमरिक', 'Crimson'), o('swatch:#2fa36b', 'हरियो', 'Green'), o('swatch:#f6c445', 'पहेंलो', 'Yellow')], answer: 0 },
+    options: [o('swatch:#DC143C', 'सिमरिक', 'Crimson'), o('swatch:#2fa36b', 'हरियो', 'Green'), o('swatch:#f6c445', 'पहेंलो', 'Yellow')], answer: 0, easy: true },
   { q: { ne: 'एकसिङ्गे गैंडा कहाँ बस्छ?', en: 'Where does the one-horned rhino live?' },
-    options: [o('🌳', 'चितवनको जङ्गलमा', 'In Chitwan’s forests'), o('🏔️', 'सगरमाथाको टुप्पोमा', 'On top of Everest'), o('🌊', 'समुद्रमा', 'In the sea')], answer: 0 },
+    options: [o('🌳', 'चितवनको जङ्गलमा', 'In Chitwan’s forests'), o('🏔️', 'सगरमाथाको टुप्पोमा', 'On top of Everest'), o('🌊', 'समुद्रमा', 'In the sea')], answer: 0, easy: true },
   { q: { ne: 'तिहारमा के बालिन्छ?', en: 'What do we light at Tihar?' },
-    options: [o('🪔', 'दियो', 'Lamps'), o('🪁', 'चङ्गा', 'Kites'), o('🎨', 'रङ', 'Colours')], answer: 0 },
+    options: [o('🪔', 'दियो', 'Lamps'), o('🪁', 'चङ्गा', 'Kites'), o('🎨', 'रङ', 'Colours')], answer: 0, easy: true },
   { q: { ne: 'दशैंमा आकाशमा के उडाइन्छ?', en: 'What do we fly in the sky at Dashain?' },
-    options: [o('🪁', 'चङ्गा', 'Kites'), o('🪔', 'दियो', 'Lamps'), o('🛶', 'डुङ्गा', 'Boats')], answer: 0 },
+    options: [o('🪁', 'चङ्गा', 'Kites'), o('🪔', 'दियो', 'Lamps'), o('🛶', 'डुङ्गा', 'Boats')], answer: 0, easy: true },
   { q: { ne: 'होलीमा के खेलिन्छ?', en: 'What do we play with at Holi?' },
-    options: [o('🎨', 'रङ', 'Colours'), o('🪁', 'चङ्गा', 'Kites'), o('🪔', 'दियो', 'Lamps')], answer: 0 },
+    options: [o('🎨', 'रङ', 'Colours'), o('🪁', 'चङ्गा', 'Kites'), o('🪔', 'दियो', 'Lamps')], answer: 0, easy: true },
   { q: { ne: 'नेपालको राष्ट्रिय खेल कुन हो?', en: 'What is the national sport of Nepal?' },
     options: [o('🏐', 'भलिबल', 'Volleyball'), o('⚽', 'फुटबल', 'Football'), o('🏏', 'क्रिकेट', 'Cricket')], answer: 0 },
   { q: { ne: 'नेपालको सबैभन्दा ठूलो ताल कुन हो?', en: 'Which is the biggest lake in Nepal?' },
     options: [o('🏞️', 'राराताल', 'Rara'), o('🛶', 'फेवाताल', 'Phewa'), o('💧', 'बेगनासताल', 'Begnas')], answer: 0 },
   { q: { ne: 'हाब्रे (रातो पाण्डा) कहाँ बस्छ?', en: 'Where do red pandas live?' },
-    options: [o('🌲', 'हिमाली जङ्गलमा', 'In mountain forests'), o('🌊', 'समुद्रमा', 'In the sea'), o('🏜️', 'मरुभूमिमा', 'In the desert')], answer: 0 },
+    options: [o('🌲', 'हिमाली जङ्गलमा', 'In mountain forests'), o('🌊', 'समुद्रमा', 'In the sea'), o('🏜️', 'मरुभूमिमा', 'In the desert')], answer: 0, easy: true },
   { q: { ne: 'नेपालको उत्तरतिर के छ?', en: 'What is in the north of Nepal?' },
-    options: [o('🏔️', 'हिमाल', 'Mountains'), o('🌾', 'तराई', 'Plains'), o('🌊', 'समुद्र', 'The sea')], answer: 0 },
+    options: [o('🏔️', 'हिमाल', 'Mountains'), o('🌾', 'तराई', 'Plains'), o('🌊', 'समुद्र', 'The sea')], answer: 0, easy: true },
   { q: { ne: 'नेपालको झण्डामा के-के छन्?', en: "What is on Nepal's flag?" },
-    options: [o('🌙', 'चन्द्रमा र सूर्य', 'Moon and sun'), o('⭐', 'तारा', 'A star'), o('🌳', 'रूख', 'A tree')], answer: 0 },
+    options: [o('🌙', 'चन्द्रमा र सूर्य', 'Moon and sun'), o('⭐', 'तारा', 'A star'), o('🌳', 'रूख', 'A tree')], answer: 0, easy: true },
   { q: { ne: 'डाँफे के हो?', en: 'What is the Danfe?' },
     options: [o('danfe', 'राष्ट्रिय चरा', 'National bird'), o('🌺', 'राष्ट्रिय फूल', 'National flower'), o('🏐', 'राष्ट्रिय खेल', 'National sport')], answer: 0 },
   { q: { ne: 'मिथिला चित्रकला कुन प्रदेशमा प्रसिद्ध छ?', en: 'Which province is famous for Mithila painting?' },
     options: [o('🎨', 'मधेश', 'Madhesh'), o('🏞️', 'कर्णाली', 'Karnali'), o('⛰️', 'गण्डकी', 'Gandaki')], answer: 0 },
   { q: { ne: '"क" बाट सुरु हुने शब्द कुन हो?', en: 'Which word starts with "क"?' },
-    options: [o('🪷', 'कमल', 'kamal'), o('🏠', 'घर', 'ghar'), o('🐟', 'माछा', 'maachha')], answer: 0 },
+    options: [o('🪷', 'कमल', 'kamal'), o('🏠', 'घर', 'ghar'), o('🐟', 'माछा', 'maachha')], answer: 0, easy: true },
   { q: { ne: 'नेपाली भाषा कुन लिपिमा लेखिन्छ?', en: 'Which script is Nepali written in?' },
     options: [o('txt:क', 'देवनागरी', 'Devanagari'), o('txt:A', 'रोमन', 'Roman'), o('txt:ا', 'अरबी', 'Arabic')], answer: 0 },
 ];

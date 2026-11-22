@@ -136,6 +136,21 @@ Items marked ⚠ are known compromises that need a decision.
 | ☐ | danfe प्रकृति / Nature | डाँफे नेपालको राष्ट्रिय चरा हो। | The Danfe (Himalayan monal) is our national bird. |
 | ☐ | ✍️ बाह्रखरी / Syllable builder | क + ा = का! मात्राले अक्षरलाई नयाँ आवाज दिन्छ। | क + ा = का! Vowel signs give letters new sounds. |
 | ☐ | 🏆 प्रश्न विजेता / Quiz champion | तिमीलाई नेपालबारे धेरै थाहा छ! | You know so much about Nepal! |
+| ☐ | 👨‍👩‍👧‍👦 परिवार / Family | हजुरआमा र हजुरबासँग नेपालीमा कुरा गर — उहाँहरू कति खुसी हुनुहुन्छ! | Talk to grandma and grandpa in Nepali — see how happy they are! |
+| ☐ | 🙏 बोली-व्यवहार / Kind words | नमस्ते भन्दा दुई हात जोडिन्छ। | When we say namaste, we join our two hands. |
+| ☐ | 🍛 खाना / Food | दाल भात नेपालको सबैभन्दा मन पराइने खाना हो। | Daal bhaat is the most loved meal in Nepal. |
+| ☐ | 🐸 जनावर / Animals | भ्यागुतो वर्षामा "टर्र टर्र" कराउँछ। | In the rainy season, frogs go "tarr tarr". |
+| ☐ | 🎨 रङ / Colours | होलीमा सबै रङ एकैचोटि देखिन्छन्! | At Holi you can see every colour at once! |
+| ☐ | ✋ मेरो शरीर / My body | हातले नमस्ते गर्छौं, खुट्टाले नाच्छौं! | We say namaste with our hands and dance with our feet! |
+| ☐ | 🪷 ताल र कमल / Lake and lotus | काठमाडौं उपत्यका पहिले ताल थियो भन्ने किंवदन्ती छ। | Legend says the Kathmandu Valley was once a lake. |
+| ☐ | 🦢 दयालु राजकुमार / The kind prince | सिद्धार्थले घाइते हाँसलाई बचाउनुभयो। | Siddhartha saved a hurt swan. |
+| ☐ | 🧗 हिमाल चढ्ने साथी / Climbing friends | तेन्जिङ र हिलारी सन् १९५३ मा सगरमाथा चढ्नुभयो। | Tenzing and Hillary climbed Sagarmatha in 1953. |
+| ☐ | 🌱 जमरा / Jamara | दशैंमा जमरा र टीका लगाइन्छ। | At Dashain we wear jamara and tika. |
+| ☐ | 🐕 कुकुर तिहार / Kukur Tihar | तिहारमा कुकुरलाई फूलको माला लगाइन्छ। | At Tihar dogs wear flower garlands. |
+| ☐ | 🌙 जून र घाम / Moon and sun | हाम्रो झण्डामा जून र घाम छन्। | Our flag has the moon and the sun. |
+| ☐ | txt:१२३ गन्ती / Counting | एक, दुई, तीन … तिमी नेपालीमा गन्न सक्छौ! | One, two, three … you can count in Nepali! |
+| ☐ | 🥁 बाजा / Music | मादल नेपाली लोकगीतको मुटु हो। | The madal drum is the heartbeat of Nepali folk songs. |
+| ☐ | 🖍️ चित्रकार / Little artist | तिमीले नेपालका चित्रहरूमा रङ भर्यौ! | You coloured pictures of Nepal! |
 
 ## 5. बाह्रखरी vowel signs (12)
 
@@ -157,7 +172,174 @@ Items marked ⚠ are known compromises that need a decision.
 ⚠ Traditional बाह्रखरी has 12 forms and leaves out ृ (ऋकार); confirm this matches the school curriculum.
 
 
-## 6. Quiz (correct answer listed first)
+## 6. First words (शब्द)
+
+⚠ Spellings with common variants to confirm: बुबा/बुवा, हजुरबा/हजुरबुबा, मम/मःम/मोमो, शुभ रात्रि.
+
+### परिवार / Family
+
+| ✓ | Word | Roman | English | Picture |
+|---|---|---|---|---|
+| ☐ | आमा | aamaa | mother | 👩 |
+| ☐ | बुबा | bubaa | father | 👨 |
+| ☐ | हजुरआमा | hajuraamaa | grandmother | 👵 |
+| ☐ | हजुरबा | hajurbaa | grandfather | 👴 |
+| ☐ | दिदी | didi | older sister | 👧 |
+| ☐ | दाइ | daai | older brother | 👦 |
+| ☐ | बच्चा | bachchaa | baby | 👶 |
+| ☐ | परिवार | pariwaar | family | 👨‍👩‍👧‍👦 |
+
+### बोली-व्यवहार / Kind words
+
+| ✓ | Word | Roman | English | Picture |
+|---|---|---|---|---|
+| ☐ | नमस्ते | namaste | hello (with joined hands) | 🙏 |
+| ☐ | धन्यवाद | dhanyabaad | thank you | 💐 |
+| ☐ | माफ गर्नुहोस् | maaph garnuhos | sorry / excuse me | 🙇 |
+| ☐ | हो | ho | yes | 👍 |
+| ☐ | होइन | hoina | no | 🙅 |
+| ☐ | म ठीक छु | ma thik chhu | I'm fine | 😊 |
+| ☐ | माया | maayaa | love | ❤️ |
+| ☐ | शुभ रात्रि | shubha raatri | good night | 🌙 |
+
+### खाना / Food
+
+| ✓ | Word | Roman | English | Picture |
+|---|---|---|---|---|
+| ☐ | दाल भात | daal bhaat | lentils and rice | 🍛 |
+| ☐ | मम | momo | dumplings | 🥟 |
+| ☐ | सेल रोटी | sel roti | ring-shaped rice bread | 🍩 |
+| ☐ | चिया | chiyaa | tea | 🍵 |
+| ☐ | दूध | doodh | milk | 🥛 |
+| ☐ | स्याउ | syaau | apple | 🍎 |
+| ☐ | केरा | keraa | banana | 🍌 |
+| ☐ | पानी | paani | water | 💧 |
+
+### जनावर / Animals
+
+| ✓ | Word | Roman | English | Picture |
+|---|---|---|---|---|
+| ☐ | कुकुर | kukur | dog | 🐕 |
+| ☐ | बिरालो | biraalo | cat | 🐈 |
+| ☐ | गाई | gaai | cow | 🐄 |
+| ☐ | कुखुरा | kukhuraa | chicken | 🐓 |
+| ☐ | बाँदर | baandar | monkey | 🐒 |
+| ☐ | बाघ | baagh | tiger | 🐅 |
+| ☐ | हात्ती | haatti | elephant | 🐘 |
+| ☐ | भ्यागुतो | bhyaaguto | frog | 🐸 |
+
+### रङ / Colours
+
+| ✓ | Word | Roman | English | Picture |
+|---|---|---|---|---|
+| ☐ | रातो | raato | red | swatch:#e53935 |
+| ☐ | निलो | nilo | blue | swatch:#1e63d6 |
+| ☐ | हरियो | hariyo | green | swatch:#2fa36b |
+| ☐ | पहेंलो | pahenlo | yellow | swatch:#f6c445 |
+| ☐ | सेतो | seto | white | swatch:#ffffff |
+| ☐ | कालो | kaalo | black | swatch:#222222 |
+| ☐ | गुलाबी | gulaabi | pink | swatch:#ff7ab6 |
+| ☐ | खैरो | khairo | brown | swatch:#8d5a3b |
+
+### मेरो शरीर / My body
+
+| ✓ | Word | Roman | English | Picture |
+|---|---|---|---|---|
+| ☐ | आँखा | aankhaa | eyes | 👁️ |
+| ☐ | कान | kaan | ears | 👂 |
+| ☐ | नाक | naak | nose | 👃 |
+| ☐ | मुख | mukh | mouth | 👄 |
+| ☐ | हात | haat | hand | ✋ |
+| ☐ | खुट्टा | khuttaa | leg | 🦵 |
+| ☐ | दाँत | daant | teeth | 🦷 |
+| ☐ | कपाल | kapaal | hair | 💇 |
+
+## 7. Numbers (अङ्क)
+
+| ✓ | Numeral | Word | Roman |
+|---|---|---|---|
+| ☐ | १ | एक | ek |
+| ☐ | २ | दुई | dui |
+| ☐ | ३ | तीन | tin |
+| ☐ | ४ | चार | chaar |
+| ☐ | ५ | पाँच | paanch |
+| ☐ | ६ | छ | chha |
+| ☐ | ७ | सात | saat |
+| ☐ | ८ | आठ | aath |
+| ☐ | ९ | नौ | nau |
+| ☐ | १० | दस | das |
+
+## 8. Stories (कथा)
+
+Check each sentence for accuracy, cultural sensitivity and child-appropriateness (ages 3–6). Legends are labelled as legends.
+
+### ताल र कमलको कथा / The Lake and the Lotus — Legend
+
+| ✓ | Page | Nepali | English |
+|---|---|---|---|
+| ☐ | 1 | धेरै धेरै पहिले, काठमाडौं उपत्यका एउटा ठूलो ताल थियो। | Long, long ago, the Kathmandu Valley was a big lake. |
+| ☐ | 2 | तालको बीचमा एउटा चम्किलो कमलको फूल फुल्यो। | In the middle of the lake, a shining lotus flower bloomed. |
+| ☐ | 3 | मञ्जुश्रीले आफ्नो तरवारले चोभारको डाँडा काटिदिनुभयो। | Manjushri cut open the hill at Chobhar with his sword. |
+| ☐ | 4 | तालको सबै पानी बगेर गयो। | All the water of the lake flowed away. |
+| ☐ | 5 | त्यहाँ हरियो उपत्यका बन्यो, अनि मानिसहरू बस्न थाले। | A green valley appeared, and people came to live there. |
+| ☐ | 6 | कमल फुलेको डाँडामा आज स्वयम्भू छ! | Today, Swayambhu stands on the hill where the lotus bloomed! |
+
+### बुद्धको कथा / The Story of the Buddha — History
+
+| ✓ | Page | Nepali | English |
+|---|---|---|---|
+| ☐ | 1 | धेरै पहिले, लुम्बिनीको बगैंचामा राजकुमार सिद्धार्थ जन्मनुभयो। | Long ago, Prince Siddhartha was born in a garden in Lumbini. |
+| ☐ | 2 | एक दिन उहाँले घाइते हाँसलाई माया गरेर बचाउनुभयो। | One day, he lovingly saved a hurt swan. |
+| ☐ | 3 | उहाँ रूखमुनि शान्त भएर बस्नुहुन्थ्यो र सोच्नुहुन्थ्यो। | He would sit calmly under a tree and think. |
+| ☐ | 4 | पछि उहाँ गौतम बुद्ध हुनुभयो र सबैलाई शान्ति र दया सिकाउनुभयो। | Later he became Gautama Buddha and taught everyone peace and kindness. |
+| ☐ | 5 | बुद्ध जन्मनुभएको ठाउँ, लुम्बिनी, हाम्रो नेपालमा छ! | Lumbini, where the Buddha was born, is in our Nepal! |
+
+### सगरमाथाको टुप्पोमा / To the Top of Sagarmatha — History
+
+| ✓ | Page | Nepali | English |
+|---|---|---|---|
+| ☐ | 1 | सगरमाथा संसारकै सबैभन्दा अग्लो हिमाल हो। | Sagarmatha is the highest mountain in the whole world. |
+| ☐ | 2 | माथि धेरै चिसो हुन्छ र हावा चल्छ, चढ्न निकै गाह्रो छ। | Up high it is very cold and windy, so climbing is very hard. |
+| ☐ | 3 | सन् १९५३ मा तेन्जिङ नोर्गे शेर्पा र एडमन्ड हिलारी सँगै चढ्नुभयो। | In 1953, Tenzing Norgay Sherpa and Edmund Hillary climbed together. |
+| ☐ | 4 | बाटोमा उहाँहरूले एकअर्कालाई सघाउनुभयो। | On the way, they helped each other. |
+| ☐ | 5 | अनि टुप्पोमा पुग्नुभयो! सँगै मिलेर काम गर्दा ठूलो काम पनि सकिन्छ। | And they reached the top! Working together, we can do big things. |
+
+### दशैं आयो! / Dashain Is Here! — Festival
+
+| ✓ | Page | Nepali | English |
+|---|---|---|---|
+| ☐ | 1 | दशैं आयो! सबै परिवार घरमा भेला हुन्छ। | Dashain is here! The whole family comes home. |
+| ☐ | 2 | घरमा जमरा उमारिन्छ — सानो, हरियो बिरुवा। | We grow jamara at home — little green shoots. |
+| ☐ | 3 | ठूलाबडाले निधारमा रातो टीका लगाइदिएर आशीर्वाद दिनुहुन्छ। | Elders put red tika on our forehead and give us their blessings. |
+| ☐ | 4 | केटाकेटी चङ्गा उडाउँछन् र पिङ खेल्छन्। | Children fly kites and play on the swing. |
+| ☐ | 5 | दशैंमा सबै मिलेर खुसी मनाउँछौं। | At Dashain, we all celebrate happily together. |
+
+### उज्यालो तिहार / Bright Tihar — Festival
+
+| ✓ | Page | Nepali | English |
+|---|---|---|---|
+| ☐ | 1 | तिहार बत्ती र दियोको चाड हो। | Tihar is the festival of lights and lamps. |
+| ☐ | 2 | हामी काग र कुकुरलाई माया गरेर खाना र माला दिन्छौं। | We lovingly give food and flower garlands to crows and dogs. |
+| ☐ | 3 | गाईको पूजा गर्छौं, अनि घर सफा गरेर सजाउँछौं। | We honour the cow, then clean and decorate our homes. |
+| ☐ | 4 | दिदीबहिनीले दाजुभाइलाई सात रङको टीका लगाइदिन्छन्। | Sisters give their brothers a seven-coloured tika. |
+| ☐ | 5 | देउसी-भैलो गाउँदै सबै नाच्छन्! | Everyone sings Deusi and Bhailo and dances! |
+
+### हाम्रो झण्डा / Our Flag — Our country
+
+| ✓ | Page | Nepali | English |
+|---|---|---|---|
+| ☐ | 1 | यो हाम्रो झण्डा हो। संसारमा यस्तो आकारको झण्डा अरू कतै छैन! | This is our flag. No other flag in the world has this shape! |
+| ☐ | 2 | यसका दुई त्रिकोण हिमालका चुचुराजस्तै देखिन्छन्। | Its two triangles look like the peaks of the Himalaya. |
+| ☐ | 3 | यसको सिमरिक रातो रङ लालीगुराँसजस्तै छ। | Its crimson red is like the rhododendron flower. |
+| ☐ | 4 | यसमा जून र घाम छन्। | It has the moon and the sun. |
+| ☐ | 5 | जून र घाम रहुन्जेल नेपाल रहोस् भन्ने चाहना यसमा छ। | It carries the wish that Nepal lasts as long as the moon and the sun. |
+
+⚠ Dashain: the story leaves out animal sacrifice on purpose (audience 3–6). Some Indigenous communities do not celebrate Dashain; Lhosar, Chhath and Teej appear in the festival cards so the app does not present one community's festivals as everyone's.
+
+⚠ Everest: Tenzing Norgay's nationality is a sensitive topic — the story deliberately says only "Tenzing Norgay Sherpa".
+
+
+## 9. Quiz (correct answer listed first)
 
 | ✓ | Question | Correct | Distractors |
 |---|---|---|---|

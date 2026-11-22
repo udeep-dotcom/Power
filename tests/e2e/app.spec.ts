@@ -4,7 +4,7 @@ import { expect, test, type Page } from '@playwright/test';
 
 const KEY = 'akshar-yatra:v1';
 
-async function boot(page: Page, state?: object) {
+async function boot(page: Page, state?: object, age = 6) {
   const errors: string[] = [];
   page.on('pageerror', (e) => errors.push(e.message));
   page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
@@ -12,8 +12,14 @@ async function boot(page: Page, state?: object) {
   await page.goto('/');
   const start = page.locator('.start-play, .player').first();
   await start.click({ force: true });
-  await expect(page.locator('.home-menu')).toBeVisible();
+  await pickAgeIfAsked(page, age);
+  await expect(page.locator('.home-grid')).toBeVisible();
   return errors;
+}
+/** First time a player starts, Habre asks their age (3–6). Tests default to 6 = hardest. */
+async function pickAgeIfAsked(page: Page, age = 6) {
+  const btn = page.locator(`.age-btn[aria-label="${age}"]`);
+  try { await btn.waitFor({ timeout: 1500 }); await btn.click(); } catch { /* not asked */ }
 }
 const go = (page: Page, route: string) => page.evaluate((r) => { location.hash = r; }, route);
 const saved = (page: Page) => page.evaluate((k) => JSON.parse(localStorage.getItem(k) ?? '{}'), KEY);
@@ -28,7 +34,8 @@ const veteran = {
 
 test('start screen → home, all main screens render without errors', async ({ page }) => {
   const errors = await boot(page);
-  for (const r of ['/journey', '/letters', '/barakhari', '/nepal', '/nepal/map', '/nepal/deck/symbols', '/nepal/quiz', '/stickers', '/parents', '/learn/ka', '/game/u1']) {
+  for (const r of ['/journey', '/letters', '/barakhari', '/nepal', '/nepal/map', '/nepal/deck/symbols', '/nepal/quiz', '/stickers', '/parents', '/learn/ka', '/game/u1',
+    '/words', '/words/family', '/words/colours/game', '/numbers', '/numbers/game', '/stories', '/stories/valley', '/play', '/play/music', '/play/colour', '/play/colour/flag']) {
     await go(page, r);
     await expect(page.locator('.screen').first()).toBeVisible();
     await page.waitForTimeout(250);
@@ -173,10 +180,11 @@ test('players: add a sibling in the parent zone; each has separate progress', as
   await page.locator('.player-btn').click();
   await expect(page.locator('.player')).toHaveCount(2);
   await page.locator('.player').nth(1).click();
-  await expect(page.locator('.menu-chip')).toHaveText(/[०0]\/[४4][९9]/); // new player starts at 0/49
+  await pickAgeIfAsked(page, 3);
+  await expect(page.locator('.jh-count')).toHaveText(/^०\/४९/); // new player starts at 0/49
   await page.locator('.player-btn').click();
   await page.locator('.player').nth(0).click();
-  await expect(page.locator('.menu-chip')).toHaveText(/[६6]\/[४4][९9]/); // first player still has 6
+  await expect(page.locator('.jh-count')).toHaveText(/^६\/४९/); // first player still has 6
 });
 
 test('exploring all 7 provinces earns the map sticker', async ({ page }) => {
@@ -199,4 +207,87 @@ test('no horizontal page overflow on a 360×640 phone', async ({ page }) => {
     const w = await page.evaluate(() => [document.documentElement.scrollWidth, document.documentElement.clientWidth]);
     expect(w[0], r).toBeLessThanOrEqual(w[1]);
   }
+});
+
+test('age 3: games offer two big choices and counting stays within 1–3', async ({ page }) => {
+  await boot(page, undefined, 3);
+  await go(page, '/game/u1');
+  await expect(page.locator('.choice')).toHaveCount(2);
+  await go(page, '/numbers/game');
+  for (let i = 0; i < 6; i++) {
+    const n = Number(await page.locator('.count-field').getAttribute('data-target'));
+    expect(n).toBeGreaterThanOrEqual(1);
+    expect(n).toBeLessThanOrEqual(3);
+    await expect(page.locator('.count-thing')).toHaveCount(n);
+    await page.locator('.count-thing').first().click(); // tap-to-count works
+    await page.locator(`.choice[data-id="${n}"]`).click();
+    await page.waitForTimeout(1600);
+  }
+  await expect(page.locator('.celebrate')).toBeVisible();
+  await expect.poll(async () => (await saved(page)).stickers ?? []).toContain('counting');
+});
+
+test('words: hear a word, then the listening game can be completed', async ({ page }) => {
+  await boot(page);
+  await go(page, '/words/family');
+  await page.locator('.word-tile').first().click();
+  await expect.poll(async () => (await saved(page)).wordsHeard ?? []).toContain('aama');
+  await page.locator('.words-play').click();
+  for (let i = 0; i < 6; i++) {
+    const id = await page.locator('.prompt').getAttribute('data-target');
+    await page.locator(`.choice[data-id="${id}"]`).click();
+    await page.waitForTimeout(1300);
+  }
+  await expect(page.locator('.celebrate')).toBeVisible();
+  await expect.poll(async () => (await saved(page)).stickers ?? []).toContain('w-family');
+});
+
+test('stories: read a story to the end and earn its sticker', async ({ page }) => {
+  await boot(page);
+  await go(page, '/stories/buddha');
+  const pages = await page.locator('.story-dots i').count();
+  expect(pages).toBe(5);
+  for (let i = 0; i < pages; i++) {
+    await expect(page.locator('.story-text')).not.toBeEmpty();
+    await page.locator('.story-nav .big-arrow').last().click();
+    await page.waitForTimeout(300);
+  }
+  await expect(page.locator('.celebrate')).toBeVisible();
+  const st = await saved(page);
+  expect(st.storiesRead).toContain('buddha');
+  expect(st.stickers).toContain('s-buddha');
+});
+
+test('colouring: colouring the flag correctly is recognised and saved', async ({ page }) => {
+  await boot(page);
+  await go(page, '/play/colour/flag');
+  const paint = async (colour: string, region: number) => {
+    await page.locator(`.swatch-btn[aria-label="${colour}"]`).click();
+    // dispatch on the shape itself: the centre of the crescent's box is the flag body (its hollow)
+    await page.locator('.colour-canvas .region').nth(region).dispatchEvent('pointerdown');
+  };
+  // regions: 0 border, 1 body, 2 moon, 3 moon rays, 4 sun
+  await paint('#1d4fb0', 0);
+  await paint('#dc143c', 1);
+  for (const r of [2, 3, 4]) await paint('#ffffff', r);
+  await expect.poll(async () => (await saved(page)).coloring?.flag?.body).toBe('#dc143c');
+  await expect.poll(async () => (await saved(page)).stickers ?? []).toContain('colouring');
+});
+
+test('instruments play without errors', async ({ page }) => {
+  const errors = await boot(page);
+  await go(page, '/play/music');
+  for (const sel of ['.madal .hit >> nth=0', '.madal .hit >> nth=1', '.damphu', '.bell-btn', '.bansuri .hole >> nth=0', '.bansuri .hole >> nth=5']) {
+    await page.locator(sel).click({ force: true });
+    await page.waitForTimeout(80);
+  }
+  await expect(page.locator('.float-note').first()).toBeVisible();
+  expect(errors).toEqual([]);
+});
+
+test('bilingual mode keeps Nepali first and adds small English', async ({ page }) => {
+  await boot(page, { v: 2, lang: 'en', profiles: [{ id: 'p1', avatar: '🐯', name: '', age: 5 }], active: 'p1' });
+  const label = page.locator('.home-tile').first();
+  await expect(label.locator('.bi-ne')).toHaveText('अक्षर');
+  await expect(label.locator('.bi-en')).toHaveText('Letters');
 });

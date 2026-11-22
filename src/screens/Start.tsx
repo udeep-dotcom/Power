@@ -4,29 +4,70 @@
 //  2. Let siblings on a shared phone pick who's playing.
 
 import { Habre } from '../components/Habre';
+import { Bi } from '../components/Bi';
 import { Pic } from '../components/Art';
 import { PrayerFlags, Scenery } from '../components/Scenery';
 import { UI } from '../data/i18n';
 import { LETTERS } from '../data/alphabet';
 import { unlockAudio, sfx } from '../lib/sfx';
 import { initSpeech, instruct } from '../lib/speech';
-import { getState, learnedLetterIds, switchProfile, useStore, type Profile } from '../lib/store';
+import { useState } from 'preact/hooks';
+import { editProfile, getState, learnedLetterIds, switchProfile, useStore, type Profile } from '../lib/store';
+import { DEFAULT_AGE } from '../lib/level';
+import { toNeDigits } from '../data/i18n';
 import { haptic, tr } from '../lib/util';
 
 export function Start({ onStart }: { onStart: () => void }) {
   const s = useStore();
   const many = s.profiles.length > 1;
 
-  const go = (p: Profile) => {
-    unlockAudio();
-    sfx.unlock(); haptic('success');
-    switchProfile(p.id);
+  const [askAge, setAskAge] = useState<Profile | null>(null);
+
+  const finish = () => {
     onStart();
     void initSpeech().then(() => {
       const fresh = learnedLetterIds(getState()).length === 0; // state of the player just chosen
       void instruct(fresh ? UI.hello : UI.welcomeBack);
     });
   };
+
+  const go = (p: Profile) => {
+    unlockAudio();
+    sfx.unlock(); haptic('success');
+    switchProfile(p.id);
+    // First time for this child: ask their age once — it sets how hard every game is.
+    if (!p.age) { setAskAge(p); void initSpeech().then(() => instruct(UI.howOld)); return; }
+    finish();
+  };
+
+  const pickAge = (age: number) => {
+    sfx.correct(); haptic('success');
+    if (askAge) editProfile(askAge.id, { age });
+    setAskAge(null);
+    finish();
+  };
+
+  if (askAge) {
+    return (
+      <div class="screen start">
+        <Scenery kind="home" />
+        <PrayerFlags />
+        <div class="start-col">
+          <div class="start-habre"><Habre size={130} mood="think" /></div>
+          <p class="start-q"><Bi t={UI.howOld} /></p>
+          <div class="ages">
+            {[3, 4, 5, 6].map((a, i) => (
+              <button key={a} class="age-btn" style={{ animationDelay: `${i * 0.07}s` }} onClick={() => pickAge(a)} aria-label={`${a}`}>
+                <span class="age-num deva" lang="ne">{toNeDigits(a)}</span>
+                <span class="age-dots" aria-hidden="true">{Array.from({ length: a }, (_, k) => <i key={k} />)}</span>
+              </button>
+            ))}
+          </div>
+          <button class="age-skip" onClick={() => pickAge(DEFAULT_AGE)}><Bi t={UI.ageSkip} /></button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div class="screen start">
@@ -40,7 +81,7 @@ export function Start({ onStart }: { onStart: () => void }) {
         <div class="start-habre"><Habre size={150} mood="wave" /></div>
         {many ? (
           <>
-            <p class={`start-q ${s.lang === 'ne' ? 'deva' : ''}`}>{tr(UI.whoPlays)}</p>
+            <p class={`start-q ${s.lang === 'ne' ? 'deva' : ''}`}><Bi t={UI.whoPlays} /></p>
             <div class={`players n${s.profiles.length}`}>
               {s.profiles.map((p, i) => {
                 const learned = p.id === s.active ? learnedLetterIds(s).length : Object.keys(p.data?.nodes ?? {}).filter((k) => k.startsWith('L:')).length;
@@ -57,7 +98,7 @@ export function Start({ onStart }: { onStart: () => void }) {
         ) : (
           <button class="btn crimson big start-play" onClick={() => go(s.profiles[0])}>
             <span class="play-tri" aria-hidden="true" />
-            <span class={s.lang === 'ne' ? 'deva' : ''}>{tr(UI.letsPlay)}</span>
+            <span class={s.lang === 'ne' ? 'deva' : ''}><Bi t={UI.letsPlay} /></span>
           </button>
         )}
       </div>

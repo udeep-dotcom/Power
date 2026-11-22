@@ -26,9 +26,16 @@ export interface Progress {
   barakhari: string[];
   /** ISO dates (YYYY-MM-DD) on which a practice session was completed (shown to parents only) */
   practiceDays: string[];
+  /** first-words ids the child has heard (शब्द) */
+  wordsHeard: string[];
+  /** story ids read to the end (कथा) */
+  storiesRead: string[];
+  /** colouring pages: page id → region id → colour */
+  coloring: Record<string, Record<string, string>>;
 }
 
-export interface Profile { id: string; avatar: string; name: string; data?: Progress }
+/** `age` (3–6) tunes difficulty; undefined until the child (or parent) answers once. */
+export interface Profile { id: string; avatar: string; name: string; age?: number; data?: Progress }
 
 export interface State extends Progress {
   v: 2;
@@ -37,23 +44,34 @@ export interface State extends Progress {
   voice: boolean;
   roman: boolean;
   unlockAll: boolean;
+  /** gentle background music on menus */
+  music: boolean;
+  /** daily play limit in minutes (0 = off) — screen time matters at this age */
+  playLimit: number;
+  /** today's date and play time (all players together), plus extra minutes a parent granted today */
+  playDay: string;
+  playDaySeconds: number;
+  playExtra: number;
   profiles: Profile[];
   active: string;
   lastPlayed: number;
 }
 
-export const PROGRESS_KEYS = ['letters', 'nodes', 'stickers', 'newStickers', 'provincesSeen', 'cardsSeen', 'quizBest', 'playSeconds', 'barakhari', 'practiceDays'] as const;
+export const PROGRESS_KEYS = ['letters', 'nodes', 'stickers', 'newStickers', 'provincesSeen', 'cardsSeen', 'quizBest', 'playSeconds', 'barakhari', 'practiceDays', 'wordsHeard', 'storiesRead', 'coloring'] as const;
 
 export const AVATARS = ['🐯', '🐘', '🦏', '🐒', '🐻', '🐦'];
 export const MAX_PROFILES = 4;
 
 export function emptyProgress(): Progress {
-  return { letters: {}, nodes: {}, stickers: [], newStickers: [], provincesSeen: [], cardsSeen: [], quizBest: 0, playSeconds: 0, barakhari: [], practiceDays: [] };
+  return {
+    letters: {}, nodes: {}, stickers: [], newStickers: [], provincesSeen: [], cardsSeen: [], quizBest: 0, playSeconds: 0,
+    barakhari: [], practiceDays: [], wordsHeard: [], storiesRead: [], coloring: {},
+  };
 }
 
 export function defaultState(): State {
   return {
-    v: 2, lang: 'ne', sound: true, voice: true, roman: false, unlockAll: false,
+    v: 2, lang: 'ne', sound: true, voice: true, roman: false, unlockAll: false, music: true, playLimit: 0, playDay: '', playDaySeconds: 0, playExtra: 0,
     ...emptyProgress(),
     profiles: [{ id: 'p1', avatar: AVATARS[0], name: '' }], active: 'p1', lastPlayed: 0,
   };
@@ -77,6 +95,18 @@ export function migrate(raw: unknown): State {
   if (!merged.profiles.some((p) => p.id === merged.active)) merged.active = merged.profiles[0].id;
   for (const k of PROGRESS_KEYS) if (merged[k] === undefined) (merged as unknown as Record<string, unknown>)[k] = emptyProgress()[k];
   return merged;
+}
+
+/** Local calendar date (YYYY-MM-DD). */
+export function today(): string {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+/** True once today's play time has reached the parent's limit (plus any extra granted). */
+export function overPlayLimit(s: State = state): boolean {
+  if (!s.playLimit || s.playDay !== today()) return false;
+  return s.playDaySeconds >= (s.playLimit + s.playExtra) * 60;
 }
 
 let state: State = load();
@@ -176,11 +206,12 @@ export function addProfile(avatar: string, name = ''): string | null {
   return id;
 }
 
-export function editProfile(id: string, patch: { avatar?: string; name?: string }): void {
+export function editProfile(id: string, patch: { avatar?: string; name?: string; age?: number }): void {
   update((s) => {
     const p = s.profiles.find((x) => x.id === id);
     if (!p) return;
     if (patch.avatar) p.avatar = patch.avatar;
+    if (patch.age) p.age = Math.max(3, Math.min(6, Math.round(patch.age)));
     if (patch.name !== undefined) p.name = patch.name.trim().slice(0, 20);
   });
 }
@@ -252,14 +283,26 @@ export function resetProgress(id: string = state.active): void {
   });
 }
 
-export const today = () => new Date().toISOString().slice(0, 10);
+
 
 // Count play time while the tab/app is visible.
 if (typeof window !== 'undefined') {
   setInterval(() => {
     if (document.visibilityState === 'visible') {
-      state = { ...state, playSeconds: state.playSeconds + 15 };
+      const d = today();
+      const sameDay = state.playDay === d;
+      state = {
+        ...state, playSeconds: state.playSeconds + 15, playDay: d,
+        playDaySeconds: (sameDay ? state.playDaySeconds : 0) + 15, playExtra: sameDay ? state.playExtra : 0,
+      };
       persist();
+      emit();
     }
   }, 15_000);
+}
+
+/** Mark something as seen in a list-type progress field (no duplicates). */
+export function markSeen(key: 'wordsHeard' | 'storiesRead' | 'barakhari' | 'cardsSeen' | 'provincesSeen', id: string): void {
+  if (state[key].includes(id)) return;
+  update((s) => { s[key].push(id); });
 }

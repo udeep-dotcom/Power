@@ -9,10 +9,12 @@ import { LETTERS } from '../data/alphabet';
 import { BK_CONSONANTS } from '../data/barakhari';
 import { UI, type T } from '../data/i18n';
 import { STICKERS } from '../data/journey';
+import { ALL_WORDS } from '../data/words';
+import { STORIES } from '../data/stories';
 import { sfx } from '../lib/sfx';
 import { initSpeech, say, voiceSource, type VoiceSource } from '../lib/speech';
 import {
-  addProfile, AVATARS, editProfile, emptyProgress, learnedLetterIds, letterProgress, mastery, MAX_PROFILES,
+  addProfile, AVATARS, editProfile, today, emptyProgress, learnedLetterIds, letterProgress, mastery, MAX_PROFILES,
   removeProfile, resetProgress, update, useStore, type Progress, type State,
 } from '../lib/store';
 import { shuffle, tr } from '../lib/util';
@@ -30,7 +32,7 @@ function makeQuestion() {
   return { a, b, options: shuffle([...set]) };
 }
 
-function Gate({ onPass }: { onPass: () => void }) {
+export function Gate({ onPass }: { onPass: () => void }) {
   const [q, setQ] = useState(makeQuestion);
   const [wrong, setWrong] = useState(false);
   return (
@@ -86,6 +88,12 @@ function Players({ s, viewing, setViewing }: { s: State; viewing: string; setVie
             </button>
             <input id={`pname-${p.id}`} class="pz-name" value={p.name} placeholder={`${tr(UI.player)} ${i + 1}`} maxLength={20}
               aria-label={tr(UI.namePlaceholder)} onChange={(e) => editProfile(p.id, { name: (e.target as HTMLInputElement).value })} />
+            <span class="pz-ages" role="radiogroup" aria-label={tr(UI.age)}>
+              {[3, 4, 5, 6].map((a) => (
+                <button key={a} role="radio" aria-checked={p.age === a} class={`pz-age ${p.age === a ? 'on' : ''}`}
+                  onClick={() => { sfx.tap(); editProfile(p.id, { age: a }); }}>{a}</button>
+              ))}
+            </span>
             <button class="btn white pz-view" onClick={() => setViewing(p.id)}>
               {learnedLetterIds(progressOf(s, p.id)).length}/{LETTERS.length}
             </button>
@@ -144,6 +152,7 @@ function Report({ p, lang }: { p: Progress; lang: string }) {
         {p.nodes['B:game'] ? ` · ${lang === 'ne' ? 'खेल' : 'game'} ${'★'.repeat(p.nodes['B:game'])}` : ''}
       </p>
       <p class="weak"><b>{tr(UI.todaysPractice)}:</b> {practiceWeek} {lang === 'ne' ? 'दिन (पछिल्लो ७ दिनमा)' : 'days in the last 7'}</p>
+      <p class="weak"><b>{tr(UI.words)}:</b> {p.wordsHeard.length}/{ALL_WORDS.length} {lang === 'ne' ? 'शब्द सुनेको' : 'words heard'} · <b>{tr(UI.stories)}:</b> {p.storiesRead.length}/{STORIES.length} · <b>{tr(UI.numbers)}:</b> {p.nodes['N:count'] ? '★'.repeat(p.nodes['N:count']) : '—'}</p>
     </section>
   );
 }
@@ -169,10 +178,21 @@ function Dashboard({ s }: { s: State }) {
           <span>{tr(UI.language)}</span>
           <span class="seg">
             <button class={s.lang === 'ne' ? 'on' : ''} onClick={() => update((st) => { st.lang = 'ne'; })}>नेपाली</button>
-            <button class={s.lang === 'en' ? 'on' : ''} onClick={() => update((st) => { st.lang = 'en'; })}>English</button>
+            <button class={s.lang === 'en' ? 'on' : ''} onClick={() => update((st) => { st.lang = 'en'; })}>नेपाली + English</button>
           </span>
+          <small class="pz-hint">{tr(UI.langHint)}</small>
         </div>
         <Toggle label={UI.sound} value={s.sound} onChange={(v) => update((st) => { st.sound = v; })} />
+        <Toggle label={UI.music} value={s.music} onChange={(v) => update((st) => { st.music = v; })} />
+        <div class="setting">
+          <span>{tr(UI.playLimit)}</span>
+          <span class="seg">
+            {[0, 15, 30, 45, 60].map((m) => (
+              <button key={m} class={s.playLimit === m ? 'on' : ''} onClick={() => update((st) => { st.playLimit = m; })}>{m ? `${m}` : tr(UI.noLimit)}</button>
+            ))}
+          </span>
+          <small class="pz-hint">{s.lang === 'en' ? 'WHO advises at most 1 hour of screen time a day for ages 2–5. Today so far: ' : 'WHO ले २–५ वर्षका लागि दिनमा बढीमा १ घण्टा स्क्रिन समय सुझाउँछ। आज: '}{Math.round(s.playDay === today() ? s.playDaySeconds / 60 : 0)} {tr(UI.minutes)}</small>
+        </div>
         <Toggle label={UI.voice} value={s.voice} onChange={(v) => update((st) => { st.voice = v; })} />
         <Toggle label={UI.roman} value={s.roman} onChange={(v) => update((st) => { st.roman = v; })} />
         <Toggle label={UI.unlockAll} value={s.unlockAll} onChange={(v) => update((st) => { st.unlockAll = v; })} />

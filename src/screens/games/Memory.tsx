@@ -2,6 +2,7 @@
 // 5–8 year olds without overwhelming working memory.
 
 import { useMemo, useRef, useState } from 'preact/hooks';
+import { level } from '../../lib/level';
 import { Pic } from '../../components/Art';
 import { HabreSays } from '../../components/UI';
 import { LETTER_BY_ID } from '../../data/alphabet';
@@ -19,7 +20,7 @@ export function Memory({ letters, onFinish }: GameProps) {
   const cards = useMemo(() => {
     // Always the unit's own letters first; fill up with weak earlier letters if the unit is small.
     const review = withReview(letters, 4).filter((id) => !letters.includes(id));
-    const ids = [...shuffle(letters), ...shuffle(review)].slice(0, 4);
+    const ids = [...shuffle(letters), ...shuffle(review)].slice(0, level().pairs); // 2–4 pairs by age
     return shuffle(ids.flatMap((id): Card[] => [{ key: `${id}-l`, letterId: id, face: 'letter' }, { key: `${id}-p`, letterId: id, face: 'pic' }]));
   }, []);
   const [open, setOpen] = useState<string[]>([]);
@@ -56,7 +57,7 @@ export function Memory({ letters, onFinish }: GameProps) {
   return (
     <div class="game-body">
       <HabreSays text={GAME_META.memory.howto} size={72} />
-      <div class="memory-grid">
+      <div class={`memory-grid p${cards.length / 2}`}>
         {cards.map((c) => {
           const l = LETTER_BY_ID[c.letterId];
           const up = open.includes(c.key) || matched.includes(c.letterId);

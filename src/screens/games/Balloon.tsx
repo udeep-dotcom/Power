@@ -2,6 +2,8 @@
 // No time pressure and no penalty for letting balloons escape — only wrong pops count.
 
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
+import { level } from '../../lib/level';
+import { Bi } from '../../components/Bi';
 import { Pic } from '../../components/Art';
 import { RoundDots, SpeakerButton } from '../../components/UI';
 import { LETTER_BY_ID, type Letter } from '../../data/alphabet';
@@ -9,15 +11,17 @@ import { UI } from '../../data/i18n';
 import { sfx } from '../../lib/sfx';
 import { instruct, say } from '../../lib/speech';
 import { recordAnswer } from '../../lib/store';
-import { distractors, haptic, shuffle, tr, withReview } from '../../lib/util';
+import { distractors, haptic, shuffle, withReview } from '../../lib/util';
 import type { GameProps } from './GameScreen';
 
-const GOAL = 6; // pops needed; target changes every 2 pops
 const COLORS = ['#ff4d6d', '#4d8dff', '#ffb11b', '#2fc27a', '#a46bff', '#ff7fbf', '#17c3d6'];
 
 interface B { id: number; letter: Letter; x: number; color: string; dur: number; popped?: boolean; wrong?: boolean; leaving?: boolean }
 
 export function Balloon({ letters, onFinish }: GameProps) {
+  // pops needed (4 for ages 3–4, 6 for 5–6); the target changes every 2 pops
+  const lv = useMemo(level, []);
+  const GOAL = lv.balloonGoal;
   const targets = useMemo(() => shuffle(letters).slice(0, GOAL / 2).map((id) => LETTER_BY_ID[id]), []);
   const pool = useMemo(() => withReview(letters, 2), []);
   const [hits, setHits] = useState(0);
@@ -47,7 +51,7 @@ export function Balloon({ letters, onFinish }: GameProps) {
         const others = distractors(target, 3, pool);
         const letter = isTarget || !others.length ? target : others[Math.floor(Math.random() * others.length)];
         const x = 8 + Math.random() * 74;
-        return [...bs.filter((b) => b.leaving || b.popped), ...live, { id: nextId.current++, letter, x, color: COLORS[Math.floor(Math.random() * COLORS.length)], dur: 7 + Math.random() * 3 }];
+        return [...bs.filter((b) => b.leaving || b.popped), ...live, { id: nextId.current++, letter, x, color: COLORS[Math.floor(Math.random() * COLORS.length)], dur: (7 + Math.random() * 3) * lv.balloonSlow }];
       });
     };
     spawn();
@@ -77,7 +81,7 @@ export function Balloon({ letters, onFinish }: GameProps) {
   return (
     <div class="game-body balloon-game">
       <div class="balloon-target card" key={target.id}>
-        <span class="lbl">{tr(UI.pop)}</span>
+        <span class="lbl"><Bi t={UI.pop} /></span>
         <span class="deva tgt" lang="ne">{target.char}</span>
         <Pic pic={target.pic} size={44} />
         <SpeakerButton onClick={() => void say(target.say ?? target.char, `letter-${target.id}`)} />

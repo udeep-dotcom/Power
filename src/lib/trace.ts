@@ -32,7 +32,8 @@ export function dilate(m: Mask, r = 1): Mask {
 
 export interface TraceScore { coverage: number; precision: number; stars: number; inkRatio: number }
 
-export function scoreTrace(letter: Mask, drawn: Mask): TraceScore {
+/** `ease` (0–0.15) lowers the star thresholds for younger children (see lib/level.ts). */
+export function scoreTrace(letter: Mask, drawn: Mask, ease = 0): TraceScore {
   const near = dilate(letter, 3);
   let letterCells = 0, covered = 0, drawnCells = 0, onLetter = 0;
   for (let i = 0; i < letter.length; i++) {
@@ -46,13 +47,13 @@ export function scoreTrace(letter: Mask, drawn: Mask): TraceScore {
   // letter's area in ink; box scribbles use 1.39–1.77×. Excess ink beyond 1.3× lowers precision.
   const tidy = Math.max(0, Math.min(1, 1 - (inkRatio - 1.3) / 0.4));
   const precision = drawnCells ? (onLetter / drawnCells) * tidy : 0;
-  return { coverage, precision, inkRatio, stars: starsFor(coverage, precision) };
+  return { coverage, precision, inkRatio, stars: starsFor(coverage, precision, ease) };
 }
 
-export function starsFor(coverage: number, precision: number): number {
-  if (coverage >= 0.8 && precision >= 0.8) return 3;
-  if (coverage >= 0.65 && precision >= 0.65) return 2;
-  if (coverage >= 0.5 && precision >= 0.5) return 1;
+export function starsFor(coverage: number, precision: number, ease = 0): number {
+  if (coverage >= 0.8 - ease && precision >= 0.8 - ease) return 3;
+  if (coverage >= 0.65 - ease && precision >= 0.65 - ease) return 2;
+  if (coverage >= 0.5 - ease && precision >= 0.5 - ease) return 1;
   return 0;
 }
 

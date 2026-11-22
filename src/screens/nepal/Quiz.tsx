@@ -2,25 +2,33 @@
 // The question is read aloud, so non-readers can play.
 
 import { useEffect, useMemo, useState } from 'preact/hooks';
+import { level } from '../../lib/level';
+import { Bi } from '../../components/Bi';
 import { Pic } from '../../components/Art';
 import { Scenery } from '../../components/Scenery';
 import { Celebration, HabreSays, RoundDots, TopBar } from '../../components/UI';
-import { UI } from '../../data/i18n';
+import { UI, toNeDigits } from '../../data/i18n';
 import { STICKER_BY_ID } from '../../data/journey';
 import { QUIZ } from '../../data/nepal';
 import { goBack } from '../../lib/router';
 import { sfx } from '../../lib/sfx';
 import { awardSticker, update, useStore } from '../../lib/store';
-import { haptic, shuffle, sleep, starsFromMistakes, tr } from '../../lib/util';
+import { haptic, shuffle, sleep, starsFromMistakes } from '../../lib/util';
 
 const N = 8;
 
 export function Quiz() {
   const s = useStore();
-  const qs = useMemo(() => shuffle(QUIZ).slice(0, N).map((q) => {
-    const order = shuffle(q.options.map((_, i) => i));
+  const qs = useMemo(() => {
+    const lv = level();
+    // ages 3–4: only everyday, picture-answerable questions, and 2 answers instead of 3
+    const pool = lv.age <= 4 ? QUIZ.filter((q) => q.easy) : QUIZ;
+    return shuffle(pool).slice(0, N).map((q) => {
+    const keep = [q.answer, ...shuffle(q.options.map((_, i) => i).filter((i) => i !== q.answer)).slice(0, lv.quizOptions - 1)];
+    const order = shuffle(keep);
     return { q: q.q, options: order.map((i) => q.options[i]), answer: order.indexOf(q.answer) };
-  }), []);
+    });
+  }, []);
   const [i, setI] = useState(0);
   const [marks, setMarks] = useState<Record<number, 'correct' | 'wrong'>>({});
   const [score, setScore] = useState(0);
@@ -57,21 +65,21 @@ export function Quiz() {
   return (
     <div class="screen quiz-screen">
       <Scenery kind="home" />
-      <TopBar title={tr(UI.quiz)} right={<span class="chip">★ {score}</span>} />
+      <TopBar title={<Bi t={UI.quiz} />} right={<span class="chip deva">★ {toNeDigits(score)}</span>} />
       <RoundDots total={N} done={i} />
       <HabreSays key={i} text={q.q} size={78} />
       <div class="quiz-options">
         {q.options.map((o, k) => (
           <button key={`${i}-${k}`} class={`tile quiz-opt ${marks[k] ?? ''} ${marks[k] === 'wrong' ? 'dim' : ''}`} onClick={() => choose(k)} style={{ animationDelay: `${k * 0.07}s` }}>
             <Pic pic={o.pic} size={58} />
-            <span class={s.lang === 'ne' ? 'deva' : ''}>{tr(o.label)}</span>
+            <span class={s.lang === 'ne' ? 'deva' : ''}><Bi t={o.label} /></span>
           </button>
         ))}
       </div>
       {done && (
         <Celebration title={UI.quizDone} subtitle={{ ne: `${N} मध्ये ${score} सही!`, en: `${score} of ${N} right first time!` }} stars={starsFromMistakes(mistakes)}
           onNext={() => goBack('/nepal')}>
-          {newSticker && <div class="sticker"><Pic pic={STICKER_BY_ID.quiz.pic} size={80} /><div class="deva">{tr(UI.newSticker)}</div></div>}
+          {newSticker && <div class="sticker"><Pic pic={STICKER_BY_ID.quiz.pic} size={80} /><div class="deva"><Bi t={UI.newSticker} /></div></div>}
         </Celebration>
       )}
     </div>

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
+import { Bi } from '../components/Bi';
 import { Icon, NepalFlag, Pic, Stars } from '../components/Art';
 import { Habre } from '../components/Habre';
 import { TopBar } from '../components/UI';
@@ -86,7 +87,7 @@ export function Journey() {
 
   return (
     <div class="screen journey">
-      <div class="journey-top"><TopBar title={tr(UI.play)} /></div>
+      <div class="journey-top"><TopBar title={<Bi t={UI.play} />} /></div>
       <div class="journey-scroll" ref={scroller}>
         <div class="journey-map" style={{ height, background: bg }}>
           {/* summit goal */}
@@ -105,7 +106,7 @@ export function Journey() {
               return (
                 <div key={`b${k}`} class="region-banner" style={{ top: height - it.y - 40 }}>
                   <span class="deva" lang="ne">{r.name.ne}</span>
-                  <small>{tr(r.blurb)}</small>
+                  <small><Bi t={r.blurb} /></small>
                 </div>
               );
             }

@@ -1,17 +1,18 @@
 // Flip-card decks (symbols, festivals, nature). Flip every card in a deck to earn its sticker.
 
 import { useState } from 'preact/hooks';
+import { Bi } from '../../components/Bi';
 import { Pic } from '../../components/Art';
 import { Scenery } from '../../components/Scenery';
 import { Celebration, TopBar } from '../../components/UI';
-import { UI } from '../../data/i18n';
+import { UI, toNeDigits } from '../../data/i18n';
 import { STICKER_BY_ID } from '../../data/journey';
 import { DECKS } from '../../data/nepal';
 import { goBack } from '../../lib/router';
 import { sfx } from '../../lib/sfx';
 import { instruct } from '../../lib/speech';
 import { awardSticker, update, useStore } from '../../lib/store';
-import { haptic, tileVars, tr } from '../../lib/util';
+import { haptic, tileVars } from '../../lib/util';
 
 export function DeckScreen({ deckId }: { deckId: string }) {
   const deck = DECKS.find((d) => d.id === deckId) ?? DECKS[0];
@@ -36,8 +37,8 @@ export function DeckScreen({ deckId }: { deckId: string }) {
   return (
     <div class="screen scroll deck-screen">
       <Scenery kind="pahad" />
-      <TopBar title={tr(deck.title)} right={<span class="chip">{seenCount}/{deck.cards.length}</span>} />
-      <p class="deck-hint">{tr(UI.tapCard)}</p>
+      <TopBar title={<Bi t={deck.title} />} right={<span class="chip deva">{toNeDigits(seenCount)}/{toNeDigits(deck.cards.length)}</span>} />
+      <p class="deck-hint"><Bi t={UI.tapCard} /></p>
       <div class="deck-grid">
         {deck.cards.map((c, i) => {
           const up = flipped === c.id;
@@ -47,11 +48,11 @@ export function DeckScreen({ deckId }: { deckId: string }) {
               <span class="fcard-inner">
                 <span class="fcard-front">
                   <Pic pic={c.pic} size={76} />
-                  <span class={`fcard-title ${s.lang === 'ne' ? 'deva' : ''}`}>{tr(c.title)}</span>
+                  <span class={`fcard-title ${s.lang === 'ne' ? 'deva' : ''}`}><Bi t={c.title} /></span>
                   {seen && <span class="fcard-tick">✓</span>}
                 </span>
                 <span class="fcard-back">
-                  <span class={`fcard-fact ${s.lang === 'ne' ? 'deva' : ''}`}>{tr(c.fact)}</span>
+                  <span class={`fcard-fact ${s.lang === 'ne' ? 'deva' : ''}`}><Bi t={c.fact} /></span>
                 </span>
               </span>
             </button>

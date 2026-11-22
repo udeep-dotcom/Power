@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from 'preact/hooks';
+import { level } from '../lib/level';
+import { Bi } from '../components/Bi';
 import { Icon, Pic } from '../components/Art';
 import { Scenery } from '../components/Scenery';
 import { TraceCanvas } from '../components/TraceCanvas';
@@ -58,7 +60,7 @@ export function Lesson({ letterId }: { letterId: string; fromJourney?: boolean }
           <HabreSays size={64} speakOnMount={false} onReplay={() => void speakLetter(l)}
             text={{ ne: `${l.char} — ${l.word}को ${l.char}`, en: `${l.roman} — as in “${l.wordRoman}” (${l.meaning})` }} />
           <AutoSpeak l={l} />
-          <button class="btn big crimson lesson-next" onClick={() => { sfx.whoosh(); setStep('trace'); }}>{tr(UI.traceStep)} <Icon name="next" /></button>
+          <button class="btn big crimson lesson-next" onClick={() => { sfx.whoosh(); setStep('trace'); }}><Bi t={UI.traceStep} /> <Icon name="next" /></button>
         </div>
       )}
 
@@ -92,7 +94,7 @@ function AutoSpeak({ l }: { l: Letter }) {
 }
 
 function FindIt({ l, onDone }: { l: Letter; onDone: (firstTry: boolean) => void }) {
-  const options = useMemo(() => shuffle([l, ...distractors(l, 3)]), [l.id]);
+  const options = useMemo(() => shuffle([l, ...distractors(l, level().choices - 1)]), [l.id]);
   const [state, setState] = useState<Record<string, 'correct' | 'wrong'>>({});
   const [mistakes, setMistakes] = useState(0);
   const tap = async (o: Letter) => {

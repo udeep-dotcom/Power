@@ -2,6 +2,7 @@
 // "learn" corner opens the full lesson. Mastery shows as a coloured ring.
 
 import { Pic, Stars } from '../components/Art';
+import { Bi } from '../components/Bi';
 import { Scenery } from '../components/Scenery';
 import { TopBar } from '../components/UI';
 import { LETTERS, type Letter } from '../data/alphabet';
@@ -9,7 +10,7 @@ import { UI } from '../data/i18n';
 import { navigate } from '../lib/router';
 import { sfx } from '../lib/sfx';
 import { letterProgress, useStore } from '../lib/store';
-import { haptic, tr } from '../lib/util';
+import { haptic } from '../lib/util';
 
 export function LetterGrid() {
   const s = useStore();
@@ -29,7 +30,11 @@ export function LetterGrid() {
   return (
     <div class="screen scroll letters-screen">
       <Scenery kind="terai" />
-      <TopBar title={tr(UI.letters)} />
+      <TopBar title={<Bi t={UI.letters} />} />
+      <button class="bk-banner" onClick={() => { sfx.tap(); haptic(); navigate('/barakhari'); }}>
+        <span class="deva bk-banner-ex" lang="ne">क का कि की</span>
+        <span class="bk-banner-label"><Bi t={UI.barakhari} /><small><Bi t={UI.barakhariAge} inline /></small></span>
+      </button>
       <section class="lgroup">
         <h2><span class="deva" lang="ne">स्वर वर्ण</span>{s.lang === 'en' && <small> · {UI.vowels.en}</small>}</h2>
         <div class="lgrid">{LETTERS.filter((l) => l.kind === 'vowel').map(tile)}</div>

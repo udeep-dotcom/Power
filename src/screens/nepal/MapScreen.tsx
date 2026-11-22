@@ -2,6 +2,7 @@
 // Tap a province → it lifts, Habre reads its name, capital and one fact.
 
 import { useState } from 'preact/hooks';
+import { Bi } from '../../components/Bi';
 import { Pic } from '../../components/Art';
 import { Habre } from '../../components/Habre';
 import { Scenery } from '../../components/Scenery';
@@ -14,7 +15,7 @@ import { goBack } from '../../lib/router';
 import { sfx } from '../../lib/sfx';
 import { instruct } from '../../lib/speech';
 import { awardSticker, update, useStore } from '../../lib/store';
-import { haptic, tr } from '../../lib/util';
+import { haptic } from '../../lib/util';
 
 // Hand-tuned label positions so names don't collide with pins or leave narrow provinces.
 const LABEL_NUDGE: Record<string, [number, number]> = { P1: [0, 10], P2: [-10, 30], P3: [0, -58], P6: [0, 10], P7: [14, 24] };
@@ -43,7 +44,7 @@ export function MapScreen() {
   return (
     <div class="screen map-screen">
       <Scenery kind="himal" />
-      <TopBar title={tr(UI.map)} right={<span class="chip">{s.lang === 'ne' ? toNeDigits(n) : n}/{s.lang === 'ne' ? '७' : 7}</span>} />
+      <TopBar title={<Bi t={UI.map} />} right={<span class="chip">{s.lang === 'ne' ? toNeDigits(n) : n}/{s.lang === 'ne' ? '७' : 7}</span>} />
       <div class="map-wrap card">
         <svg class="nepal-map" viewBox={`0 0 ${MAP_W} ${MAP_H}`} role="img" aria-label="Map of Nepal">
           <defs>
@@ -87,14 +88,14 @@ export function MapScreen() {
       {p ? (
         <div class="prov-card card" key={p.id} style={{ '--pc': p.color } as never}>
           <div class="prov-head">
-            <span class={`prov-name ${s.lang === 'ne' ? 'deva' : ''}`}>{tr(p.name)}</span>
+            <span class={`prov-name ${s.lang === 'ne' ? 'deva' : ''}`}><Bi t={p.name} /></span>
             <span class="prov-pics">{p.pics.map((x) => <Pic key={x} pic={x} size={38} />)}</span>
           </div>
-          <div class="prov-cap">📍 {tr(UI.capital)}: <b class={s.lang === 'ne' ? 'deva' : ''}>{tr(p.capital)}</b></div>
-          <p class={s.lang === 'ne' ? 'deva' : ''}>{tr(p.fact)}</p>
+          <div class="prov-cap">📍 <Bi t={UI.capital} />: <b class={s.lang === 'ne' ? 'deva' : ''}><Bi t={p.capital} /></b></div>
+          <p class={s.lang === 'ne' ? 'deva' : ''}><Bi t={p.fact} /></p>
         </div>
       ) : (
-        <div class="prov-card card hint"><Habre size={60} mood="think" /><span class={s.lang === 'ne' ? 'deva' : ''}>{tr(UI.tapProvince)}</span></div>
+        <div class="prov-card card hint"><Habre size={60} mood="think" /><span class={s.lang === 'ne' ? 'deva' : ''}><Bi t={UI.tapProvince} /></span></div>
       )}
 
       {celebrate && (

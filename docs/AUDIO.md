@@ -5,8 +5,10 @@ is weakest, and those are exactly the sounds children must learn. A native speak
 single biggest quality upgrade available.
 
 ## What to record
-`docs/recording-script.csv` lists **147 priority clips** (49 letters × 3: the letter name, the example
-word, and the chart chant "क, कमलको क"), followed by **432 optional बाह्रखरी syllables** (36 consonants ×
+`docs/recording-script.csv` lists **236 priority clips**: 49 letters × 3 (the letter name, the example
+word, and the chart chant "क, कमलको क"), 48 first words, 10 numbers and all 31 story pages (ids like
+`story-valley-1`, read in a slow, warm storyteller voice). They are followed by **432 optional बाह्रखरी
+syllables** (36 consonants ×
 12 forms, ids like `syl-ka-i`). Text-to-speech reads whole syllables far better than lone letters, so
 record the priority clips first. Regenerate the list after content changes:
 

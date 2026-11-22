@@ -1,4 +1,5 @@
 import { useState } from 'preact/hooks';
+import { Bi } from '../components/Bi';
 import { Icon, NepalFlag, Pic } from '../components/Art';
 import { Habre } from '../components/Habre';
 import { Confetti, Scenery } from '../components/Scenery';
@@ -32,7 +33,7 @@ export function Chest({ unitId }: { unitId: string }) {
   return (
     <div class="screen chest-screen">
       <Scenery kind={opened ? unit.region : 'dusk'} />
-      <TopBar title={tr(opened ? UI.newSticker : UI.openChest)} />
+      <TopBar title={<Bi t={opened ? UI.newSticker : UI.openChest} />} />
       <div class="chest-body">
         {!opened ? (
           <button class="gift" onClick={open} aria-label={tr(UI.openChest)}>
@@ -46,12 +47,12 @@ export function Chest({ unitId }: { unitId: string }) {
               <Pic pic={sticker.pic} size={150} />
               {final && <span class="summit-flag"><NepalFlag size={60} wave /></span>}
             </div>
-            <h2 class={s.lang === 'ne' ? 'deva' : ''}>{tr(sticker.name)}</h2>
+            <h2 class={s.lang === 'ne' ? 'deva' : ''}><Bi t={sticker.name} /></h2>
             <div class="fact card">
               <Habre size={64} mood="happy" />
-              <p class={s.lang === 'ne' ? 'deva' : ''}>{final && s.lang === 'ne' ? 'तिमी सगरमाथाको टुप्पोमा पुग्यौ! ' : final ? 'You reached the top of Sagarmatha! ' : ''}{tr(sticker.fact)}</p>
+              <p><Bi t={final ? { ne: `तिमी सगरमाथाको टुप्पोमा पुग्यौ! ${sticker.fact.ne}`, en: `You reached the top of Sagarmatha! ${sticker.fact.en}` } : sticker.fact} /></p>
             </div>
-            <button class="btn big crimson" onClick={() => { sfx.tap(); goBack('/journey'); }}>{tr(UI.next)} <Icon name="next" /></button>
+            <button class="btn big crimson" onClick={() => { sfx.tap(); goBack('/journey'); }}><Bi t={UI.next} /> <Icon name="next" /></button>
           </div>
         )}
       </div>

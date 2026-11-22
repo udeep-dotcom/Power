@@ -8,7 +8,8 @@ import type { T } from './i18n';
 export type Region = 'terai' | 'pahad' | 'himal';
 export type GameType = 'listen' | 'picture' | 'balloon' | 'memory';
 
-export interface Sticker { id: string; pic: string; name: T; fact: T }
+export type StickerGroup = 'journey' | 'letters' | 'words' | 'stories' | 'nepal' | 'play';
+export interface Sticker { id: string; pic: string; name: T; fact: T; group?: StickerGroup }
 export interface Unit { id: string; region: Region; letters: string[]; game: GameType; sticker: string }
 
 export const REGIONS: Record<Region, { name: T; blurb: T; colors: [string, string] }> = {
@@ -65,6 +66,55 @@ export const STICKERS: Sticker[] = [
     fact: { ne: 'क + ा = का! मात्राले अक्षरलाई नयाँ आवाज दिन्छ।', en: 'क + ा = का! Vowel signs give letters new sounds.' } },
   { id: 'quiz', pic: '🏆', name: { ne: 'प्रश्न विजेता', en: 'Quiz champion' },
     fact: { ne: 'तिमीलाई नेपालबारे धेरै थाहा छ!', en: 'You know so much about Nepal!' } },
+  // शब्द — one per topic (earned in the listening game)
+  { id: 'w-family', group: 'words', pic: '👨‍👩‍👧‍👦', name: { ne: 'परिवार', en: 'Family' },
+    fact: { ne: 'हजुरआमा र हजुरबासँग नेपालीमा कुरा गर — उहाँहरू कति खुसी हुनुहुन्छ!', en: 'Talk to grandma and grandpa in Nepali — see how happy they are!' } },
+  { id: 'w-greet', group: 'words', pic: '🙏', name: { ne: 'बोली-व्यवहार', en: 'Kind words' },
+    fact: { ne: 'नमस्ते भन्दा दुई हात जोडिन्छ।', en: 'When we say namaste, we join our two hands.' } },
+  { id: 'w-food', group: 'words', pic: '🍛', name: { ne: 'खाना', en: 'Food' },
+    fact: { ne: 'दाल भात नेपालको सबैभन्दा मन पराइने खाना हो।', en: 'Daal bhaat is the most loved meal in Nepal.' } },
+  { id: 'w-animals', group: 'words', pic: '🐸', name: { ne: 'जनावर', en: 'Animals' },
+    fact: { ne: 'भ्यागुतो वर्षामा "टर्र टर्र" कराउँछ।', en: 'In the rainy season, frogs go "tarr tarr".' } },
+  { id: 'w-colours', group: 'words', pic: '🎨', name: { ne: 'रङ', en: 'Colours' },
+    fact: { ne: 'होलीमा सबै रङ एकैचोटि देखिन्छन्!', en: 'At Holi you can see every colour at once!' } },
+  { id: 'w-body', group: 'words', pic: '✋', name: { ne: 'मेरो शरीर', en: 'My body' },
+    fact: { ne: 'हातले नमस्ते गर्छौं, खुट्टाले नाच्छौं!', en: 'We say namaste with our hands and dance with our feet!' } },
+  // कथा — one per story read to the end
+  { id: 's-valley', group: 'stories', pic: '🪷', name: { ne: 'ताल र कमल', en: 'Lake and lotus' },
+    fact: { ne: 'काठमाडौं उपत्यका पहिले ताल थियो भन्ने किंवदन्ती छ।', en: 'Legend says the Kathmandu Valley was once a lake.' } },
+  { id: 's-buddha', group: 'stories', pic: '🦢', name: { ne: 'दयालु राजकुमार', en: 'The kind prince' },
+    fact: { ne: 'सिद्धार्थले घाइते हाँसलाई बचाउनुभयो।', en: 'Siddhartha saved a hurt swan.' } },
+  { id: 's-everest', group: 'stories', pic: '🧗', name: { ne: 'हिमाल चढ्ने साथी', en: 'Climbing friends' },
+    fact: { ne: 'तेन्जिङ र हिलारी सन् १९५३ मा सगरमाथा चढ्नुभयो।', en: 'Tenzing and Hillary climbed Sagarmatha in 1953.' } },
+  { id: 's-dashain', group: 'stories', pic: '🌱', name: { ne: 'जमरा', en: 'Jamara' },
+    fact: { ne: 'दशैंमा जमरा र टीका लगाइन्छ।', en: 'At Dashain we wear jamara and tika.' } },
+  { id: 's-tihar', group: 'stories', pic: '🐕', name: { ne: 'कुकुर तिहार', en: 'Kukur Tihar' },
+    fact: { ne: 'तिहारमा कुकुरलाई फूलको माला लगाइन्छ।', en: 'At Tihar dogs wear flower garlands.' } },
+  { id: 's-flag', group: 'stories', pic: '🌙', name: { ne: 'जून र घाम', en: 'Moon and sun' },
+    fact: { ne: 'हाम्रो झण्डामा जून र घाम छन्।', en: 'Our flag has the moon and the sun.' } },
+  // खेल
+  { id: 'counting', group: 'play', pic: 'txt:१२३', name: { ne: 'गन्ती', en: 'Counting' },
+    fact: { ne: 'एक, दुई, तीन … तिमी नेपालीमा गन्न सक्छौ!', en: 'One, two, three … you can count in Nepali!' } },
+  { id: 'music', group: 'play', pic: '🥁', name: { ne: 'बाजा', en: 'Music' },
+    fact: { ne: 'मादल नेपाली लोकगीतको मुटु हो।', en: 'The madal drum is the heartbeat of Nepali folk songs.' } },
+  { id: 'colouring', group: 'play', pic: '🖍️', name: { ne: 'चित्रकार', en: 'Little artist' },
+    fact: { ne: 'तिमीले नेपालका चित्रहरूमा रङ भर्यौ!', en: 'You coloured pictures of Nepal!' } },
+];
+
+const NEPAL_STICKERS = ['mapper', 'symbols', 'festivals', 'nature', 'quiz'];
+/** Which sticker-book section a sticker belongs to. */
+export function stickerGroup(s: Sticker): StickerGroup {
+  if (s.group) return s.group;
+  if (s.id === 'barakhari') return 'letters';
+  return NEPAL_STICKERS.includes(s.id) ? 'nepal' : 'journey';
+}
+export const STICKER_GROUPS: { id: StickerGroup; title: T }[] = [
+  { id: 'journey', title: { ne: 'यात्रा', en: 'Journey' } },
+  { id: 'letters', title: { ne: 'अक्षर', en: 'Letters' } },
+  { id: 'words', title: { ne: 'शब्द', en: 'Words' } },
+  { id: 'stories', title: { ne: 'कथा', en: 'Stories' } },
+  { id: 'nepal', title: { ne: 'मेरो नेपाल', en: 'My Nepal' } },
+  { id: 'play', title: { ne: 'खेल', en: 'Play' } },
 ];
 
 export const STICKER_BY_ID: Record<string, Sticker> = Object.fromEntries(STICKERS.map((s) => [s.id, s]));

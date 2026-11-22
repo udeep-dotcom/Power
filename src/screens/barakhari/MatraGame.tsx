@@ -4,6 +4,8 @@
 // shown instead and the task becomes visual matching.
 
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
+import { level } from '../../lib/level';
+import { Bi } from '../../components/Bi';
 import { Pic } from '../../components/Art';
 import { Scenery } from '../../components/Scenery';
 import { Celebration, HabreSays, RoundDots, SpeakerButton, TopBar } from '../../components/UI';
@@ -15,18 +17,19 @@ import { goBack } from '../../lib/router';
 import { sfx } from '../../lib/sfx';
 import { canSpeak, initSpeech, instruct, say } from '../../lib/speech';
 import { awardSticker, completeNode, getState, learnedLetterIds } from '../../lib/store';
-import { haptic, shuffle, sleep, starsFromMistakes, tr } from '../../lib/util';
+import { haptic, shuffle, sleep, starsFromMistakes } from '../../lib/util';
 
 const ROUNDS = 8;
 
-export function planMatraRounds(consonantIds: string[], rounds = ROUNDS) {
+export function planMatraRounds(consonantIds: string[], rounds = ROUNDS, optionCount = 3) {
   const signs = MATRAS.filter((m) => m.sign);
   const targets = [...shuffle(signs), ...shuffle(signs)].slice(0, rounds);
   return targets.map((m, i) => {
     const c = LETTER_BY_ID[consonantIds[i % consonantIds.length]];
     const partner = MATRA_BY_ID[MATRA_CONFUSABLE[m.id]];
     const other = shuffle(signs.filter((x) => x.id !== m.id && x.id !== partner?.id))[0];
-    return { c, m, options: shuffle([m, ...(partner ? [partner] : []), other]) };
+    // younger children: just the sign and its confusable partner
+    return { c, m, options: shuffle([m, ...(partner ? [partner] : []), ...(optionCount > 2 || !partner ? [other] : [])]) };
   });
 }
 
@@ -34,7 +37,7 @@ export function MatraGame() {
   const rounds = useMemo(() => {
     const learned = learnedLetterIds(getState()).filter((id) => LETTER_BY_ID[id].kind !== 'vowel');
     const pool = learned.length >= 3 ? learned : BK_CONSONANTS.slice(0, 8).map((l) => l.id);
-    return planMatraRounds(shuffle(pool));
+    return planMatraRounds(shuffle(pool), ROUNDS, level().choices >= 3 ? 3 : 2);
   }, []);
   const [voiceOk, setVoiceOk] = useState(true);
   const [i, setI] = useState(0);
@@ -85,7 +88,7 @@ export function MatraGame() {
   return (
     <div class="screen game bk-game">
       <Scenery kind="pahad" />
-      <TopBar title={tr(UI.bkPlay)} />
+      <TopBar title={<Bi t={UI.bkPlay} />} />
       <div class="game-body">
         <HabreSays text={voiceOk ? UI.bkGameHow : UI.bkGameHowSilent} size={68} speakOnMount={false} />
         <RoundDots total={ROUNDS} done={i} />
@@ -96,7 +99,7 @@ export function MatraGame() {
           </span>
           {!voiceOk && !built && <span class="bk-target deva" lang="ne">→ {syllable(r.c, r.m)}</span>}
         </div>
-        <div class="choice-grid n3">
+        <div class={`choice-grid n${r.options.length}`}>
           {r.options.map((m) => (
             <button key={`${i}-${m.id}`} data-id={m.id} class={`tile choice ${marks[m.id] ?? ''}`} onClick={() => choose(m)} aria-label={m.name.en}>
               <span class="deva" lang="ne">{showSign(m)}</span>

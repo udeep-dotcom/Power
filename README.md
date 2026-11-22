@@ -1,8 +1,10 @@
 # अक्षर यात्रा · Akshar Yatra
 
-A game for Nepali children aged 4–8: climb from the Terai to the top of Sagarmatha by learning the 49
-letters of the Nepali alphabet, and collect stickers of real places, animals and festivals of Nepal on
-the way. Your guide is **Habre**, a red panda in a Dhaka topi.
+नेपाली अक्षर, शब्द, कथा र संस्कृति — साना नानीहरूका लागि, नेपालमा र विदेशमा।
+
+A Nepali-first app and website for children **under 6**, in Nepal and abroad, to grow up with their
+language: letters, first words, numbers, stories, music and Nepal itself. Your guide is **Habre (हाब्रे)**,
+a red panda in a Dhaka topi.
 
 **Web first, Android second, one codebase:** a Preact + TypeScript web app, wrapped for Android with
 Capacitor so it runs fully offline.
@@ -11,10 +13,23 @@ Capacitor so it runs fully offline.
 |---|---|
 | 📖 Design document | [`docs/GAME_DESIGN.md`](docs/GAME_DESIGN.md): audience, learning goals, activities, rewards, art, roadmap, a critique of the brief, and the v0.2 audit (§0b) |
 | 🤖 Android | [`docs/ANDROID.md`](docs/ANDROID.md): build, publish, what is Android-specific |
-| 🎙️ Audio | [`docs/AUDIO.md`](docs/AUDIO.md) + [`docs/recording-script.csv`](docs/recording-script.csv): 147 priority clips (+432 optional बाह्रखरी syllables) for a native voice artist |
+| 🎙️ Audio | [`docs/AUDIO.md`](docs/AUDIO.md) + [`docs/recording-script.csv`](docs/recording-script.csv): 236 priority clips (+432 optional बाह्रखरी syllables) for a native voice artist |
 | ✅ Content review | [`docs/CONTENT_REVIEW.md`](docs/CONTENT_REVIEW.md): every word and fact, as a checklist for a Nepali teacher |
 
-## What's in v0.2
+## What's in v0.3
+- **Nepali first, for every family:** Nepali text is always shown and spoken first. The "नेपाली +
+  English" mode adds a small English line and spoken translation for families abroad.
+- **Made for ages 3–6:** Habre asks each child's age once, and every game adapts (2 choices at 3, 4 at 6;
+  counting to 3 vs to 10; gentler tracing for little hands).
+- **शब्द (Words):** 48 first words (family, kind words, food, animals, colours, body), each spoken, with
+  a listening game. These are the words that let children abroad talk to their grandparents.
+- **अङ्क (Numbers):** numerals १–१० with count-along and a tap-to-count game.
+- **कथा (Stories):** 6 narrated picture stories: the Kathmandu Valley legend, the Buddha, Everest 1953,
+  Dashain, Tihar and our flag.
+- **खेल (Play):** play मादल, डम्फू, बाँसुरी and a temple घण्टी, and colour the flag, a Danfe, लालीगुराँस and
+  a pagoda (artwork is saved).
+- **For parents:** an optional daily play limit (Habre gets sleepy), gentle menu music, and a
+  progress report for each child.
 - **Journey (यात्रा):** 71 stops across Terai → Pahad → Himal. Each letter gets a 3-step lesson: look &
   listen, trace with your finger (scored), find it.
 - **4 mini-games:** Listen & pick, Picture match, Balloon pop, Memory pairs. They mix in the child's
@@ -38,8 +53,8 @@ Capacitor so it runs fully offline.
 ```bash
 npm ci
 npm run dev            # http://localhost:5173
-npm test               # 127 unit tests (content, trace scoring, saves/players, बाह्रखरी)
-npm run test:e2e       # 10 Playwright end-to-end tests against the production build
+npm test               # 136 unit tests (content, trace scoring, saves/players, age levels, Nepali-first)
+npm run test:e2e       # 16 Playwright end-to-end tests against the production build
 npm run build          # dist/ (PWA)
 npm run build:single   # dist-single/index.html — one self-contained file to share
 npm run android:sync   # build + copy into android/ (then open in Android Studio)

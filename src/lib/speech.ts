@@ -76,7 +76,21 @@ export function canSpeak(): boolean {
   return getState().voice && voiceSource() !== 'none';
 }
 
+/** Every new utterance bumps this, so a queued follow-up (e.g. the English half of a bilingual
+ *  line) can tell it was interrupted and must not start. */
+let gen = 0;
+let speaking = 0;
+function speakingChanged(delta: number) {
+  speaking = Math.max(0, speaking + delta);
+  window.dispatchEvent(new CustomEvent('akshar:speaking', { detail: speaking > 0 }));
+}
+async function tracked<T>(p: Promise<T>): Promise<T> {
+  speakingChanged(1);
+  try { return await p; } finally { speakingChanged(-1); }
+}
+
 export function stopSpeech(): void {
+  gen++;
   currentAudio?.pause();
   currentAudio = null;
   try { speechSynthesis?.cancel(); } catch { /* */ }
@@ -91,6 +105,10 @@ export async function say(text: string, clip?: string): Promise<boolean> {
   if (!getState().voice) return false;
   await initSpeech();
   stopSpeech();
+  return tracked(speakNepali(text, clip));
+}
+
+async function speakNepali(text: string, clip?: string): Promise<boolean> {
 
   if (clip && manifest?.has(clip)) {
     try {
@@ -113,11 +131,15 @@ export async function say(text: string, clip?: string): Promise<boolean> {
   return false;
 }
 
-/** Speak an English line (used only when the parent picked English instructions). */
+/** Speak an English line (bilingual mode only). */
 export async function sayEnglish(text: string): Promise<boolean> {
   if (!getState().voice) return false;
   await initSpeech();
   stopSpeech();
+  return tracked(speakEnglish(text));
+}
+
+async function speakEnglish(text: string): Promise<boolean> {
   if (nativeEnglish) {
     try { await nativeEnglish.speak({ text, lang: 'en-US', rate: 0.95, pitch: 1.1, volume: 1, category: 'ambient' }); return true; } catch { /* fall through */ }
   }
@@ -143,7 +165,21 @@ function speakWeb(text: string, voice: SpeechSynthesisVoice | null, lang: string
   });
 }
 
-/** Speak an instruction in the parent's chosen instruction language. */
-export function instruct(t: { ne: string; en: string }, clip?: string): Promise<unknown> {
-  return getState().lang === 'en' ? sayEnglish(t.en) : say(t.ne, clip);
+/**
+ * Speak an instruction. Nepali always comes first — the app exists so children hear Nepali.
+ * In bilingual mode ("नेपाली + English", for families abroad) the English line follows, unless
+ * something else started speaking in between.
+ */
+export async function instruct(t: { ne: string; en: string }, clip?: string): Promise<unknown> {
+  if (!getState().voice) return false;
+  await initSpeech();
+  stopSpeech();
+  const my = gen;
+  const spokeNepali = await tracked(speakNepali(t.ne, clip));
+  if (getState().lang !== 'en' || my !== gen) return spokeNepali;
+  if (spokeNepali) await new Promise((r) => setTimeout(r, 250));
+  if (my !== gen) return spokeNepali;
+  return tracked(speakEnglish(t.en));
 }
+
+export function isSpeaking(): boolean { return speaking > 0; }

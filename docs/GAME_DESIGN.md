@@ -1,6 +1,6 @@
 # अक्षर यात्रा · Akshar Yatra — Game Design Document
 
-*Version 0.2 · November 2026 · Status: playable web build + Android project (audited and extended — see §0b)*
+*Version 0.3 · November 2026 · Status: playable web build + Android project · Audience: children under 6, in Nepal and abroad (see §0c)*
 
 A game in which Nepali children climb from the Terai to the top of Sagarmatha by learning the
 49 letters of the Nepali alphabet, collecting stickers of real Nepali places, animals and festivals on
@@ -53,6 +53,44 @@ the code, and reading the Capacitor 8 Android sources. Findings, most serious fi
 
 **New in v0.2:** player profiles for siblings, Today's practice (spaced review), बाह्रखरी, a live
 trace star meter with a sparkle trail, the start screen, and a Playwright end-to-end suite in CI.
+
+---
+
+## 0c. v0.3 — refocused on under-6s, Nepali first, language and culture
+
+**The brief changed.** The app is for Nepali children **under 6**, in Nepal **and abroad**, to embrace
+their language, letters, history and culture. **The name and the software are Nepali first.**
+
+| Decision | Why | What was built |
+|---|---|---|
+| **One difficulty doesn't fit 3 to 6.** | A 3-year-old holds about 2 choices in mind, has little pencil control and counts to 3. A 6-year-old manages 4 choices, real tracing and counting to 10. | Habre asks "तिमी कति वर्षको भयौ?" once per child. Every game reads its difficulty from the answer (table below); parents can change it. |
+| **"Nepali first" means the experience, not only the title.** | v0.2's English mode *replaced* Nepali on screen, so children abroad never saw Nepali labels, which defeats the purpose. | The language setting is now **नेपाली** or **नेपाली + English**. Nepali text is always shown and large; English is a small line underneath. Habre says each line in Nepali first, then English. The title, manifest, Android name and preview are all Nepali first. Child-facing numbers use Nepali digits (०–९). |
+| **Language is more than letters.** | For children abroad, the words that matter are the ones that let them talk to grandparents. | **शब्द:** 48 first words in 6 topics (family, kind words, food, animals, colours, body), each spoken, with a listening game. |
+| **History for under-6s must be stories, not dates.** | Pre-schoolers learn through narrative, not facts. | **कथा:** 6 narrated picture stories (a legend, Buddha, Everest, Dashain, Tihar, the flag), one short sentence per page, each labelled as legend, history, festival or nation. |
+| **Culture is felt through play.** | Music and art are how young children meet a culture. | **खेल:** मादल, डम्फू, बाँसुरी and a temple घण्टी played by touch, plus colouring pages of the flag, the Danfe, लालीगुराँस and a pagoda. |
+| **Numbers are core early learning.** | Counting objects one by one (not reciting) builds number sense. | **अङ्क:** numerals १–१०, count-along, and a tap-each-object counting game. |
+| **Screen time matters at this age.** | WHO advises at most 1 hour a day for ages 2–5. | An optional daily play limit. When it's reached, Habre gets sleepy and says goodnight; only a grown-up can add 15 minutes. |
+| **Pre-readers choose by picture.** | Most of the audience can't read. | The new home is a big Journey card plus six picture tiles. बाह्रखरी moved into Letters and is marked "५–६ वर्षका लागि" (for ages 5–6). |
+
+### Difficulty by age (`src/lib/level.ts`)
+| Age | Answer choices | Memory pairs | Balloons | Counts up to | Quiz | Trace leniency |
+|---|---|---|---|---|---|---|
+| 3 | 2 | 2 | 4, slow | 3 | easy only, 2 answers | thresholds −0.15 |
+| 4 | 3 | 3 | 4, slower | 5 | easy only, 2 answers | −0.10 |
+| 5 | 3 | 4 | 6 | 7 | all, 3 answers | −0.05 |
+| 6 | 4 | 4 | 6 | 10 | all, 3 answers | none |
+
+### Pushback, honestly
+- **Under 3 is not the audience for letters.** Tracing and letter recognition aren't developmentally
+  appropriate before about 3½–4. A 2-year-old will enjoy Words, Music and Colouring *with a parent*, so
+  the age picker starts at 3.
+- **Without a recorded Nepali voice, this is half an app for pre-readers.** When no voice is available,
+  the Words game shows the word and asks a grown-up to read it. Co-play is good at this age, but the
+  236 priority clips in `docs/recording-script.csv` matter even more now.
+- **Stories are culturally sensitive.** The Dashain story leaves out animal sacrifice. Lhosar, Chhath
+  and Teej appear in the festival cards so one community's festivals aren't presented as everyone's.
+  The Everest story says only "Tenzing Norgay Sherpa". All of this is in `docs/CONTENT_REVIEW.md` for a
+  Nepali educator to approve.
 
 ---
 
@@ -248,8 +286,8 @@ nothing is lost for skipping a day.
 
 | Item | Scope | Rough effort |
 |---|---|---|
-| Native Nepali voice recording | 147 priority clips plus 432 optional बाह्रखरी syllables (`docs/recording-script.csv`), and about 40 instruction lines | 1 day studio + 1–2 days editing |
-| Custom illustrations | 49 word pictures + 17 stickers + 23 fact cards ≈ 90, one consistent style | 3–5 weeks for one illustrator |
+| Native Nepali voice recording | 236 priority clips (letters, words, numbers, every story page) plus 432 optional बाह्रखरी syllables (`docs/recording-script.csv`), and about 60 instruction lines | 1–2 days studio + 2 days editing |
+| Custom illustrations | 49 letter pictures + 48 first words + 32 stickers + 23 fact cards + 31 story scenes ≈ 180, one consistent style | 6–8 weeks for one illustrator (story scenes first; they gain the most) |
 | Educator content review | `docs/CONTENT_REVIEW.md` | 1–2 days |
 | Stroke-order data | 49 letters × hand-authored SVG strokes | 3–4 days |
 | Background music | 2–3 gentle loops (madal / bansuri flavour), off by default | Commission or license |
@@ -313,7 +351,8 @@ android/       Capacitor project (bundles dist/ — fully offline)
 | Version | Content |
 |---|---|
 | 0.1 | 49 letters, trace, 4 mini-games, journey, map, 3 fact decks, quiz, stickers, parent zone, Android project |
-| **0.2 (this build)** | Audit fixes (§0b), start screen, sibling profiles, Today's practice, बाह्रखरी explorer + vowel-sign game, live trace meter, tablet scaling, e2e tests |
+| 0.2 | Audit fixes (§0b), start screen, sibling profiles, Today's practice, बाह्रखरी explorer + vowel-sign game, live trace meter, tablet scaling, e2e tests |
+| **0.3 (this build)** | Under-6 focus (§0c): age levels, Nepali-first bilingual mode, शब्द (48 words), अङ्क (१–१०), कथा (6 stories), खेल (4 instruments, 4 colouring pages), music, play-time limit, new home |
 | 0.3 — "Premium pass" | Recorded voice, custom illustrations, stroke-order animation, music, play-test fixes. *Needs people and budget, not code.* |
 | 0.4 — Words and numbers | बाह्रखरी tracing, Nepali numerals ०–९ with counting, then 2–3-letter words (घर, कलम, माछा) |
 | 1.0 — Launch | Google Play (Designed for Families), web PWA, a school/NGO edition |
