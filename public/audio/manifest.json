@@ -1,0 +1,4 @@
+{
+  "note": "List the ids of recorded clips that exist in this folder (e.g. \"chant-ka\" for chant-ka.mp3). See docs/AUDIO.md. Empty = use text-to-speech.",
+  "clips": []
+}

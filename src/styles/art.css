@@ -1,0 +1,37 @@
+/* Mascot animation */
+.habre { overflow: visible; }
+.habre .hb-head { transform-origin: 100px 120px; animation: hb-breathe 3.2s ease-in-out infinite; }
+.habre .hb-eyes { transform-origin: 100px 84px; animation: hb-blink 4.5s infinite; }
+.habre .hb-tail { transform-origin: 130px 160px; animation: hb-tail 2.6s ease-in-out infinite; }
+.habre.mood-happy { animation: hb-jump 0.7s var(--ease-spring) 2; }
+.habre.mood-wave .hb-arm-r { transform-origin: 130px 136px; animation: hb-wave 0.6s ease-in-out infinite alternate; }
+.habre.mood-think .hb-head { animation: hb-tilt 2s ease-in-out infinite alternate; }
+.habre.mood-oops .hb-head { animation: hb-shake 0.5s ease-in-out 2; }
+@keyframes hb-breathe { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(2px) rotate(-1.5deg); } }
+@keyframes hb-blink { 0%, 92%, 100% { transform: scaleY(1); } 95% { transform: scaleY(0.1); } }
+@keyframes hb-tail { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(7deg); } }
+@keyframes hb-jump { 0%, 100% { transform: translateY(0) scale(1, 1); } 30% { transform: translateY(4px) scale(1.06, 0.94); } 60% { transform: translateY(-22px) scale(0.97, 1.04); } }
+@keyframes hb-wave { from { transform: rotate(-10deg); } to { transform: rotate(-145deg); } }
+@keyframes hb-tilt { from { transform: rotate(-8deg); } to { transform: rotate(6deg); } }
+@keyframes hb-shake { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(-7deg); } 75% { transform: rotate(7deg); } }
+
+.flag.wave { transform-origin: 0 50%; animation: flag-wave 2.4s ease-in-out infinite; }
+@keyframes flag-wave { 0%, 100% { transform: skewY(0) scaleX(1); } 50% { transform: skewY(-3deg) scaleX(0.96); } }
+
+/* Scenery */
+.scenery { position: absolute; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+.scenery svg.land { position: absolute; left: 0; bottom: 0; width: 100%; height: 62%; }
+.scenery .cloud { position: absolute; opacity: 0.95; animation: drift linear infinite; }
+@keyframes drift { from { transform: translateX(-30vw); } to { transform: translateX(130vw); } }
+.scenery .sun { position: absolute; right: 9%; top: 9%; width: 86px; height: 86px; border-radius: 50%;
+  background: radial-gradient(circle at 40% 40%, #fff6b0, #ffd23f 55%, #ffb11b);
+  box-shadow: 0 0 0 14px rgba(255, 220, 90, 0.25), 0 0 0 30px rgba(255, 220, 90, 0.12); animation: sun-glow 4s ease-in-out infinite alternate; }
+@keyframes sun-glow { to { box-shadow: 0 0 0 20px rgba(255, 220, 90, 0.2), 0 0 0 42px rgba(255, 220, 90, 0.08); } }
+
+/* Prayer flags (लुङ्दार) strung across the top of the home screen */
+.lungta { position: absolute; left: -2%; right: -2%; top: calc(4px + var(--safe-top)); height: 70px; z-index: 1; pointer-events: none; }
+.lungta .pf { transform-origin: 50% 0; animation: pf-flutter 2.2s ease-in-out infinite alternate; }
+@keyframes pf-flutter { from { transform: skewX(-6deg) rotate(-2deg); } to { transform: skewX(6deg) rotate(2deg); } }
+
+/* Confetti canvas */
+.confetti { position: absolute; inset: 0; z-index: 60; pointer-events: none; }
