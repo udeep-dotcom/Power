@@ -1,6 +1,6 @@
 // Android-only behaviour (no-ops on the web): hardware back button, status bar, splash screen.
 
-import { goBack } from './router';
+import { currentRoute, goBack } from './router';
 
 export async function initNative(): Promise<void> {
   try {
@@ -11,8 +11,7 @@ export async function initNative(): Promise<void> {
     const { App } = await import('@capacitor/app');
     // Hardware back = in-app back. Only exit from the home screen, never mid-lesson.
     App.addListener('backButton', () => {
-      const path = location.hash.replace(/^#/, '') || '/';
-      if (path === '/') void App.minimizeApp();
+      if (currentRoute() === '/') void App.minimizeApp();
       else goBack('/');
     });
 
