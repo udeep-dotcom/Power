@@ -3,9 +3,12 @@ import { UI } from '../data/i18n';
 import { sfx } from '../lib/sfx';
 import { maskFromCanvas, scoreTrace, type Mask, type TraceScore } from '../lib/trace';
 import { haptic, tr } from '../lib/util';
-import { Icon, Pic } from './Art';
+import { toAppPx } from '../lib/scale';
+import { Icon, Pic, Stars } from './Art';
 
 const FONT = '"Noto Sans Devanagari"';
+/** Guide fill — strong enough to see on a cheap, dim screen in daylight. (Tests read this colour.) */
+export const GUIDE_FILL = '#f1dcc0';
 
 /** Draw `char` centred in a square canvas using real glyph bounds (Devanagari metrics vary a lot). */
 function drawGlyph(g: CanvasRenderingContext2D, char: string, size: number) {
@@ -37,11 +40,16 @@ export function TraceCanvas({ char, onResult }: { char: string; onResult: (s: Tr
   const [feedback, setFeedback] = useState<'' | 'almost'>('');
   const last = useRef<{ x: number; y: number } | null>(null);
   const strokeCount = useRef(0);
+  const [live, setLive] = useState(0);
+  const accepted = useRef(false);
+  const failures = useRef(0);
+  const lastLive = useRef(0);
+  const sparkles = useRef<HTMLDivElement>(null);
 
   // Size to the available width.
   useEffect(() => {
     const el = wrap.current!;
-    const fit = () => setSize(Math.floor(Math.min(el.clientWidth, 400, window.innerHeight * 0.48)));
+    const fit = () => setSize(Math.floor(Math.min(el.clientWidth - 24, 400, toAppPx(window.innerHeight) * 0.46)));
     fit();
     const ro = new ResizeObserver(fit);
     ro.observe(el);
@@ -68,9 +76,9 @@ export function TraceCanvas({ char, onResult }: { char: string; onResult: (s: Tr
       for (const f of [0.26, 0.74]) { g.beginPath(); g.moveTo(10, size * f); g.lineTo(size - 10, size * f); g.stroke(); }
       g.setLineDash([]);
       const { x, y } = drawGlyph(g, char, size);
-      g.fillStyle = '#f6ead8';
+      g.fillStyle = GUIDE_FILL;
       g.fillText(char, x, y);
-      g.lineWidth = 3; g.strokeStyle = '#d9c09b'; g.setLineDash([2, 7]); g.lineCap = 'round';
+      g.lineWidth = 3; g.strokeStyle = '#c29a63'; g.setLineDash([2, 7]); g.lineCap = 'round';
       g.strokeText(char, x, y);
       g.setLineDash([]);
 
@@ -92,8 +100,10 @@ export function TraceCanvas({ char, onResult }: { char: string; onResult: (s: Tr
   const lw = () => Math.max(14, size * 0.085);
 
   const pos = (e: PointerEvent) => {
+    // Map viewport coordinates to canvas CSS pixels (correct under UI zoom and any transform).
     const r = ink.current!.getBoundingClientRect();
-    return { x: e.clientX - r.left, y: e.clientY - r.top };
+    const k = size / r.width;
+    return { x: (e.clientX - r.left) * k, y: (e.clientY - r.top) * k };
   };
 
   const line = (a: { x: number; y: number }, b: { x: number; y: number }) => {
@@ -112,12 +122,24 @@ export function TraceCanvas({ char, onResult }: { char: string; onResult: (s: Tr
   };
 
   const evaluate = (final: boolean) => {
-    if (!letterMask.current || !shadow.current) return;
+    if (!letterMask.current || !shadow.current || accepted.current) return;
     const score = scoreTrace(letterMask.current, maskFromCanvas(shadow.current));
+    (window as unknown as { __trace?: unknown }).__trace = score; // read by e2e tests
+    if (score.stars > live) sfx.star(score.stars * 2);
+    setLive(score.stars);
     if (score.stars === 3 || (final && score.stars > 0)) {
+      accepted.current = true;
       sfx.correct(); haptic('success');
       onResult(score);
     } else if (final) {
+      failures.current++;
+      if (failures.current >= 3) {
+        // Never a dead end: after three tries the child moves on with one star.
+        accepted.current = true;
+        sfx.correct();
+        onResult({ ...score, stars: 1 });
+        return;
+      }
       sfx.wrong(); haptic('error');
       setFeedback('almost');
       setTimeout(() => { clear(); setFeedback(''); }, 1300);
@@ -139,6 +161,14 @@ export function TraceCanvas({ char, onResult }: { char: string; onResult: (s: Tr
     line(last.current, p);
     last.current = p;
     if (Math.random() < 0.08) sfx.stroke();
+    sparkle(p.x, p.y);
+    // live meter while drawing, throttled (scoring reads back a 64×64 canvas)
+    const now = performance.now();
+    if (now - lastLive.current > 180 && letterMask.current && shadow.current) {
+      lastLive.current = now;
+      const st = scoreTrace(letterMask.current, maskFromCanvas(shadow.current)).stars;
+      if (st > live) { sfx.star(st * 2); setLive(st); }
+    }
   };
   const up = () => {
     if (!last.current) return;
@@ -147,12 +177,25 @@ export function TraceCanvas({ char, onResult }: { char: string; onResult: (s: Tr
     evaluate(false);
   };
 
+  const sparkle = (x: number, y: number) => {
+    const host = sparkles.current;
+    if (!host || Math.random() > 0.35 || host.childElementCount > 14) return;
+    const el = document.createElement('i');
+    el.className = 'spark';
+    el.style.left = `${x + (Math.random() - 0.5) * 24}px`;
+    el.style.top = `${y + (Math.random() - 0.5) * 24}px`;
+    el.style.background = ['#ffc21a', '#ff7aa8', '#6cc6ff', '#ffffff'][Math.floor(Math.random() * 4)];
+    host.appendChild(el);
+    setTimeout(() => el.remove(), 650);
+  };
+
   const clear = () => {
     for (const c of [ink.current, shadow.current]) {
       const g = c?.getContext('2d');
       g?.save(); g?.setTransform(1, 0, 0, 1, 0, 0); g?.clearRect(0, 0, c!.width, c!.height); g?.restore();
     }
     setDrawn(false);
+    setLive(0);
   };
 
   return (
@@ -161,13 +204,15 @@ export function TraceCanvas({ char, onResult }: { char: string; onResult: (s: Tr
         <div class="trace-stack" style={{ width: size, height: size }}>
           <canvas ref={guide} class="trace-guide" />
           <canvas ref={ink} class="trace-ink" onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up} onPointerLeave={up} />
+          <div class="sparkles" ref={sparkles} />
           {hint && <span class="trace-hint"><Pic pic="👆" size={56} /></span>}
           {feedback === 'almost' && <span class="trace-feedback">{tr(UI.almost)}</span>}
         </div>
       </div>
+      <div class={`trace-meter s${live}`} aria-label={`${live} / 3`}><Stars n={live} size={36} /></div>
       <div class="trace-actions">
         <button class="btn white" onClick={() => { sfx.tap(); clear(); }} disabled={!drawn}><Icon name="refresh" /> {tr(UI.clear)}</button>
-        <button class="btn big" onClick={() => evaluate(true)} disabled={!drawn}><Icon name="check" /> {tr(UI.done)}</button>
+        <button class={`btn big ${live > 0 ? 'pulse' : ''}`} onClick={() => evaluate(true)} disabled={!drawn}><Icon name="check" /> {tr(UI.done)}</button>
       </div>
     </div>
   );

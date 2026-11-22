@@ -34,6 +34,13 @@ describe('scoreTrace', () => {
     expect(s.stars).toBe(0);
   });
 
+  it("colouring in the letter's whole bounding box is not full marks", () => {
+    const box = fill((x, y) => x >= 12 && x < 52 && y >= 8 && y < 56);
+    const s = scoreTrace(letterL(), box);
+    expect(s.coverage).toBe(1);
+    expect(s.stars).toBeLessThan(3);
+  });
+
   it('tracing only half the letter is not full marks', () => {
     const l = letterL();
     const half = fill((x, y) => !!l[y * GRID + x] && y < 40);

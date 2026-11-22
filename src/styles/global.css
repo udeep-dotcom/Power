@@ -26,8 +26,11 @@
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
   --font-ui: 'Baloo 2', 'Noto Sans Devanagari', system-ui, sans-serif;
   --font-deva: 'Noto Sans Devanagari', 'Baloo 2', sans-serif;
-  --safe-top: env(safe-area-inset-top, 0px);
-  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  /* Capacitor injects --safe-area-inset-* on Android; browsers provide env(). */
+  --safe-top: var(--safe-area-inset-top, env(safe-area-inset-top, 0px));
+  --safe-bottom: var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px));
+  --safe-left: var(--safe-area-inset-left, env(safe-area-inset-left, 0px));
+  --safe-right: var(--safe-area-inset-right, env(safe-area-inset-right, 0px));
   color-scheme: light;
 }
 
@@ -47,11 +50,15 @@ button { font: inherit; color: inherit; border: 0; background: none; padding: 0;
 img { -webkit-user-drag: none; user-select: none; }
 .deva { font-family: var(--font-deva); }
 
+/* Keyboard / switch-access focus (invisible for touch, clear for keyboards) */
+:focus-visible { outline: 4px solid var(--blue); outline-offset: 3px; border-radius: 12px; }
+:focus:not(:focus-visible) { outline: none; }
+
 /* ───────────────── Screen frame ───────────────── */
 .screen {
   position: absolute; inset: 0;
   display: flex; flex-direction: column;
-  padding: calc(12px + var(--safe-top)) 16px calc(16px + var(--safe-bottom));
+  padding: calc(12px + var(--safe-top)) calc(16px + var(--safe-right)) calc(16px + var(--safe-bottom)) calc(16px + var(--safe-left));
   animation: screen-in 0.38s var(--ease-spring) both;
 }
 .screen.scroll { overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; }

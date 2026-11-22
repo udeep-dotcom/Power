@@ -1,35 +1,48 @@
 // Parent zone, behind a simple arithmetic gate (Google Play "Designed for Families" expects
-// adult-only areas to be gated). Shows real learning data, not vanity metrics.
+// adult-only areas to be gated). Shows real learning data per child, not vanity metrics.
 
 import { useMemo, useState } from 'preact/hooks';
+import { Pic } from '../components/Art';
 import { Scenery } from '../components/Scenery';
 import { TopBar } from '../components/UI';
 import { LETTERS } from '../data/alphabet';
+import { BK_CONSONANTS } from '../data/barakhari';
 import { UI, type T } from '../data/i18n';
 import { STICKERS } from '../data/journey';
 import { sfx } from '../lib/sfx';
 import { initSpeech, say, voiceSource, type VoiceSource } from '../lib/speech';
-import { letterProgress, mastery, resetProgress, update, useStore, type State } from '../lib/store';
+import {
+  addProfile, AVATARS, editProfile, emptyProgress, learnedLetterIds, letterProgress, mastery, MAX_PROFILES,
+  removeProfile, resetProgress, update, useStore, type Progress, type State,
+} from '../lib/store';
 import { shuffle, tr } from '../lib/util';
 
 const WORDS = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine'];
 
+function makeQuestion() {
+  const a = 3 + Math.floor(Math.random() * 6), b = 3 + Math.floor(Math.random() * 6);
+  const ans = a * b;
+  const set = new Set([ans]);
+  while (set.size < 4) {
+    const delta = (1 + Math.floor(Math.random() * 3)) * (Math.random() < 0.5 ? -1 : 1) * (Math.random() < 0.5 ? 1 : a);
+    if (ans + delta > 0) set.add(ans + delta);
+  }
+  return { a, b, options: shuffle([...set]) };
+}
+
 function Gate({ onPass }: { onPass: () => void }) {
-  const { a, b, options } = useMemo(() => {
-    const a = 3 + Math.floor(Math.random() * 6), b = 3 + Math.floor(Math.random() * 6);
-    const ans = a * b;
-    const set = new Set([ans]);
-    while (set.size < 4) set.add(ans + (Math.floor(Math.random() * 9) - 4) * (Math.random() < 0.5 ? 1 : a) || ans + 1);
-    return { a, b, options: shuffle([...set].filter((n) => n > 0)) };
-  }, []);
+  const [q, setQ] = useState(makeQuestion);
   const [wrong, setWrong] = useState(false);
   return (
     <div class="gate card">
       <h2>{tr(UI.parentGate)}</h2>
-      <p>{tr(UI.parentGateQ)} <b>{WORDS[a]} × {WORDS[b]}</b></p>
+      <p>{tr(UI.parentGateQ)} <b>{WORDS[q.a]} × {WORDS[q.b]}</b></p>
       <div class="gate-opts">
-        {options.map((n) => (
-          <button key={n} class="btn white" onClick={() => { if (n === a * b) { sfx.correct(); onPass(); } else { sfx.wrong(); setWrong(true); } }}>{n}</button>
+        {q.options.map((n) => (
+          <button key={n} class="btn white" onClick={() => {
+            if (n === q.a * q.b) { sfx.correct(); onPass(); }
+            else { sfx.wrong(); setWrong(true); setQ(makeQuestion()); } // new question: no trial-and-error
+          }}>{n}</button>
         ))}
       </div>
       {wrong && <p class="gate-wrong">✗</p>}
@@ -54,40 +67,101 @@ function Toggle({ label, value, onChange }: { label: T; value: boolean; onChange
   );
 }
 
+function progressOf(s: State, id: string): Progress {
+  if (id === s.active) return s;
+  return s.profiles.find((p) => p.id === id)?.data ?? emptyProgress();
+}
+
+function Players({ s, viewing, setViewing }: { s: State; viewing: string; setViewing: (id: string) => void }) {
+  const [confirm, setConfirm] = useState<string | null>(null);
+  return (
+    <section class="card pz-section">
+      <h3>{tr(UI.players)}</h3>
+      <div class="pz-players">
+        {s.profiles.map((p, i) => (
+          <div key={p.id} class={`pz-player ${viewing === p.id ? 'on' : ''}`}>
+            <button class="pz-avatar" aria-label="Change avatar"
+              onClick={() => { sfx.tap(); editProfile(p.id, { avatar: AVATARS[(AVATARS.indexOf(p.avatar) + 1) % AVATARS.length] }); }}>
+              <Pic pic={p.avatar} size={40} />
+            </button>
+            <input id={`pname-${p.id}`} class="pz-name" value={p.name} placeholder={`${tr(UI.player)} ${i + 1}`} maxLength={20}
+              aria-label={tr(UI.namePlaceholder)} onChange={(e) => editProfile(p.id, { name: (e.target as HTMLInputElement).value })} />
+            <button class="btn white pz-view" onClick={() => setViewing(p.id)}>
+              {learnedLetterIds(progressOf(s, p.id)).length}/{LETTERS.length}
+            </button>
+            {s.profiles.length > 1 && (confirm === p.id ? (
+              <span class="confirm">
+                <button class="btn crimson" onClick={() => { removeProfile(p.id); setConfirm(null); if (viewing === p.id) setViewing(s.active); }}>{tr(UI.yes)}</button>
+                <button class="btn white" onClick={() => setConfirm(null)}>{tr(UI.no)}</button>
+              </span>
+            ) : (
+              <button class="btn white pz-remove" aria-label={tr(UI.removePlayer)} onClick={() => setConfirm(p.id)}>✕</button>
+            ))}
+          </div>
+        ))}
+      </div>
+      {s.profiles.length < MAX_PROFILES && (
+        <button class="btn sky" onClick={() => {
+          const used = new Set(s.profiles.map((p) => p.avatar));
+          addProfile(AVATARS.find((a) => !used.has(a)) ?? AVATARS[0]);
+        }}>＋ {tr(UI.addPlayer)}</button>
+      )}
+    </section>
+  );
+}
+
+function Report({ p, lang }: { p: Progress; lang: string }) {
+  const learned = learnedLetterIds(p).length;
+  const stars = Object.values(p.nodes).reduce((a, b) => a + b, 0);
+  const weak = LETTERS.filter((l) => letterProgress(p, l.id).seen).sort((a, b) => mastery(letterProgress(p, a.id)) - mastery(letterProgress(p, b.id))).slice(0, 6);
+  const minutes = Math.round(p.playSeconds / 60);
+  const weekAgo = new Date(Date.now() - 7 * 864e5).toISOString().slice(0, 10);
+  const practiceWeek = p.practiceDays.filter((d) => d >= weekAgo).length;
+  return (
+    <section class="card pz-section">
+      <h3>{tr(UI.progress)}</h3>
+      <div class="stat-row">
+        <div class="stat"><b>{learned}<small>/{LETTERS.length}</small></b><span>{tr(UI.lettersLearned)}</span></div>
+        <div class="stat"><b>{stars}</b><span>{tr(UI.starsEarned)}</span></div>
+        <div class="stat"><b>{p.stickers.length}<small>/{STICKERS.length}</small></b><span>{tr(UI.stickersWon)}</span></div>
+        <div class="stat"><b>{minutes}<small>m</small></b><span>{lang === 'ne' ? 'खेलेको समय' : 'Time played'}</span></div>
+      </div>
+      <div class="mastery-grid" aria-label="Letter mastery">
+        {LETTERS.map((l) => {
+          const lp = letterProgress(p, l.id);
+          const m = mastery(lp);
+          const hue = lp.seen ? Math.round(m * 120) : 0;
+          return (
+            <span key={l.id} class="m-cell deva" lang="ne" title={`${l.roman}: ${Math.round(m * 100)}%`}
+              style={lp.seen ? { background: `hsl(${hue} 70% 85%)`, borderColor: `hsl(${hue} 60% 55%)` } : undefined}>{l.char}</span>
+          );
+        })}
+      </div>
+      <p class="legend"><i style={{ background: 'hsl(0 70% 85%)' }} /> {lang === 'ne' ? 'अभ्यास चाहिन्छ' : 'needs practice'} <i style={{ background: 'hsl(120 70% 85%)' }} /> {lang === 'ne' ? 'राम्रो' : 'confident'} <i style={{ background: '#faf6ef' }} /> {lang === 'ne' ? 'अझै सुरु भएन' : 'not started'}</p>
+      {weak.length > 0 && <p class="weak"><b>{tr(UI.needsAttention)}:</b> <span class="deva" lang="ne">{weak.map((l) => l.char).join('  ')}</span></p>}
+      <p class="weak">
+        <b>{tr(UI.barakhari)}:</b> {p.barakhari.length}/{BK_CONSONANTS.length} {lang === 'ne' ? 'अक्षर खोजेको' : 'consonants explored'}
+        {p.nodes['B:game'] ? ` · ${lang === 'ne' ? 'खेल' : 'game'} ${'★'.repeat(p.nodes['B:game'])}` : ''}
+      </p>
+      <p class="weak"><b>{tr(UI.todaysPractice)}:</b> {practiceWeek} {lang === 'ne' ? 'दिन (पछिल्लो ७ दिनमा)' : 'days in the last 7'}</p>
+    </section>
+  );
+}
+
 function Dashboard({ s }: { s: State }) {
   const [voice, setVoice] = useState<VoiceSource>(voiceSource());
   const [confirm, setConfirm] = useState(false);
-  const learned = LETTERS.filter((l) => s.nodes[`L:${l.id}`]).length;
-  const stars = Object.values(s.nodes).reduce((a, b) => a + b, 0);
-  const weak = LETTERS.filter((l) => letterProgress(s, l.id).seen).sort((a, b) => mastery(letterProgress(s, a.id)) - mastery(letterProgress(s, b.id))).slice(0, 6);
-  const minutes = Math.round(s.playSeconds / 60);
+  const [viewing, setViewing] = useState(s.active);
+  const viewed = useMemo(() => progressOf(s, viewing), [s, viewing]);
+  const viewedProfile = s.profiles.find((p) => p.id === viewing) ?? s.profiles[0];
 
   return (
     <div class="parent-body">
-      <section class="card pz-section">
-        <h3>{tr(UI.progress)}</h3>
-        <div class="stat-row">
-          <div class="stat"><b>{learned}<small>/{LETTERS.length}</small></b><span>{tr(UI.lettersLearned)}</span></div>
-          <div class="stat"><b>{stars}</b><span>{tr(UI.starsEarned)}</span></div>
-          <div class="stat"><b>{s.stickers.length}<small>/{STICKERS.length}</small></b><span>{tr(UI.stickersWon)}</span></div>
-          <div class="stat"><b>{minutes}<small>m</small></b><span>{s.lang === 'ne' ? 'खेलेको समय' : 'Time played'}</span></div>
-        </div>
-        <div class="mastery-grid" aria-label="Letter mastery">
-          {LETTERS.map((l) => {
-            const p = letterProgress(s, l.id);
-            const m = mastery(p);
-            const hue = p.seen ? Math.round(m * 120) : 0;
-            return (
-              <span key={l.id} class="m-cell deva" lang="ne" title={`${l.roman}: ${Math.round(m * 100)}%`}
-                style={p.seen ? { background: `hsl(${hue} 70% 85%)`, borderColor: `hsl(${hue} 60% 55%)` } : undefined}>{l.char}</span>
-            );
-          })}
-        </div>
-        <p class="legend"><i style={{ background: 'hsl(0 70% 85%)' }} /> {s.lang === 'ne' ? 'अभ्यास चाहिन्छ' : 'needs practice'} <i style={{ background: 'hsl(120 70% 85%)' }} /> {s.lang === 'ne' ? 'राम्रो' : 'confident'}</p>
-        {weak.length > 0 && (
-          <p class="weak"><b>{tr(UI.needsAttention)}:</b> <span class="deva" lang="ne">{weak.map((l) => l.char).join('  ')}</span></p>
-        )}
-      </section>
+      <Players s={s} viewing={viewing} setViewing={setViewing} />
+      {s.profiles.length > 1 && (
+        <p class="pz-viewing"><Pic pic={viewedProfile.avatar} size={26} /> {tr(UI.viewing)}: <b>{viewedProfile.name || `${tr(UI.player)} ${s.profiles.indexOf(viewedProfile) + 1}`}</b></p>
+      )}
+      <Report p={viewed} lang={s.lang} />
 
       <section class="card pz-section">
         <h3>{tr(UI.settings)}</h3>
@@ -111,7 +185,7 @@ function Dashboard({ s }: { s: State }) {
             <button class="btn white" onClick={() => setConfirm(true)}>{tr(UI.reset)}</button>
           ) : (
             <span class="confirm">{tr(UI.resetConfirm)}
-              <button class="btn crimson" onClick={() => { resetProgress(); setConfirm(false); }}>{tr(UI.yes)}</button>
+              <button class="btn crimson" onClick={() => { resetProgress(viewing); setConfirm(false); }}>{tr(UI.yes)}</button>
               <button class="btn white" onClick={() => setConfirm(false)}>{tr(UI.no)}</button>
             </span>
           )}

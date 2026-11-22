@@ -25,11 +25,13 @@ export function TopBar({ title, back = '/', right }: { title?: ComponentChildren
 }
 
 /** Habre with a speech bubble. Tapping either replays the line. */
-export function HabreSays({ text, mood = 'idle', size = 96, speakOnMount = true, clip }: { text: T; mood?: Mood; size?: number; speakOnMount?: boolean; clip?: string }) {
+export function HabreSays({ text, mood = 'idle', size = 96, speakOnMount = true, clip, onReplay }: {
+  text: T; mood?: Mood; size?: number; speakOnMount?: boolean; clip?: string; onReplay?: () => void;
+}) {
   const s = useStore();
   useEffect(() => { if (speakOnMount) void instruct(text, clip); }, [text.ne, speakOnMount]);
   return (
-    <button class="habre-says" onClick={() => { sfx.tap(); void instruct(text, clip); }} aria-label={text[s.lang]}>
+    <button class="habre-says" onClick={() => { sfx.tap(); if (onReplay) onReplay(); else void instruct(text, clip); }} aria-label={text[s.lang]}>
       <Habre size={size} mood={mood} />
       <span class="bubble" key={text.ne}>
         <span class={s.lang === 'ne' ? 'deva' : ''} lang={s.lang}>{text[s.lang]}</span>

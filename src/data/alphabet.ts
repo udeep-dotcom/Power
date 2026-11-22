@@ -47,7 +47,7 @@ export const LETTERS: Letter[] = [
   V('o', 'ओ', 'o', 'ओठ', 'ओ', 'oth', 'lips', '👄'),
   V('au', 'औ', 'au', 'औषधि', 'औ', 'aushadhi', 'medicine', '💊'),
   V('am', 'अं', 'am', 'अंगुर', 'अं', 'angur', 'grapes', '🍇'),
-  V('ah', 'अः', 'ah', 'प्रातः', 'तः', 'praatah', 'morning', '🌅'),
+  V('ah', 'अः', 'ah', 'प्रातः', 'ः', 'praatah', 'morning', '🌅'),
 
   // ── व्यञ्जन वर्ण (consonants) ──
   C('ka', 'क', 'ka', 'कमल', 'क', 'kamal', 'lotus', '🪷'),
@@ -109,4 +109,19 @@ export const CONFUSABLE: Record<string, string[]> = {
 export function letterChant(l: Letter): string {
   const say = l.say ?? l.char;
   return `${say}, ${l.word}को ${say}`;
+}
+
+/**
+ * Split an example word around the letter for "fill the missing letter" prompts.
+ * Only the letter itself is hidden; vowel signs / marks attached to it stay visible on a
+ * dotted placeholder (e.g. छाता → [◌ा]ता), so the child is never asked for छ when the gap
+ * actually reads छा.
+ */
+export function blankSplit(l: Letter): { before: string; marks: string; after: string } {
+  let i = l.word.indexOf(l.char);
+  let len = l.char.length;
+  if (i < 0) { i = l.word.indexOf(l.hl); len = l.hl.length; } // अः in प्रातः: the gap is ः
+  const rest = l.word.slice(i + len);
+  const marks = rest.match(/^\p{M}+/u)?.[0] ?? '';
+  return { before: l.word.slice(0, i), marks, after: rest.slice(marks.length) };
 }

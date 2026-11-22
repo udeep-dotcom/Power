@@ -13,7 +13,10 @@ export default defineConfig(({ mode }) => {
     build: {
       outDir: single ? 'dist-single' : 'dist',
       assetsInlineLimit: single ? 100_000_000 : 4096,
-      target: 'es2019',
+      // Android System WebView 88+ (Jan 2021). CSS like `inset` is lowered for older engines;
+      // anything that can't be lowered is gated at startup (see src/lib/compat.ts).
+      target: ['es2019', 'chrome88'],
+      cssTarget: ['chrome88'],
       cssCodeSplit: !single,
     },
     test: { environment: 'jsdom', include: ['tests/**/*.test.ts'] },

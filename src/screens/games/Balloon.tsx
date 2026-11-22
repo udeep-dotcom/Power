@@ -15,7 +15,7 @@ import type { GameProps } from './GameScreen';
 const GOAL = 6; // pops needed; target changes every 2 pops
 const COLORS = ['#ff4d6d', '#4d8dff', '#ffb11b', '#2fc27a', '#a46bff', '#ff7fbf', '#17c3d6'];
 
-interface B { id: number; letter: Letter; x: number; color: string; dur: number; popped?: boolean; wrong?: boolean }
+interface B { id: number; letter: Letter; x: number; color: string; dur: number; popped?: boolean; wrong?: boolean; leaving?: boolean }
 
 export function Balloon({ letters, onFinish }: GameProps) {
   const targets = useMemo(() => shuffle(letters).slice(0, GOAL / 2).map((id) => LETTER_BY_ID[id]), []);
@@ -23,21 +23,31 @@ export function Balloon({ letters, onFinish }: GameProps) {
   const [hits, setHits] = useState(0);
   const [balloons, setBalloons] = useState<B[]>([]);
   const mistakes = useRef(0);
+  const hitsRef = useRef(0);
   const nextId = useRef(1);
   const target = targets[Math.min(targets.length - 1, Math.floor(hits / 2))];
   const done = hits >= GOAL;
 
-  useEffect(() => { void instruct({ ne: `${target.char} भएको बेलुन फुटाऊ!`, en: `Pop the ${target.char} balloons!` }); }, [target.id]);
+  // New target: old balloons float away (so a balloon that was right a moment ago can never
+  // count as a mistake), then Habre names the new letter.
+  useEffect(() => {
+    setBalloons((bs) => bs.map((b) => (b.popped ? b : { ...b, leaving: true })));
+    const t = setTimeout(() => setBalloons((bs) => bs.filter((b) => !b.leaving)), 450);
+    void instruct({ ne: `${target.char} भएको बेलुन फुटाऊ!`, en: `Pop the ${target.roman} balloons!` })
+      .then(() => say(target.say ?? target.char, `letter-${target.id}`));
+    return () => clearTimeout(t);
+  }, [target.id]);
 
   useEffect(() => {
     if (done) return;
     const spawn = () => {
       setBalloons((bs) => {
-        const live = bs.filter((b) => !b.popped).slice(-9);
+        const live = bs.filter((b) => !b.popped && !b.leaving).slice(-9);
         const isTarget = Math.random() < 0.42 || !live.some((b) => b.letter.id === target.id);
-        const letter = isTarget ? target : distractors(target, 3, pool)[Math.floor(Math.random() * 3)];
+        const others = distractors(target, 3, pool);
+        const letter = isTarget || !others.length ? target : others[Math.floor(Math.random() * others.length)];
         const x = 8 + Math.random() * 74;
-        return [...live, { id: nextId.current++, letter, x, color: COLORS[Math.floor(Math.random() * COLORS.length)], dur: 7 + Math.random() * 3 }];
+        return [...bs.filter((b) => b.leaving || b.popped), ...live, { id: nextId.current++, letter, x, color: COLORS[Math.floor(Math.random() * COLORS.length)], dur: 7 + Math.random() * 3 }];
       });
     };
     spawn();
@@ -46,15 +56,15 @@ export function Balloon({ letters, onFinish }: GameProps) {
   }, [target.id, done]);
 
   const pop = (b: B) => {
-    if (b.popped || done) return;
+    if (b.popped || b.leaving || hitsRef.current >= GOAL) return;
     if (b.letter.id === target.id) {
       sfx.pop(); haptic('success');
       recordAnswer(target.id, true);
       setBalloons((bs) => bs.map((x) => (x.id === b.id ? { ...x, popped: true } : x)));
       setTimeout(() => setBalloons((bs) => bs.filter((x) => x.id !== b.id)), 450);
-      const h = hits + 1;
-      setHits(h);
-      if (h >= GOAL) setTimeout(() => onFinish(mistakes.current), 700);
+      hitsRef.current++;
+      setHits(hitsRef.current);
+      if (hitsRef.current >= GOAL) setTimeout(() => onFinish(mistakes.current), 700);
     } else {
       sfx.wrong(); haptic('error');
       mistakes.current++;
@@ -75,7 +85,7 @@ export function Balloon({ letters, onFinish }: GameProps) {
       <RoundDots total={GOAL} done={hits} />
       <div class="sky-field">
         {balloons.map((b) => (
-          <button key={b.id} data-id={b.letter.id} class={`balloon ${b.popped ? 'popped' : ''} ${b.wrong ? 'wrong' : ''}`}
+          <button key={b.id} data-id={b.letter.id} class={`balloon ${b.popped ? 'popped' : ''} ${b.wrong ? 'wrong' : ''} ${b.leaving ? 'leaving' : ''}`}
             style={{ left: `${b.x}%`, animationDuration: `${b.dur}s`, '--bc': b.color } as never}
             onAnimationEnd={(e) => { if ((e as AnimationEvent).animationName === 'rise') setBalloons((bs) => bs.filter((x) => x.id !== b.id)); }}
             onPointerDown={() => pop(b)} aria-label={b.letter.char}>

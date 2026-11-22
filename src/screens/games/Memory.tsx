@@ -11,13 +11,15 @@ import { say } from '../../lib/speech';
 import { recordAnswer } from '../../lib/store';
 import { haptic, shuffle, withReview } from '../../lib/util';
 import type { GameProps } from './GameScreen';
-import { speakLetter } from '../Lesson';
+import { speakLetter } from '../../components/Word';
 
 interface Card { key: string; letterId: string; face: 'letter' | 'pic' }
 
 export function Memory({ letters, onFinish }: GameProps) {
   const cards = useMemo(() => {
-    const ids = shuffle(withReview(letters, 4)).slice(0, 4);
+    // Always the unit's own letters first; fill up with weak earlier letters if the unit is small.
+    const review = withReview(letters, 4).filter((id) => !letters.includes(id));
+    const ids = [...shuffle(letters), ...shuffle(review)].slice(0, 4);
     return shuffle(ids.flatMap((id): Card[] => [{ key: `${id}-l`, letterId: id, face: 'letter' }, { key: `${id}-p`, letterId: id, face: 'pic' }]));
   }, []);
   const [open, setOpen] = useState<string[]>([]);

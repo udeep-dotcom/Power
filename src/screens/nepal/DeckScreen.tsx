@@ -11,7 +11,7 @@ import { goBack } from '../../lib/router';
 import { sfx } from '../../lib/sfx';
 import { instruct } from '../../lib/speech';
 import { awardSticker, update, useStore } from '../../lib/store';
-import { haptic, tr } from '../../lib/util';
+import { haptic, tileVars, tr } from '../../lib/util';
 
 export function DeckScreen({ deckId }: { deckId: string }) {
   const deck = DECKS.find((d) => d.id === deckId) ?? DECKS[0];
@@ -43,7 +43,7 @@ export function DeckScreen({ deckId }: { deckId: string }) {
           const up = flipped === c.id;
           const seen = s.cardsSeen.includes(key(c.id));
           return (
-            <button key={c.id} class={`fcard ${up ? 'up' : ''} ${seen ? 'seen' : ''}`} style={{ '--dc': deck.color, animationDelay: `${i * 0.05}s` } as never} onClick={() => flip(c.id)}>
+            <button key={c.id} class={`fcard ${up ? 'up' : ''} ${seen ? 'seen' : ''}`} style={{ ...tileVars('dc', deck.color), animationDelay: `${i * 0.05}s` } as never} onClick={() => flip(c.id)}>
               <span class="fcard-inner">
                 <span class="fcard-front">
                   <Pic pic={c.pic} size={76} />

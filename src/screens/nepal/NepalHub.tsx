@@ -6,7 +6,7 @@ import { DECKS, PROVINCES } from '../../data/nepal';
 import { navigate } from '../../lib/router';
 import { sfx } from '../../lib/sfx';
 import { useStore } from '../../lib/store';
-import { haptic, tr } from '../../lib/util';
+import { haptic, tileVars, tr } from '../../lib/util';
 
 export function NepalHub() {
   const s = useStore();
@@ -23,7 +23,7 @@ export function NepalHub() {
       <HabreSays text={{ ne: 'हाम्रो देश नेपालबारे के सिक्ने?', en: 'What shall we learn about Nepal?' }} size={80} />
       <div class="hub-grid">
         {tiles.map((t, i) => (
-          <button key={t.path} class="hub-tile" style={{ '--tc': t.color, animationDelay: `${i * 0.06}s` } as never} onClick={go(t.path)}>
+          <button key={t.path} class="hub-tile" style={{ ...tileVars('tc', t.color), animationDelay: `${i * 0.06}s` } as never} onClick={go(t.path)}>
             <span class="hub-pic"><Pic pic={t.pic} size={64} /></span>
             <span class={`hub-title ${s.lang === 'ne' ? 'deva' : ''}`}>{tr(t.title)}</span>
             {t.progress && <span class="hub-progress">{t.progress}</span>}

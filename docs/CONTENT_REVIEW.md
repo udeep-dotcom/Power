@@ -23,7 +23,7 @@ Items marked ⚠ are known compromises that need a decision.
 | ☐ | **ओ** | o | ओठ | ओ | lips | 👄 |  |
 | ☐ | **औ** | au | औषधि | औ | medicine | 💊 |  |
 | ☐ | **अं** | am | अंगुर | अं | grapes | 🍇 |  |
-| ☐ | **अः** | ah | प्रातः | तः | morning | 🌅 | ⚠ No common word starts with अः; using प्रातः (ends with ः). Many charts show अः without a word. |
+| ☐ | **अः** | ah | प्रातः | ः | morning | 🌅 | ⚠ No common word starts with अः; using प्रातः (ends with ः). Many charts show अः without a word. |
 | ☐ | **क** | ka | कमल | क | lotus | 🪷 |  |
 | ☐ | **ख** | kha | खरायो | ख | rabbit | 🐇 |  |
 | ☐ | **ग** | ga | गमला | ग | flower pot | 🪴 |  |
@@ -134,9 +134,30 @@ Items marked ⚠ are known compromises that need a decision.
 | ☐ | flag हाम्रो चिनारी / Our symbols | नेपालको झण्डा संसारकै अनौठो झण्डा हो। | Nepal's flag is the only national flag that isn't a rectangle. |
 | ☐ | 🪁 चाडपर्व / Festivals | दशैंमा आकाशभरि चङ्गा उड्छन्। | At Dashain the sky fills with kites. |
 | ☐ | danfe प्रकृति / Nature | डाँफे नेपालको राष्ट्रिय चरा हो। | The Danfe (Himalayan monal) is our national bird. |
+| ☐ | ✍️ बाह्रखरी / Syllable builder | क + ा = का! मात्राले अक्षरलाई नयाँ आवाज दिन्छ। | क + ा = का! Vowel signs give letters new sounds. |
 | ☐ | 🏆 प्रश्न विजेता / Quiz champion | तिमीलाई नेपालबारे धेरै थाहा छ! | You know so much about Nepal! |
 
-## 5. Quiz (correct answer listed first)
+## 5. बाह्रखरी vowel signs (12)
+
+| ✓ | Sign | Name (ne) | Example with क |
+|---|---|---|---|
+| ☐ | — | अकार (चिह्न छैन) | क |
+| ☐ | ◌ा | आकार | का |
+| ☐ | ◌ि | ह्रस्व इकार | कि |
+| ☐ | ◌ी | दीर्घ ईकार | की |
+| ☐ | ◌ु | ह्रस्व उकार | कु |
+| ☐ | ◌ू | दीर्घ ऊकार | कू |
+| ☐ | ◌े | एकार | के |
+| ☐ | ◌ै | ऐकार | कै |
+| ☐ | ◌ो | ओकार | को |
+| ☐ | ◌ौ | औकार | कौ |
+| ☐ | ◌ं | शिरबिन्दु | कं |
+| ☐ | ◌ः | विसर्ग | कः |
+
+⚠ Traditional बाह्रखरी has 12 forms and leaves out ृ (ऋकार); confirm this matches the school curriculum.
+
+
+## 6. Quiz (correct answer listed first)
 
 | ✓ | Question | Correct | Distractors |
 |---|---|---|---|

@@ -4,6 +4,7 @@
 import { writeFileSync } from 'node:fs';
 import { LETTERS } from '../src/data/alphabet.ts';
 import { STICKERS } from '../src/data/journey.ts';
+import { MATRAS } from '../src/data/barakhari.ts';
 import { DECKS, PROVINCES, QUIZ } from '../src/data/nepal.ts';
 
 const L: string[] = [];
@@ -47,7 +48,11 @@ for (const d of DECKS) {
 L.push('## 4. Stickers (rewards)', '', '| ✓ | Sticker | Fact (ne) | Fact (en) |', '|---|---|---|---|');
 for (const s of STICKERS) L.push(`| ☐ | ${s.pic} ${s.name.ne} / ${s.name.en} | ${s.fact.ne} | ${s.fact.en} |`);
 
-L.push('', '## 5. Quiz (correct answer listed first)', '', '| ✓ | Question | Correct | Distractors |', '|---|---|---|---|');
+L.push('', '## 5. बाह्रखरी vowel signs (12)', '', '| ✓ | Sign | Name (ne) | Example with क |', '|---|---|---|---|');
+for (const m of MATRAS) L.push(`| ☐ | ${m.sign ? '◌' + m.sign : '—'} | ${m.name.ne} | क${m.sign} |`);
+L.push('', '⚠ Traditional बाह्रखरी has 12 forms and leaves out ृ (ऋकार); confirm this matches the school curriculum.', '');
+
+L.push('', '## 6. Quiz (correct answer listed first)', '', '| ✓ | Question | Correct | Distractors |', '|---|---|---|---|');
 for (const q of QUIZ) {
   const ok = q.options[q.answer];
   const rest = q.options.filter((_, i) => i !== q.answer).map((o) => o.label.ne).join(', ');

@@ -5,6 +5,8 @@
 //   coverage  = share of letter cells the child painted        ("did you trace all of it?")
 //   precision = share of painted cells that are near the letter ("did you stay on the letter?")
 // "Near" uses a dilated letter mask so small wobbles are forgiven — these are 4-year-olds.
+// Excess ink (far more paint than the letter has) also lowers precision, so filling in the
+// letter's bounding box can't earn full marks.
 // Limitation (documented): this does not check stroke ORDER or DIRECTION. Proper Devanagari
 // stroke-order animation needs hand-authored stroke paths for all 49 letters (roadmap).
 
@@ -28,7 +30,7 @@ export function dilate(m: Mask, r = 1): Mask {
   return out;
 }
 
-export interface TraceScore { coverage: number; precision: number; stars: number }
+export interface TraceScore { coverage: number; precision: number; stars: number; inkRatio: number }
 
 export function scoreTrace(letter: Mask, drawn: Mask): TraceScore {
   const near = dilate(letter, 3);
@@ -38,8 +40,13 @@ export function scoreTrace(letter: Mask, drawn: Mask): TraceScore {
     if (drawn[i]) { drawnCells++; if (near[i]) onLetter++; }
   }
   const coverage = letterCells ? covered / letterCells : 0;
-  const precision = drawnCells ? onLetter / drawnCells : 0;
-  return { coverage, precision, stars: starsFor(coverage, precision) };
+  const inkRatio = letterCells ? drawnCells / letterCells : 0;
+  // Colouring in the letter's whole box keeps most ink "near" a dense letter, so nearness alone
+  // can't catch it. Measured (see docs/GAME_DESIGN.md §4.1): careful traces use ≤ 1.33× the
+  // letter's area in ink; box scribbles use 1.39–1.77×. Excess ink beyond 1.3× lowers precision.
+  const tidy = Math.max(0, Math.min(1, 1 - (inkRatio - 1.3) / 0.4));
+  const precision = drawnCells ? (onLetter / drawnCells) * tidy : 0;
+  return { coverage, precision, inkRatio, stars: starsFor(coverage, precision) };
 }
 
 export function starsFor(coverage: number, precision: number): number {

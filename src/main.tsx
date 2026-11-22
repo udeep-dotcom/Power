@@ -11,6 +11,8 @@ import { hydrateNative } from './lib/store';
 import { initSpeech } from './lib/speech';
 import { unlockAudio } from './lib/sfx';
 import { initNative } from './lib/native';
+import { isSupported, renderUnsupported } from './lib/compat';
+import { applyUiScale } from './lib/scale';
 
 void hydrateNative();
 void initSpeech();
@@ -22,4 +24,6 @@ if ('serviceWorker' in navigator && import.meta.env.PROD && !__SINGLE_FILE__ && 
   window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));
 }
 
-render(<App />, document.getElementById('app')!);
+const root = document.getElementById('app')!;
+if (isSupported()) { applyUiScale(root); render(<App />, root); }
+else renderUnsupported(root);

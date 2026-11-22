@@ -13,8 +13,10 @@ export type VoiceSource = 'recorded' | 'native' | 'web-ne' | 'web-hi' | 'none';
 
 let manifest: Set<string> | null = null;
 let webVoice: SpeechSynthesisVoice | null = null;
-let nativeTts: null | { speak(o: object): Promise<void>; stop(): Promise<void>; getSupportedLanguages(): Promise<{ languages: string[] }> } = null;
+type NativeTts = { speak(o: object): Promise<void>; stop(): Promise<void>; getSupportedLanguages(): Promise<{ languages: string[] }> };
+let nativeTts: NativeTts | null = null;
 let nativeLang = 'ne-NP';
+let nativeEnglish: NativeTts | null = null;
 let currentAudio: HTMLAudioElement | null = null;
 let ready: Promise<void> | null = null;
 
@@ -41,9 +43,10 @@ async function initNative() {
     const { languages } = await TextToSpeech.getSupportedLanguages();
     const ne = languages.find((l) => /^ne/i.test(l));
     const hi = languages.find((l) => /^hi/i.test(l));
+    nativeEnglish = TextToSpeech as unknown as NativeTts;
     if (!ne && !hi) return;
     nativeLang = ne ?? hi!;
-    nativeTts = TextToSpeech as unknown as typeof nativeTts;
+    nativeTts = TextToSpeech as unknown as NativeTts;
   } catch { /* plugin unavailable */ }
 }
 
@@ -77,7 +80,7 @@ export function stopSpeech(): void {
   currentAudio?.pause();
   currentAudio = null;
   try { speechSynthesis?.cancel(); } catch { /* */ }
-  void nativeTts?.stop().catch(() => {});
+  void (nativeTts ?? nativeEnglish)?.stop().catch(() => {});
 }
 
 /**
@@ -106,32 +109,38 @@ export async function say(text: string, clip?: string): Promise<boolean> {
     } catch { /* fall through */ }
   }
 
-  if (webVoice && typeof speechSynthesis !== 'undefined') {
-    return new Promise((resolve) => {
-      const u = new SpeechSynthesisUtterance(text);
-      u.voice = webVoice;
-      u.lang = webVoice!.lang;
-      u.rate = 0.8;
-      u.pitch = 1.1;
-      u.onend = () => resolve(true);
-      u.onerror = () => resolve(false);
-      speechSynthesis.speak(u);
-      setTimeout(() => resolve(true), 6000); // some engines never fire onend
-    });
-  }
+  if (webVoice && typeof speechSynthesis !== 'undefined') return speakWeb(text, webVoice, webVoice.lang, 0.8);
   return false;
 }
 
 /** Speak an English line (used only when the parent picked English instructions). */
-export async function sayEnglish(text: string): Promise<void> {
-  if (!getState().voice || typeof speechSynthesis === 'undefined') return;
+export async function sayEnglish(text: string): Promise<boolean> {
+  if (!getState().voice) return false;
+  await initSpeech();
   stopSpeech();
+  if (nativeEnglish) {
+    try { await nativeEnglish.speak({ text, lang: 'en-US', rate: 0.95, pitch: 1.1, volume: 1, category: 'ambient' }); return true; } catch { /* fall through */ }
+  }
+  if (typeof speechSynthesis === 'undefined') return false;
   const v = speechSynthesis.getVoices().find((x) => /^en/i.test(x.lang));
-  const u = new SpeechSynthesisUtterance(text);
-  if (v) u.voice = v;
-  u.rate = 0.95;
-  u.pitch = 1.15;
-  speechSynthesis.speak(u);
+  return speakWeb(text, v ?? null, 'en-US', 0.95);
+}
+
+function speakWeb(text: string, voice: SpeechSynthesisVoice | null, lang: string, rate: number): Promise<boolean> {
+  return new Promise((resolve) => {
+    const u = new SpeechSynthesisUtterance(text);
+    if (voice) u.voice = voice;
+    u.lang = voice?.lang ?? lang;
+    u.rate = rate;
+    u.pitch = 1.1;
+    let done = false;
+    const finish = (ok: boolean) => { if (!done) { done = true; resolve(ok); } };
+    u.onend = () => finish(true);
+    u.onerror = () => finish(false);
+    speechSynthesis.speak(u);
+    // Some engines never fire onend; allow time proportional to the text length.
+    setTimeout(() => finish(true), 2500 + text.length * 140);
+  });
 }
 
 /** Speak an instruction in the parent's chosen instruction language. */

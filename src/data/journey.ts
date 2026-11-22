@@ -61,6 +61,8 @@ export const STICKERS: Sticker[] = [
     fact: { ne: 'दशैंमा आकाशभरि चङ्गा उड्छन्।', en: 'At Dashain the sky fills with kites.' } },
   { id: 'nature', pic: 'danfe', name: { ne: 'प्रकृति', en: 'Nature' },
     fact: { ne: 'डाँफे नेपालको राष्ट्रिय चरा हो।', en: 'The Danfe (Himalayan monal) is our national bird.' } },
+  { id: 'barakhari', pic: '✍️', name: { ne: 'बाह्रखरी', en: 'Syllable builder' },
+    fact: { ne: 'क + ा = का! मात्राले अक्षरलाई नयाँ आवाज दिन्छ।', en: 'क + ा = का! Vowel signs give letters new sounds.' } },
   { id: 'quiz', pic: '🏆', name: { ne: 'प्रश्न विजेता', en: 'Quiz champion' },
     fact: { ne: 'तिमीलाई नेपालबारे धेरै थाहा छ!', en: 'You know so much about Nepal!' } },
 ];

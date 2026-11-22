@@ -11,7 +11,10 @@ inside the APK, so the app works **fully offline**.
 | Hardware back button | Steps back inside the app; on the home screen it minimises instead of quitting | `src/lib/native.ts` |
 | Progress safety | Saved to `localStorage` **and** `@capacitor/preferences`, because the OS can evict WebView storage | `src/lib/store.ts` |
 | Haptics | `@capacitor/haptics` (falls back to `navigator.vibrate`) | `src/lib/util.ts` |
-| Splash, status bar | `@capacitor/splash-screen` (hidden after first render), transparent status bar | `capacitor.config.ts`, `src/lib/native.ts` |
+| Splash screen | `@capacitor/splash-screen`, hidden after the first render | `capacitor.config.ts`, `src/lib/native.ts` |
+| Edge-to-edge / system bars | Capacitor 8 `SystemBars` with `insetsHandling: 'css'` (dark icons on our light sky). On WebView ≥ 140 the page draws under the bars and receives correct insets; on older WebViews Capacitor pads the WebView natively. CSS reads `var(--safe-area-inset-*, env(safe-area-inset-*))`, which is right in both cases. **Don't add `@capacitor/status-bar` overlay calls**: v0.1 did, and it fights this mechanism. | `capacitor.config.ts`, `src/styles/global.css` |
+| Old WebViews | The build targets Chrome / WebView 88+. Below that, a bilingual "please update Android System WebView" screen is shown instead of a broken game. | `src/lib/compat.ts`, `vite.config.ts` |
+| Tablets | The whole UI scales up (1–1.7×) so school tablets don't show a tiny phone layout. | `src/lib/scale.ts` |
 | Orientation | Portrait (Android 16+ ignores this on tablets, by design) | `android/app/src/main/AndroidManifest.xml` |
 | Icons and splash | Generated from `assets/*.png` with `npx capacitor-assets generate --android` | `assets/` |
 
@@ -55,7 +58,9 @@ After changing web code, run `npm run android:sync` again before rebuilding.
 
 ## Verification status
 
-- ✅ The web build runs in Chromium at phone size. Every screen and game was played end to end.
-- ✅ The Android project was generated and synced (6 plugins detected) and icons/splash generated.
+- ✅ The web build passes 10 Playwright end-to-end tests (every screen, every game played to the end)
+  and was checked at 360×640, 390×844 and 768×1024.
+- ✅ The Android project was generated and synced (5 plugins, after removing `@capacitor/status-bar`), and
+  icons and splash screens were generated.
 - ⏳ **The APK compile has not yet run.** The Android SDK host was blocked in the environment that
   produced this build. The CI workflow is the first place it will compile, so check the first run.

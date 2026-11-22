@@ -1,4 +1,5 @@
-// Android-only behaviour (no-ops on the web): hardware back button, status bar, splash screen.
+// Android-only behaviour (no-ops on the web): hardware back button and splash screen.
+// System bars / edge-to-edge are configured declaratively in capacitor.config.ts (SystemBars).
 
 import { currentRoute, goBack } from './router';
 
@@ -14,10 +15,6 @@ export async function initNative(): Promise<void> {
       if (currentRoute() === '/') void App.minimizeApp();
       else goBack('/');
     });
-
-    const { StatusBar, Style } = await import('@capacitor/status-bar');
-    await StatusBar.setStyle({ style: Style.Light }).catch(() => {});
-    await StatusBar.setOverlaysWebView({ overlay: true }).catch(() => {});
 
     const { SplashScreen } = await import('@capacitor/splash-screen');
     setTimeout(() => void SplashScreen.hide({ fadeOutDuration: 300 }).catch(() => {}), 200);

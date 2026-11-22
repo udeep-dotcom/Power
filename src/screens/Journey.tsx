@@ -124,7 +124,7 @@ export function Journey() {
                   class={`jnode ${n.kind} ${stars ? 'done' : ''} ${unlocked ? '' : 'locked'} ${isCur ? 'current' : ''} ${shake === it.idx ? 'shake' : ''}`}
                   style={{ left: `${it.x}%`, top: height - it.y }}
                   onClick={() => open(it.idx)}
-                  aria-label={n.kind === 'letter' ? LETTER_BY_ID[n.letterId!].char : n.kind}
+                  aria-label={n.kind === 'letter' ? `${LETTER_BY_ID[n.letterId!].char} ${LETTER_BY_ID[n.letterId!].roman}` : n.kind === 'game' ? tr(GAME_META[n.unit.game].name) : tr(UI.openChest)}
                 >
                   <span class="jnode-face">
                     {!unlocked ? <Icon name="lock" size={28} />

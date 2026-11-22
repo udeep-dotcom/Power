@@ -3,27 +3,16 @@ import { Icon, Pic } from '../components/Art';
 import { Scenery } from '../components/Scenery';
 import { TraceCanvas } from '../components/TraceCanvas';
 import { Celebration, HabreSays, SpeakerButton, TopBar } from '../components/UI';
-import { LETTER_BY_ID, letterChant, type Letter } from '../data/alphabet';
+import { speakLetter, speakWord, Word } from '../components/Word';
+import { LETTER_BY_ID, type Letter } from '../data/alphabet';
 import { UI } from '../data/i18n';
 import { goBack } from '../lib/router';
 import { sfx } from '../lib/sfx';
-import { say } from '../lib/speech';
 import { completeNode, recordAnswer, update, useStore } from '../lib/store';
 import { distractors, haptic, shuffle, sleep, tr } from '../lib/util';
 
 type Step = 'learn' | 'trace' | 'find' | 'done';
 const STEPS: Step[] = ['learn', 'trace', 'find'];
-
-export function Word({ l, size = 40 }: { l: Letter; size?: number }) {
-  const i = l.word.indexOf(l.hl);
-  return (
-    <span class="word deva" lang="ne" style={{ fontSize: size }}>
-      {l.word.slice(0, i)}<b>{l.hl}</b>{l.word.slice(i + l.hl.length)}
-    </span>
-  );
-}
-
-export function speakLetter(l: Letter) { return say(letterChant(l), `chant-${l.id}`); }
 
 export function Lesson({ letterId }: { letterId: string; fromJourney?: boolean }) {
   const l = LETTER_BY_ID[letterId];
@@ -33,11 +22,11 @@ export function Lesson({ letterId }: { letterId: string; fromJourney?: boolean }
   const [flipIn, setFlipIn] = useState(0);
 
   useEffect(() => {
-    if (!l) return;
+    if (!l) { goBack('/'); return; } // unknown letter id (old link) — leave quietly
     update((st) => { (st.letters[l.id] ??= { trace: 0, correct: 0, wrong: 0, seen: false }).seen = true; });
   }, [letterId]);
 
-  if (!l) { goBack('/'); return null; }
+  if (!l) return null;
 
   const finishTrace = (stars: number) => {
     setTraceStars(stars);
@@ -59,13 +48,15 @@ export function Lesson({ letterId }: { letterId: string; fromJourney?: boolean }
             <span class="big-letter deva" lang="ne">{l.char}</span>
             {s.roman && <span class="roman">{l.roman}</span>}
           </button>
-          <button class="word-card card" onClick={() => { sfx.tap(); void say(l.word, `word-${l.id}`); }}>
+          <button class="word-card card" onClick={() => { sfx.tap(); void speakWord(l); }}>
             <Pic pic={l.pic} size={92} />
             <span class="word-col">
               <Word l={l} size={44} />
               {(s.roman || s.lang === 'en') && <small>{l.wordRoman} · {l.meaning}</small>}
             </span>
           </button>
+          <HabreSays size={64} speakOnMount={false} onReplay={() => void speakLetter(l)}
+            text={{ ne: `${l.char} — ${l.word}को ${l.char}`, en: `${l.roman} — as in “${l.wordRoman}” (${l.meaning})` }} />
           <AutoSpeak l={l} />
           <button class="btn big crimson lesson-next" onClick={() => { sfx.whoosh(); setStep('trace'); }}>{tr(UI.traceStep)} <Icon name="next" /></button>
         </div>
@@ -123,7 +114,7 @@ function FindIt({ l, onDone }: { l: Letter; onDone: (firstTry: boolean) => void 
   };
   return (
     <div class="lesson-body">
-      <HabreSays text={{ ne: `${l.char} कुन हो? छोऊ त!`, en: `Which one is ${l.char} (${l.roman})? Tap it!` }} size={80} />
+      <HabreSays text={{ ne: `${l.char} कुन हो? छोऊ त!`, en: `Find the letter “${l.roman}”!` }} size={80} />
       <button class="find-target card" onClick={() => void speakLetter(l)}>
         <Pic pic={l.pic} size={64} /><Word l={l} size={34} />
       </button>

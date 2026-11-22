@@ -5,8 +5,10 @@ is weakest, and those are exactly the sounds children must learn. A native speak
 single biggest quality upgrade available.
 
 ## What to record
-`docs/recording-script.csv` lists all **147 clips** (49 letters × 3: the letter name, the example word,
-and the chart chant "क, कमलको क"). Regenerate it after content changes:
+`docs/recording-script.csv` lists **147 priority clips** (49 letters × 3: the letter name, the example
+word, and the chart chant "क, कमलको क"), followed by **432 optional बाह्रखरी syllables** (36 consonants ×
+12 forms, ids like `syl-ka-i`). Text-to-speech reads whole syllables far better than lone letters, so
+record the priority clips first. Regenerate the list after content changes:
 
 ```bash
 node scripts/gen-recording-script.ts
@@ -25,7 +27,7 @@ Use the standard Nepali pronunciation taught in schools (e.g. श/ष/स are al
 4. Rebuild. Any clip in the manifest is played instead of TTS. Missing clips still fall back to TTS,
    so you can add them gradually.
 
-Size: 147 short clips at 64 kbps come to about 1.5–2.5 MB, which is fine inside the APK.
+Size: 147 short clips at 64 kbps come to about 1.5–2.5 MB; all 579 come to about 6–8 MB. Both are fine inside the APK.
 
 ## Fallback order (for reference)
 recorded clip → Android native TTS (`ne-NP`, then `hi-IN`) → browser `speechSynthesis` with a Nepali or

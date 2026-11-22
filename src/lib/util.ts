@@ -64,3 +64,16 @@ export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 export function starsFromMistakes(mistakes: number): number {
   return mistakes <= 1 ? 3 : mistakes <= 3 ? 2 : 1;
 }
+
+/** Mix a #rrggbb colour with white (amount 0..1 of the colour). Replaces CSS color-mix(),
+ *  which Android WebViews older than Chrome 111 don't support. */
+export function tint(hex: string, amount: number): string {
+  const n = parseInt(hex.slice(1), 16);
+  const ch = (shift: number) => Math.round(((n >> shift) & 255) * amount + 255 * (1 - amount));
+  return `rgb(${ch(16)}, ${ch(8)}, ${ch(0)})`;
+}
+
+/** CSS custom properties for a themed tile: base colour plus light tints. */
+export function tileVars(prefix: string, hex: string): Record<string, string> {
+  return { [`--${prefix}`]: hex, [`--${prefix}-14`]: tint(hex, 0.14), [`--${prefix}-30`]: tint(hex, 0.3), [`--${prefix}-55`]: tint(hex, 0.55) };
+}
