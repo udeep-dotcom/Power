@@ -12,7 +12,11 @@ export default defineConfig({
   use: {
     baseURL: 'http://localhost:4174',
     trace: 'off',
-    launchOptions: process.env.PW_CHROMIUM ? { executablePath: process.env.PW_CHROMIUM } : {},
+    launchOptions: {
+      // a fake microphone so the "say it too" recorder can be tested end to end
+      args: ['--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream'],
+      ...(process.env.PW_CHROMIUM ? { executablePath: process.env.PW_CHROMIUM } : {}),
+    },
   },
   projects: [
     { name: 'phone', use: { ...devices['Desktop Chrome'], viewport: { width: 390, height: 844 } } },

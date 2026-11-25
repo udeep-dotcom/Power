@@ -6,6 +6,7 @@ import { BK_CONSONANTS, MATRAS, syllable, syllableRoman } from '../src/data/bara
 import { ALL_WORDS } from '../src/data/words.ts';
 import { NUMBERS } from '../src/data/numbers.ts';
 import { STORIES } from '../src/data/stories.ts';
+import { BLEND_WORDS, EN_LETTERS, MINIMAL_PAIRS } from '../src/data/phonics.ts';
 
 const rows: string[][] = [['clip_id', 'text_to_say', 'notes']];
 for (const l of LETTERS) {
@@ -20,10 +21,42 @@ for (const st of STORIES) st.pages.forEach((p, i) => rows.push([`story-${st.id}-
 const priority1 = rows.length - 1;
 
 // Priority 2 (optional): बाह्रखरी syllables. TTS reads syllables much better than lone letters,
-// so record these after the 147 above.
+// so record these after priority 1.
 for (const c of BK_CONSONANTS) {
   for (const m of MATRAS) rows.push([`syl-${c.id}-${m.id}`, syllable(c, m), `बाह्रखरी syllable (${syllableRoman(c, m)}). Priority 2.`]);
 }
+const priority2 = rows.length - 1 - priority1;
+
+// Priority 3 — sounds & phonics (v0.4).
+// Nepali minimal pairs + blend words: the SAME Nepali voice. Say each pair word on its own, clearly;
+// the child must hear the one difference (हावा / जिब्रो).
+for (const p of MINIMAL_PAIRS.filter((x) => x.lang === 'ne')) {
+  rows.push([`mp-${p.id}-a`, p.a.word, `Minimal pair "${p.a.word} / ${p.b.word}" — say only ${p.a.word} (${p.a.en}). Priority 3.`]);
+  rows.push([`mp-${p.id}-b`, p.b.word, `Minimal pair "${p.a.word} / ${p.b.word}" — say only ${p.b.word} (${p.b.en}). Priority 3.`]);
+}
+for (const w of BLEND_WORDS.filter((x) => x.lang === 'ne')) rows.push([`w-blend-${w.id}`, w.word, `Blend word (${w.en}). Natural speed; the app slows it down itself. Priority 3.`]);
+// English: a DIFFERENT voice — a native English speaker (pick the accent of the schools your
+// families use: UK, US or Australian). Pure sounds must have NO "uh" after them: "sss" not "suh",
+// "mmm" not "muh". Stop sounds (t p k b d g) as short and crisp as possible.
+const stop = new Set(['t', 'p', 'c', 'k', 'b', 'd', 'g', 'j', 'q', 'x']);
+for (const l of EN_LETTERS) {
+  rows.push([`en-s-${l.id}`, l.soundSay, `ENGLISH voice. The SOUND of "${l.id}" ${l.ipa}${stop.has(l.id) ? ' — short and crisp, as little "uh" as possible' : ' — hold it ~1 s, no "uh" after it'}. Priority 3.`]);
+  rows.push([`en-n-${l.id}`, l.upper, `ENGLISH voice. The letter NAME "${l.upper}". Priority 3.`]);
+  rows.push([`en-w-${l.word}`, l.word, `ENGLISH voice. Key word for ${l.id} (${l.word}). Priority 3.`]);
+}
+const enWords = new Set(EN_LETTERS.map((l) => l.word));
+for (const w of BLEND_WORDS.filter((x) => x.lang === 'en')) {
+  if (!enWords.has(w.word)) { enWords.add(w.word); rows.push([`en-w-${w.word}`, w.word, `ENGLISH voice. Blend word. Priority 3.`]); }
+  const rime = w.chunks[1];
+  rows.push([`en-r-${rime}`, rime, `ENGLISH voice. The rime "-${rime}" as in "${w.word}" — one syllable, not spelled out. Priority 3.`]);
+}
+for (const p of MINIMAL_PAIRS.filter((x) => x.lang === 'en')) {
+  for (const x of [p.a, p.b]) if (!enWords.has(x.word)) { enWords.add(x.word); rows.push([`en-w-${x.word}`, x.word, `ENGLISH voice. Minimal pair "${p.a.word} / ${p.b.word}". Priority 3.`]); }
+}
+// de-duplicate (a rime like "at" appears in several words)
+const seen = new Set<string>();
+for (let i = rows.length - 1; i > 0; i--) { if (seen.has(rows[i][0])) rows.splice(i, 1); else seen.add(rows[i][0]); }
+
 const csv = rows.map((r) => r.map((c) => `"${c.replace(/"/g, '""')}"`).join(',')).join('\n') + '\n';
 writeFileSync(new URL('../docs/recording-script.csv', import.meta.url), csv);
-console.log(`${rows.length - 1} clips (${priority1} priority 1)`);
+console.log(`${rows.length - 1} clips (${priority1} priority 1, ${priority2} priority 2, ${rows.length - 1 - priority1 - priority2} priority 3)`);

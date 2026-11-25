@@ -152,6 +152,7 @@ function Report({ p, lang }: { p: Progress; lang: string }) {
         {p.nodes['B:game'] ? ` · ${lang === 'ne' ? 'खेल' : 'game'} ${'★'.repeat(p.nodes['B:game'])}` : ''}
       </p>
       <p class="weak"><b>{tr(UI.todaysPractice)}:</b> {practiceWeek} {lang === 'ne' ? 'दिन (पछिल्लो ७ दिनमा)' : 'days in the last 7'}</p>
+      <p class="weak"><b>{tr(UI.sounds)}:</b> {p.soundsHeard.filter((x) => x.startsWith('ne:')).length} {lang === 'ne' ? 'नेपाली ध्वनि' : 'Nepali sounds'} · {p.soundsHeard.filter((x) => x.startsWith('en:')).length}/26 English · {lang === 'ne' ? 'जोड्ने' : 'blending'} {p.nodes['SB:en'] || p.nodes['SB:ne'] ? '★'.repeat(Math.max(p.nodes['SB:en'] ?? 0, p.nodes['SB:ne'] ?? 0)) : '—'}</p>
       <p class="weak"><b>{tr(UI.words)}:</b> {p.wordsHeard.length}/{ALL_WORDS.length} {lang === 'ne' ? 'शब्द सुनेको' : 'words heard'} · <b>{tr(UI.stories)}:</b> {p.storiesRead.length}/{STORIES.length} · <b>{tr(UI.numbers)}:</b> {p.nodes['N:count'] ? '★'.repeat(p.nodes['N:count']) : '—'}</p>
     </section>
   );
@@ -184,6 +185,7 @@ function Dashboard({ s }: { s: State }) {
         </div>
         <Toggle label={UI.sound} value={s.sound} onChange={(v) => update((st) => { st.sound = v; })} />
         <Toggle label={UI.music} value={s.music} onChange={(v) => update((st) => { st.music = v; })} />
+        <Toggle label={UI.micSetting} value={s.mic} onChange={(v) => update((st) => { st.mic = v; })} />
         <div class="setting">
           <span>{tr(UI.playLimit)}</span>
           <span class="seg">

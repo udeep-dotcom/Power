@@ -61,7 +61,7 @@ describe('stickers', () => {
     expect(new Set(STICKERS.map((s) => s.id)).size).toBe(STICKERS.length);
     STICKERS.forEach((s) => {
       expect(picOk(s.pic), s.id).toBe(true);
-      expect(['journey', 'letters', 'words', 'stories', 'nepal', 'play']).toContain(stickerGroup(s));
+      expect(['journey', 'letters', 'words', 'stories', 'nepal', 'play', 'sounds']).toContain(stickerGroup(s));
     });
   });
 });

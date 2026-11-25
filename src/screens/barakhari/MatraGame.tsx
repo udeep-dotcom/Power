@@ -10,7 +10,7 @@ import { Pic } from '../../components/Art';
 import { Scenery } from '../../components/Scenery';
 import { Celebration, HabreSays, RoundDots, SpeakerButton, TopBar } from '../../components/UI';
 import { LETTER_BY_ID } from '../../data/alphabet';
-import { BK_CONSONANTS, MATRAS, MATRA_BY_ID, MATRA_CONFUSABLE, showSign, syllable, type Matra } from '../../data/barakhari';
+import { BK_CONSONANTS, MATRAS, MATRA_AUDIO_PARTNER, MATRA_BY_ID, MATRA_CONFUSABLE, SAME_SOUND_TWIN, showSign, syllable, type Matra } from '../../data/barakhari';
 import { UI } from '../../data/i18n';
 import { STICKER_BY_ID } from '../../data/journey';
 import { goBack } from '../../lib/router';
@@ -21,14 +21,17 @@ import { haptic, shuffle, sleep, starsFromMistakes } from '../../lib/util';
 
 const ROUNDS = 8;
 
-export function planMatraRounds(consonantIds: string[], rounds = ROUNDS, optionCount = 3) {
+export function planMatraRounds(consonantIds: string[], rounds = ROUNDS, optionCount = 3, audio = true) {
   const signs = MATRAS.filter((m) => m.sign);
   const targets = [...shuffle(signs), ...shuffle(signs)].slice(0, rounds);
   return targets.map((m, i) => {
     const c = LETTER_BY_ID[consonantIds[i % consonantIds.length]];
-    const partner = MATRA_BY_ID[MATRA_CONFUSABLE[m.id]];
-    const other = shuffle(signs.filter((x) => x.id !== m.id && x.id !== partner?.id))[0];
-    // younger children: just the sign and its confusable partner
+    // Heard: pair with a sign that SOUNDS different (ि/ी sound the same in Nepali).
+    // Seen: pair with the sign it LOOKS/spells like (ि vs ी) — that's a reading skill.
+    const partner = MATRA_BY_ID[(audio ? MATRA_AUDIO_PARTNER : MATRA_CONFUSABLE)[m.id]];
+    const twin = audio ? SAME_SOUND_TWIN[m.id] : undefined;
+    const other = shuffle(signs.filter((x) => x.id !== m.id && x.id !== partner?.id && x.id !== twin && (!audio || SAME_SOUND_TWIN[x.id] !== partner?.id)))[0];
+    // younger children: just the sign and its partner
     return { c, m, options: shuffle([m, ...(partner ? [partner] : []), ...(optionCount > 2 || !partner ? [other] : [])]) };
   });
 }

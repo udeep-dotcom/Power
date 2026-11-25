@@ -1,6 +1,6 @@
 # अक्षर यात्रा · Akshar Yatra — Game Design Document
 
-*Version 0.3 · November 2026 · Status: playable web build + Android project · Audience: children under 6, in Nepal and abroad (see §0c)*
+*Version 0.4 · November 2026 · Status: playable web build + Android project · Audience: children under 6, in Nepal and abroad (see §0c); phonics and pronunciation in §0d*
 
 A game in which Nepali children climb from the Terai to the top of Sagarmatha by learning the
 49 letters of the Nepali alphabet, collecting stickers of real Nepali places, animals and festivals on
@@ -91,6 +91,36 @@ their language, letters, history and culture. **The name and the software are Ne
   and Teej appear in the festival cards so one community's festivals aren't presented as everyone's.
   The Everest story says only "Tenzing Norgay Sherpa". All of this is in `docs/CONTENT_REVIEW.md` for a
   Nepali educator to approve.
+
+## 0d. v0.4 — phonics and pronunciation, in Nepali and English
+
+**The brief:** teach phonetics and pronunciation of the Nepali *and* English alphabets, informed by the
+best apps. Full research, decisions and sources: **[`docs/PHONICS_RESEARCH.md`](PHONICS_RESEARCH.md)**.
+
+| Decision | Why | What was built |
+|---|---|---|
+| **Use the structure Nepali already has.** | The वर्ग table *is* a phonetics chart: rows are places in the mouth, columns are air, buzz and nose. English has nothing like it. | **ध्वनि → मुखको नक्सा:** a side-view mouth that lights up where each letter is made, with a 🕯️ flame for महाप्राण, a 🐝 for घोष and 👃 for नासिक्य. Every letter lesson now shows these as chips that link to the map. |
+| **English phonics = sounds first, then names (Jolly Phonics).** | Children read *sat, pin, tap* within days if they learn s a t p i n as *sounds*. | **ए बी सी:** 26 letters in 5 groups; each has a sound button, a name button, a key word, an action and IPA. |
+| **Bilingual children's Nepali is an asset for English.** | Many English sounds have a Nepali "friend" (m = म); some are only close (t ≈ ट); some exist in only one language (f v z th; घ झ ढ ध भ). | **ध्वनि साथी:** the friends table, "only in English / only in Nepali" cards, and a game. |
+| **Hearing differences comes before saying them.** | Children abroad merge बात/भात and दाल/डाल; Nepali speakers merge v/w. | **कान खोलेर सुन:** minimal pairs in both languages; after each answer Habre names the difference. |
+| **Blend with big chunks first.** | Onset + rime (*c + at*) is easier than *c-a-t* for 3–4-year-olds. | **जोडेर पढौं:** slide a finger along an arrow; ages 3–4 blend chunks, 5–6 every sound; Nepali blends by अक्षर. |
+| **No automatic pronunciation scoring.** | Speech recognition on 3–5-year-olds is unreliable (word error rates of roughly 40–58% in published studies) and there is no Nepali child-speech model. A false "wrong" teaches a pre-schooler to stop trying. | **मेरो आवाज:** record 2 seconds on the device, then hear yourself next to Habre. Nothing is uploaded or saved; the mic is off between clips; parents can disable it. |
+
+**A correction we owe:** v0.2's vowel-sign game asked children to tell ि from ी *by ear*. Spoken Nepali
+doesn't distinguish them, so a correct child was marked wrong. Listening rounds now use audio partners
+(ि↔े, ु↔ो), reading rounds keep ि/ी, the explorer explains "same sound, different spelling", and a
+unit test enforces it.
+
+### Pushback, honestly
+- **Until real recordings exist, the English sound buttons are slightly wrong.** TTS can't say a pure
+  /t/; it says "tuh" or "tee", and that added "uh" is exactly what phonics teachers train out. The
+  125 priority-3 clips in `docs/recording-script.csv` are the fix, and they need a native English voice
+  in the accent families' schools use.
+- **Textbook vs real pronunciation.** The mouth map shows श ष स together and र at the teeth, because
+  that is how Nepali is spoken. School books teach the Sanskrit places. A Nepali teacher should
+  decide (flagged in `docs/CONTENT_REVIEW.md` §10a).
+- **Nothing here is validated with children yet.** Watch 5–10 children use the blend and minimal-pair
+  games before paying for recordings.
 
 ---
 
@@ -204,8 +234,10 @@ nothing is lost for skipping a day.
   कं कः). `क + ◌ि = कि` assembles with an animation and is spoken. Each sign's Nepali name (ह्रस्व
   इकार, दीर्घ ईकार …) is shown.
 - **Vowel-sign game:** hear कि (or, without a voice, see it), see क with an empty slot, and choose the
-  sign. The options **always include the confusable partner** (ि/ी, ु/ू, े/ै, ो/ौ, ं/ः). This short/long
-  distinction is where Nepali children actually struggle. 8 rounds; ≥ 2★ earns the ✍️ sticker.
+  sign. **Reading rounds** (the syllable is shown) always include the confusable partner (ि/ी, ु/ू, े/ै,
+  ो/ौ, ं/ः), because telling those apart is a *spelling* skill. **Listening rounds** never offer ि with ी
+  or ु with ू: they sound the same in spoken Nepali, so the partner is one that really sounds different
+  (ि↔े, ु↔ो). *v0.2 got this wrong; see §0d.* 8 rounds; ≥ 2★ earns the ✍️ sticker.
 - It uses consonants the child has already learned, or the first eight if fewer than three are learned.
 
 ### 4.5 मेरो नेपाल · My Nepal
@@ -352,9 +384,11 @@ android/       Capacitor project (bundles dist/ — fully offline)
 |---|---|
 | 0.1 | 49 letters, trace, 4 mini-games, journey, map, 3 fact decks, quiz, stickers, parent zone, Android project |
 | 0.2 | Audit fixes (§0b), start screen, sibling profiles, Today's practice, बाह्रखरी explorer + vowel-sign game, live trace meter, tablet scaling, e2e tests |
-| **0.3 (this build)** | Under-6 focus (§0c): age levels, Nepali-first bilingual mode, शब्द (48 words), अङ्क (१–१०), कथा (6 stories), खेल (4 instruments, 4 colouring pages), music, play-time limit, new home |
-| 0.3 — "Premium pass" | Recorded voice, custom illustrations, stroke-order animation, music, play-test fixes. *Needs people and budget, not code.* |
-| 0.4 — Words and numbers | बाह्रखरी tracing, Nepali numerals ०–९ with counting, then 2–3-letter words (घर, कलम, माछा) |
+| 0.3 | Under-6 focus (§0c): age levels, Nepali-first bilingual mode, शब्द (48 words), अङ्क (१–१०), कथा (6 stories), खेल (4 instruments, 4 colouring pages), music, play-time limit, new home |
+| **0.4 (this build)** | Phonics and pronunciation (§0d): मुखको नक्सा, ए बी सी (26 letters), blending, minimal pairs, sound hunt, sound friends, record-and-compare mic, slow speech; ि/ी listening fix |
+| 0.5 — Phonics II | English digraphs (sh ch th ng ai ee oa…), Nepali conjunct sounds (क्ष त्र ज्ञ), 3-syllable blends, recorded English and Nepali phonics clips |
+| "Premium pass" (any time) | Recorded voice, custom illustrations, stroke-order animation, music, play-test fixes. *Needs people and budget, not code.* |
+| 0.6 — Reading and writing | बाह्रखरी tracing, reading 2–3-letter words (घर, कलम, माछा) with the blend engine |
 | 1.0 — Launch | Google Play (Designed for Families), web PWA, a school/NGO edition |
 
 ---

@@ -1,5 +1,5 @@
-// Home: the Journey hero card on top, then six big picture tiles a 3-year-old can choose from
-// without reading — अक्षर, शब्द, अङ्क, कथा, मेरो नेपाल, खेल. Labels are Nepali-first.
+// Home: the Journey hero card on top, then eight big picture tiles a 3-year-old can choose from
+// without reading — अक्षर, ए बी सी, ध्वनि, शब्द, अङ्क, कथा, मेरो नेपाल, खेल. Labels are Nepali-first.
 
 import { Icon, NepalFlag, Pic } from '../components/Art';
 import { Bi } from '../components/Bi';
@@ -28,6 +28,8 @@ export function Home({ onSwitchPlayer }: { onSwitchPlayer: () => void }) {
 
   const tiles: Tile[] = [
     { path: '/letters', title: UI.letters, color: '#1d4fb0', art: <span class="tile-glyph deva" lang="ne">क</span> },
+    { path: '/abc', title: UI.abc, color: '#e0457b', art: <span class="tile-glyph latin">Abc</span> },
+    { path: '/sounds', title: UI.sounds, color: '#d9452b', art: <Pic pic="👄" size={52} /> },
     { path: '/words', title: UI.words, color: '#e8505b', art: <Pic pic="👨‍👩‍👧‍👦" size={58} /> },
     { path: '/numbers', title: UI.numbers, color: '#ff9f1c', art: <span class="tile-glyph deva" lang="ne">१२३</span> },
     { path: '/stories', title: UI.stories, color: '#8e5bd6', art: <Pic pic="📖" size={58} /> },

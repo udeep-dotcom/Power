@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { blankSplit, LETTERS, LETTER_BY_ID } from '../src/data/alphabet';
-import { BK_CONSONANTS, MATRAS, MATRA_CONFUSABLE, syllable, syllableRoman } from '../src/data/barakhari';
+import { BK_CONSONANTS, MATRAS, MATRA_AUDIO_PARTNER, MATRA_CONFUSABLE, syllable, syllableRoman } from '../src/data/barakhari';
 import { planTargets } from '../src/screens/games/ChoiceGame';
 import { planMatraRounds } from '../src/screens/barakhari/MatraGame';
 import { tint } from '../src/lib/util';
@@ -42,15 +42,20 @@ describe('बाह्रखरी', () => {
     expect(syllable(LETTER_BY_ID.ksha, MATRAS[2])).toBe('क्षि');
     expect(syllableRoman(LETTER_BY_ID.ka, MATRAS[3])).toBe('kii');
   });
-  it('matra game always offers the confusable partner', () => {
-    for (let k = 0; k < 30; k++) {
-      for (const r of planMatraRounds(['ka', 'ga', 'ma'])) {
-        const partner = MATRA_CONFUSABLE[r.m.id];
-        expect(r.options.map((o) => o.id)).toContain(r.m.id);
-        if (partner) expect(r.options.map((o) => o.id)).toContain(partner);
-        expect(new Set(r.options.map((o) => o.id)).size).toBe(r.options.length);
+  it('LISTENING rounds never offer two signs that sound the same (ि/ी, ु/ू)', () => {
+    for (let k = 0; k < 60; k++) {
+      for (const r of planMatraRounds(['ka', 'ga', 'ma'], 8, 3, true)) {
+        const ids = r.options.map((o) => o.id);
+        expect(ids).toContain(r.m.id);
+        expect(ids).toContain(MATRA_AUDIO_PARTNER[r.m.id]);
+        expect(ids.includes('i') && ids.includes('ii')).toBe(false);
+        expect(ids.includes('u') && ids.includes('uu')).toBe(false);
+        expect(new Set(ids).size).toBe(ids.length);
       }
     }
+  });
+  it('READING rounds pair a sign with the one it is spelled like', () => {
+    for (const r of planMatraRounds(['ka'], 8, 3, false)) expect(r.options.map((o) => o.id)).toContain(MATRA_CONFUSABLE[r.m.id]);
   });
 });
 

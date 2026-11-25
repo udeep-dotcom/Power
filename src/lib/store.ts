@@ -32,6 +32,8 @@ export interface Progress {
   storiesRead: string[];
   /** colouring pages: page id → region id → colour */
   coloring: Record<string, Record<string, string>>;
+  /** phonics sounds explored: "ne:ka", "en:s" … */
+  soundsHeard: string[];
 }
 
 /** `age` (3–6) tunes difficulty; undefined until the child (or parent) answers once. */
@@ -46,6 +48,8 @@ export interface State extends Progress {
   unlockAll: boolean;
   /** gentle background music on menus */
   music: boolean;
+  /** allow on-device "hear yourself" recording (never uploaded) */
+  mic: boolean;
   /** daily play limit in minutes (0 = off) — screen time matters at this age */
   playLimit: number;
   /** today's date and play time (all players together), plus extra minutes a parent granted today */
@@ -57,7 +61,7 @@ export interface State extends Progress {
   lastPlayed: number;
 }
 
-export const PROGRESS_KEYS = ['letters', 'nodes', 'stickers', 'newStickers', 'provincesSeen', 'cardsSeen', 'quizBest', 'playSeconds', 'barakhari', 'practiceDays', 'wordsHeard', 'storiesRead', 'coloring'] as const;
+export const PROGRESS_KEYS = ['letters', 'nodes', 'stickers', 'newStickers', 'provincesSeen', 'cardsSeen', 'quizBest', 'playSeconds', 'barakhari', 'practiceDays', 'wordsHeard', 'storiesRead', 'coloring', 'soundsHeard'] as const;
 
 export const AVATARS = ['🐯', '🐘', '🦏', '🐒', '🐻', '🐦'];
 export const MAX_PROFILES = 4;
@@ -65,13 +69,13 @@ export const MAX_PROFILES = 4;
 export function emptyProgress(): Progress {
   return {
     letters: {}, nodes: {}, stickers: [], newStickers: [], provincesSeen: [], cardsSeen: [], quizBest: 0, playSeconds: 0,
-    barakhari: [], practiceDays: [], wordsHeard: [], storiesRead: [], coloring: {},
+    barakhari: [], practiceDays: [], wordsHeard: [], storiesRead: [], coloring: {}, soundsHeard: [],
   };
 }
 
 export function defaultState(): State {
   return {
-    v: 2, lang: 'ne', sound: true, voice: true, roman: false, unlockAll: false, music: true, playLimit: 0, playDay: '', playDaySeconds: 0, playExtra: 0,
+    v: 2, lang: 'ne', sound: true, voice: true, roman: false, unlockAll: false, music: true, mic: true, playLimit: 0, playDay: '', playDaySeconds: 0, playExtra: 0,
     ...emptyProgress(),
     profiles: [{ id: 'p1', avatar: AVATARS[0], name: '' }], active: 'p1', lastPlayed: 0,
   };
@@ -302,7 +306,7 @@ if (typeof window !== 'undefined') {
 }
 
 /** Mark something as seen in a list-type progress field (no duplicates). */
-export function markSeen(key: 'wordsHeard' | 'storiesRead' | 'barakhari' | 'cardsSeen' | 'provincesSeen', id: string): void {
+export function markSeen(key: 'wordsHeard' | 'storiesRead' | 'barakhari' | 'cardsSeen' | 'provincesSeen' | 'soundsHeard', id: string): void {
   if (state[key].includes(id)) return;
   update((s) => { s[key].push(id); });
 }

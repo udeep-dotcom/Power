@@ -33,4 +33,8 @@
     <!-- Permissions -->
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- "Hear yourself" pronunciation practice: recorded on device, never uploaded or saved.
+         Asked only when the child first taps the 🎤 button; parents can turn it off. -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
 </manifest>

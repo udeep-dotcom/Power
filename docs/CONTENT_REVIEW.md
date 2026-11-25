@@ -148,6 +148,11 @@ Items marked ⚠ are known compromises that need a decision.
 | ☐ | 🌱 जमरा / Jamara | दशैंमा जमरा र टीका लगाइन्छ। | At Dashain we wear jamara and tika. |
 | ☐ | 🐕 कुकुर तिहार / Kukur Tihar | तिहारमा कुकुरलाई फूलको माला लगाइन्छ। | At Tihar dogs wear flower garlands. |
 | ☐ | 🌙 जून र घाम / Moon and sun | हाम्रो झण्डामा जून र घाम छन्। | Our flag has the moon and the sun. |
+| ☐ | 👄 मुखको नक्सा / Mouth map | क घाँटीबाट, प ओठबाट आउँछ — हाम्रो वर्णमाला मुखको नक्सा हो! | क comes from the throat, प from the lips — our alphabet is a map of the mouth! |
+| ☐ | 🔤 पहिलो अङ्ग्रेजी आवाज / First English sounds | s, a, t, p, i, n — यी छ आवाजले धेरै शब्द बन्छन्! | s, a, t, p, i, n — these six sounds make lots of words! |
+| ☐ | 🧩 जोडेर पढ्ने / Blender | आवाज जोड्दा शब्द बन्छ: c-a-t = cat, क-म-ल = कमल! | Sounds join into words: c-a-t = cat, क-म-ल = कमल! |
+| ☐ | 👂 तेज कान / Sharp ears | बात र भात — एउटै आवाज फरक, अर्थ नै फरक! | बात and भात — one sound changes the whole meaning! |
+| ☐ | 🤝 ध्वनि साथी / Sound friends | अङ्ग्रेजी m र नेपाली म उस्तै सुनिन्छन्! | English m and Nepali म sound the same! |
 | ☐ | txt:१२३ गन्ती / Counting | एक, दुई, तीन … तिमी नेपालीमा गन्न सक्छौ! | One, two, three … you can count in Nepali! |
 | ☐ | 🥁 बाजा / Music | मादल नेपाली लोकगीतको मुटु हो। | The madal drum is the heartbeat of Nepali folk songs. |
 | ☐ | 🖍️ चित्रकार / Little artist | तिमीले नेपालका चित्रहरूमा रङ भर्यौ! | You coloured pictures of Nepal! |
@@ -363,3 +368,138 @@ Check each sentence for accuracy, cultural sensitivity and child-appropriateness
 | ☐ | मिथिला चित्रकला कुन प्रदेशमा प्रसिद्ध छ? | मधेश | कर्णाली, गण्डकी |
 | ☐ | "क" बाट सुरु हुने शब्द कुन हो? | कमल | घर, माछा |
 | ☐ | नेपाली भाषा कुन लिपिमा लेखिन्छ? | देवनागरी | रोमन, अरबी |
+
+
+## 10. Sounds & pronunciation (ध्वनि, ए बी सी)
+
+**Reviewer:** a Nepali teacher for 10a–10c, and someone who teaches English phonics (Jolly Phonics or similar) for 10d–10f.
+
+### 10a. Where each Nepali sound is made (मुखको नक्सा)
+
+| ✓ | Row | Letters | Name shown | How it is described |
+|---|---|---|---|---|
+| ☐ | throat | क ख ग घ ङ | कण्ठ्य — घाँटीबाट (Throat (velar)) | जिब्रोको पछाडिको भाग माथि छुन्छ। — The back of the tongue touches the back of the mouth. |
+| ☐ | palate | च छ ज झ ञ | तालव्य — तालुबाट (Palate (palatal)) | जिब्रो तालुतिर उठ्छ। — The tongue rises towards the roof of the mouth. |
+| ☐ | roof | ट ठ ड ढ ण | मूर्धन्य — जिब्रो फर्काएर (Tongue turned up (retroflex)) | जिब्रोको टुप्पो अलिकति पछाडि फर्काएर माथि छुन्छ। — The tip of the tongue turns back a little and touches the roof. |
+| ☐ | teeth | त थ द ध न | दन्त्य — दाँतबाट (Teeth (dental)) | जिब्रोको टुप्पो माथिल्लो दाँतमा छुन्छ। — The tip of the tongue touches the top teeth. |
+| ☐ | lips | प फ ब भ म | ओष्ठ्य — ओठबाट (Lips (labial)) | दुवै ओठ जोडिन्छन्। — Both lips press together. |
+
+| ✓ | Column | Air puff 🕯️ | Throat buzz 🐝 | Nose 👃 |
+|---|---|---|---|---|
+| ☐ | 1. अल्पप्राण (little air) |  |  |  |
+| ☐ | 2. महाप्राण (big puff of air) | yes |  |  |
+| ☐ | 3. घोष (throat buzzes) |  | yes |  |
+| ☐ | 4. घोष महाप्राण (buzz + puff) | yes | yes |  |
+| ☐ | 5. नासिक्य (through the nose) |  | yes | yes |
+
+| ✓ | Other letter | Place shown | Air | Buzz |
+|---|---|---|---|---|
+| ☐ | य | palate |  | yes |
+| ☐ | र | teeth |  | yes |
+| ☐ | ल | teeth |  | yes |
+| ☐ | व | lips |  | yes |
+| ☐ | श | teeth |  |  |
+| ☐ | ष | teeth |  |  |
+| ☐ | स | teeth |  |  |
+| ☐ | ह | throat | yes | yes |
+
+⚠ **Descriptive, not textbook.** Places follow how Nepali is *spoken today*, not the Sanskrit उच्चारण-स्थान taught in school: श and ष are shown at the teeth with स because all three are said "sa"; र is shown at the teeth (it is a tongue-tip tap behind the teeth), where textbooks list it as मूर्धन्य. Decide whether to keep this, or show the textbook place with a "we say it like स" note.
+
+- ☐ Same-sound note **श ष स**: यी तीनै प्रायः "स" नै सुनिन्छन् — फरक लेख्दा मात्र। — All three usually sound like "sa" — they differ only in spelling.
+- ☐ Same-sound note **ि ी · ु ू**: ह्रस्व र दीर्घ उस्तै सुनिन्छन् — फरक लेख्दा मात्र। — Short and long i/u sound the same — the difference is only in spelling.
+
+### 10b. Nepali minimal pairs (कान खोलेर सुन)
+
+| ✓ | Word A | Picture | Word B | Picture | Hint after answering |
+|---|---|---|---|---|---|
+| ☐ | बात (talk) | 💬 | भात (rice) | 🍚 | भ मा धेरै हावा आउँछ 🕯️ — भ has a big puff of air 🕯️ |
+| ☐ | पुल (bridge) | 🌉 | फूल (flower) | 🌸 | फ मा धेरै हावा आउँछ 🕯️ — फ has a big puff of air 🕯️ |
+| ☐ | काम (work) | 👷 | खाम (envelope) | ✉️ | ख मा धेरै हावा आउँछ 🕯️ — ख has a big puff of air 🕯️ |
+| ☐ | दाल (lentils) | 🍲 | डाल (branch) | 🌿 | द दाँतमा, ड जिब्रो फर्काएर 👅 — द at the teeth, ड with the tongue turned up 👅 |
+| ☐ | तीन (three) | txt:३ | टिन (tin can) | 🥫 | त दाँतमा, ट जिब्रो फर्काएर 👅 — त at the teeth, ट with the tongue turned up 👅 |
+
+⚠ तीन/टिन: टिन is a loanword (tin can); confirm children know it. पुल/फूल also differs in ु/ू in writing, but not in sound.
+
+### 10c. Nepali blend words (जोडेर पढौं — by अक्षर)
+
+| ✓ | Word | Parts (age 5–6) | Chunks (age 3–4) | Picture | Meaning |
+|---|---|---|---|---|---|
+| ☐ | कमल | क + म + ल | क + मल | 🪷 | lotus |
+| ☐ | घर | घ + र | घ + र | 🏠 | house |
+| ☐ | फल | फ + ल | फ + ल | 🍎 | fruit |
+| ☐ | नल | न + ल | न + ल | 🚰 | tap |
+| ☐ | बस | ब + स | ब + स | 🚌 | bus |
+| ☐ | कलम | क + ल + म | क + लम | 🖊️ | pen |
+| ☐ | मटर | म + ट + र | म + टर | 🫛 | peas |
+| ☐ | आमा | आ + मा | आ + मा | 👩 | mother |
+| ☐ | माछा | मा + छा | मा + छा | 🐟 | fish |
+| ☐ | केरा | के + रा | के + रा | 🍌 | banana |
+
+### 10d. English letter sounds (ए बी सी)
+
+| ✓ | Group | Letter | Sound | Key word | Picture | Action (ne) | Nepali friend |
+|---|---|---|---|---|---|---|---|
+| ☐ | 1 | **S s** | /s/ "sss" | sun | 🌞 | सर्पजस्तै: स्स्स् | स (= same) |
+| ☐ | 1 | **A a** | /æ/ "ah" | apple | 🍎 | स्याउ टोक्न मुख खोल: अ्या | — |
+| ☐ | 1 | **T t** | /t/ "tuh" | tiger | 🐅 | घडी बज्छ: ट् ट् ट् | ट (≈ close) |
+| ☐ | 1 | **P p** | /p/ "puh" | pig | 🐷 | बुलबुला फुटाऊ: प् प् प् | प (= same) |
+| ☐ | 1 | **I i** | /ɪ/ "ih" | insect | 🐞 | कीराले चिलायो: इ इ इ | इ (≈ close) |
+| ☐ | 1 | **N n** | /n/ "nnn" | nest | 🪺 | टाउको हल्लाऊ: न्न्न् | न (= same) |
+| ☐ | 2 | **M m** | /m/ "mmm" | moon | 🌙 | मीठो खाना: म्म्म् | म (= same) |
+| ☐ | 2 | **D d** | /d/ "duh" | dog | 🐶 | डाइनोसर हिँड्छ: ड् ड् ड् | ड (≈ close) |
+| ☐ | 2 | **G g** | /ɡ/ "guh" | goat | 🐐 | पानी घुटुक्क: ग् ग् ग् | ग (= same) |
+| ☐ | 2 | **O o** | /ɒ/ "aw" | octopus | 🐙 | अचम्म! ओ | ओ (≈ close) |
+| ☐ | 2 | **C c** | /k/ "kuh" | cat | 🐱 | क्यामेरा क्लिक: क् क् | क (= same) |
+| ☐ | 2 | **K k** | /k/ "kuh" | kite | 🪁 | चङ्गा उडाऊ: क् क् | क (= same) |
+| ☐ | 3 | **E e** | /e/ "eh" | egg | 🥚 | अण्डा फुट्यो: ए | ए (= same) |
+| ☐ | 3 | **U u** | /ʌ/ "uh" | umbrella | ☂️ | छाता माथि: अ | अ (≈ close) |
+| ☐ | 3 | **R r** | /r/ "rrr" | rabbit | 🐇 | कुकुर घुर्छ: र्र्र् | र (≈ close) |
+| ☐ | 3 | **H h** | /h/ "huh" | hat | 🎩 | दौडेर स्वाँ स्वाँ: ह् ह् | ह (= same) |
+| ☐ | 3 | **B b** | /b/ "buh" | ball | ⚽ | बल उफ्रिन्छ: ब् ब् | ब (= same) |
+| ☐ | 3 | **F f** | /f/ "fff" | fish | 🐟 | पङ्खाको हावा: fff | फ (≈ close) |
+| ☐ | 4 | **L l** | /l/ "lll" | lion | 🦁 | ललिपप चाट: ल्ल्ल् | ल (= same) |
+| ☐ | 4 | **J j** | /dʒ/ "juh" | juice | 🧃 | उफ्र उफ्र: ज् ज् | ज (≈ close) |
+| ☐ | 4 | **V v** | /v/ "vvv" | van | 🚐 | गाडीको इन्जिन: vvv | व (≈ close) |
+| ☐ | 4 | **W w** | /w/ "wuh" | whale | 🐳 | हावा चल्यो: व | व (≈ close) |
+| ☐ | 4 | **Y y** | /j/ "yuh" | yo-yo | 🪀 | योयो माथि तल: य | य (= same) |
+| ☐ | 5 | **X x** | /ks/ "ks" | fox (sound at the END) | 🦊 | फ्याउरोको अन्त्यमा: क्स | — |
+| ☐ | 5 | **Z z** | /z/ "zzz" | zebra | 🦓 | मौरी भुनभुनायो: zzz | — |
+| ☐ | 5 | **Q q** | /kw/ "kwuh" | queen | 👸 | रानी भन्छिन्: क्व | — |
+
+⚠ The **sound** column is what text-to-speech is asked to say until real recordings exist ("tuh", "kuh"…). TTS cannot say a pure stop sound; recordings (docs/recording-script.csv, priority 3) fix this.
+
+⚠ English **t** and **d** are marked only "close" to ट/ड: Nepali speakers hear English t/d as retroflex, but they are not identical. **f ≈ फ** and **v/w ≈ व** are also only close; that is exactly what the minimal pairs practise.
+
+### 10e. English minimal pairs and blend words
+
+| ✓ | Word A | Picture | Word B | Picture | Hint |
+|---|---|---|---|---|---|
+| ☐ | fan | 🪭 | van | 🚐 | f मा हावा मात्र, v मा आवाज पनि 🐝 — f is just air; v buzzes 🐝 |
+| ☐ | three | txt:3 | tree | 🌳 | th मा जिब्रो दाँतबीच 👅 — For th, the tongue goes between the teeth 👅 |
+| ☐ | sheep | 🐑 | ship | 🚢 | ee लामो, i छोटो — ee is long, i is short |
+| ☐ | bear | 🐻 | pear | 🍐 | b मा आवाज, p मा हावा — b buzzes, p puffs |
+| ☐ | vest | 🦺 | west | 🧭 | v मा दाँत र ओठ, w मा गोलो ओठ — v uses teeth and lip; w uses round lips |
+| ☐ | cap | 🧢 | cup | ☕ | a मुख ठूलो खोलेर, u छोटो "अ" — a opens wide; u is a short "uh" |
+
+⚠ **west 🧭** is too abstract for under-6s (a compass means nothing to most 4-year-olds). Replace with custom art (a signpost pointing to the setting sun) or swap the pair.
+
+| ✓ | Blend word | Sounds | Onset + rime | Picture |
+|---|---|---|---|---|
+| ☐ | sun | s-u-n | s + un | 🌞 |
+| ☐ | cat | c-a-t | c + at | 🐱 |
+| ☐ | dog | d-o-g | d + og | 🐶 |
+| ☐ | pig | p-i-g | p + ig | 🐷 |
+| ☐ | hat | h-a-t | h + at | 🎩 |
+| ☐ | bed | b-e-d | b + ed | 🛏️ |
+| ☐ | bus | b-u-s | b + us | 🚌 |
+| ☐ | map | m-a-p | m + ap | 🗺️ |
+| ☐ | pen | p-e-n | p + en | 🖊️ |
+| ☐ | box | b-o-x | b + ox | 📦 |
+| ☐ | fox | f-o-x | f + ox | 🦊 |
+| ☐ | web | w-e-b | w + eb | 🕸️ |
+
+### 10f. "Only in one language" cards
+
+- ☐ **Only English: f · v · z · th** — यी आवाजका लागि नेपाली अक्षर छैन — ओठ, दाँत र जिब्रो मिलाएर बनाउँछौं। — No Nepali letter makes these sounds — we shape them with lips, teeth and tongue.
+- ☐ **Only Nepali: घ झ ढ ध भ** — आवाज + हावा: अङ्ग्रेजीमा यस्ता आवाज छैनन्। — Buzz + a puff of air: English has no sounds like these.
+- ☐ **Only Nepali: त / ट** — नेपालीमा दुईवटा "t" छन्: दाँतको त र फर्काएको ट। — Nepali has two "t" sounds: त at the teeth, ट with the tongue turned up.

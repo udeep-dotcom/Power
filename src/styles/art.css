@@ -29,7 +29,7 @@
 @keyframes sun-glow { to { box-shadow: 0 0 0 20px rgba(255, 220, 90, 0.2), 0 0 0 42px rgba(255, 220, 90, 0.08); } }
 
 /* Prayer flags (लुङ्दार) strung across the top of the home screen */
-.lungta { position: absolute; left: -2%; right: -2%; top: calc(4px + var(--safe-top)); height: 70px; z-index: 1; pointer-events: none; }
+.lungta { position: absolute; left: 0; width: 100%; top: calc(4px + var(--safe-top)); height: 70px; z-index: 1; pointer-events: none; }
 .lungta .pf { transform-origin: 50% 0; animation: pf-flutter 2.2s ease-in-out infinite alternate; }
 @keyframes pf-flutter { from { transform: skewX(-6deg) rotate(-2deg); } to { transform: skewX(6deg) rotate(2deg); } }
 

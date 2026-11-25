@@ -101,18 +101,21 @@ export function stopSpeech(): void {
  * Speak Nepali text. `clip` is the id of a recorded file that says the same thing
  * (e.g. "letter-ka", "chant-ka", "word-ka"). Resolves when finished (or immediately if silent).
  */
-export async function say(text: string, clip?: string): Promise<boolean> {
+export interface SpeakOpts { slow?: boolean }
+
+export async function say(text: string, clip?: string, opts: SpeakOpts = {}): Promise<boolean> {
   if (!getState().voice) return false;
   await initSpeech();
   stopSpeech();
-  return tracked(speakNepali(text, clip));
+  return tracked(speakNepali(text, clip, opts));
 }
 
-async function speakNepali(text: string, clip?: string): Promise<boolean> {
+async function speakNepali(text: string, clip?: string, opts: SpeakOpts = {}): Promise<boolean> {
 
   if (clip && manifest?.has(clip)) {
     try {
       const a = new Audio(`./audio/${clip}.mp3`);
+      if (opts.slow) a.playbackRate = 0.7; // browsers keep the pitch when slowing down
       currentAudio = a;
       await a.play();
       await new Promise((r) => { a.onended = r; a.onerror = r; });
@@ -122,30 +125,40 @@ async function speakNepali(text: string, clip?: string): Promise<boolean> {
 
   if (nativeTts) {
     try {
-      await nativeTts.speak({ text, lang: nativeLang, rate: 0.85, pitch: 1.1, volume: 1, category: 'ambient' });
+      await nativeTts.speak({ text, lang: nativeLang, rate: opts.slow ? 0.45 : 0.85, pitch: 1.1, volume: 1, category: 'ambient' });
       return true;
     } catch { /* fall through */ }
   }
 
-  if (webVoice && typeof speechSynthesis !== 'undefined') return speakWeb(text, webVoice, webVoice.lang, 0.8);
+  if (webVoice && typeof speechSynthesis !== 'undefined') return speakWeb(text, webVoice, webVoice.lang, opts.slow ? 0.45 : 0.8);
   return false;
 }
 
 /** Speak an English line (bilingual mode only). */
-export async function sayEnglish(text: string): Promise<boolean> {
+export async function sayEnglish(text: string, clip?: string, opts: SpeakOpts = {}): Promise<boolean> {
   if (!getState().voice) return false;
   await initSpeech();
   stopSpeech();
-  return tracked(speakEnglish(text));
+  return tracked(speakEnglish(text, clip, opts));
 }
 
-async function speakEnglish(text: string): Promise<boolean> {
+async function speakEnglish(text: string, clip?: string, opts: SpeakOpts = {}): Promise<boolean> {
+  if (clip && manifest?.has(clip)) {
+    try {
+      const a = new Audio(`./audio/${clip}.mp3`);
+      if (opts.slow) a.playbackRate = 0.7;
+      currentAudio = a;
+      await a.play();
+      await new Promise((r) => { a.onended = r; a.onerror = r; });
+      return true;
+    } catch { /* fall through */ }
+  }
   if (nativeEnglish) {
-    try { await nativeEnglish.speak({ text, lang: 'en-US', rate: 0.95, pitch: 1.1, volume: 1, category: 'ambient' }); return true; } catch { /* fall through */ }
+    try { await nativeEnglish.speak({ text, lang: 'en-US', rate: opts.slow ? 0.5 : 0.95, pitch: 1.1, volume: 1, category: 'ambient' }); return true; } catch { /* fall through */ }
   }
   if (typeof speechSynthesis === 'undefined') return false;
   const v = speechSynthesis.getVoices().find((x) => /^en/i.test(x.lang));
-  return speakWeb(text, v ?? null, 'en-US', 0.95);
+  return speakWeb(text, v ?? null, 'en-US', opts.slow ? 0.5 : 0.95);
 }
 
 function speakWeb(text: string, voice: SpeechSynthesisVoice | null, lang: string, rate: number): Promise<boolean> {
@@ -183,3 +196,11 @@ export async function instruct(t: { ne: string; en: string }, clip?: string): Pr
 }
 
 export function isSpeaking(): boolean { return speaking > 0; }
+
+/** True if some English voice can speak (needed for the ABC section). */
+export function canSpeakEnglish(): boolean {
+  if (!getState().voice) return false;
+  if (manifest && [...manifest].some((c) => c.startsWith('en-'))) return true;
+  if (nativeEnglish) return true;
+  try { return typeof speechSynthesis !== 'undefined' && speechSynthesis.getVoices().some((v) => /^en/i.test(v.lang)); } catch { return false; }
+}

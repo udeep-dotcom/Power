@@ -9,6 +9,7 @@ import { HabreSays, TopBar } from '../../components/UI';
 import { LETTER_BY_ID } from '../../data/alphabet';
 import { BK_CONSONANTS, MATRAS, showSign, syllable, syllableRoman, type Matra } from '../../data/barakhari';
 import { UI } from '../../data/i18n';
+import { SAME_SOUND_NOTES } from '../../data/phonics';
 import { navigate } from '../../lib/router';
 import { sfx } from '../../lib/sfx';
 import { say } from '../../lib/speech';
@@ -62,6 +63,7 @@ export function Barakhari({ initial }: { initial?: string }) {
         {s.roman && <span class="eq-roman">{syllableRoman(c, m)}</span>}
       </div>
       <p class="eq-caption"><Bi t={m.name} /></p>
+      {['i', 'ii', 'u', 'uu'].includes(m.id) && <p class="eq-note"><Bi t={SAME_SOUND_NOTES[1].note} /></p>}
 
       <div class="bk-grid">
         {MATRAS.map((mm, i) => (

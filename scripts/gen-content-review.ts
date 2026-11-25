@@ -9,6 +9,8 @@ import { WORD_TOPICS } from '../src/data/words.ts';
 import { NUMBERS } from '../src/data/numbers.ts';
 import { KIND_LABEL, STORIES } from '../src/data/stories.ts';
 import { DECKS, PROVINCES, QUIZ } from '../src/data/nepal.ts';
+import { BLEND_WORDS, COLUMN_FEATURES, EN_LETTERS, MINIMAL_PAIRS, ONLY_IN, SAME_SOUND_NOTES, VARGAS, soundInfo } from '../src/data/phonics.ts';
+import { LETTER_BY_ID } from '../src/data/alphabet.ts';
 
 const L: string[] = [];
 L.push('# Content review checklist', '');
@@ -80,6 +82,54 @@ for (const q of QUIZ) {
   const rest = q.options.filter((_, i) => i !== q.answer).map((o) => o.label.ne).join(', ');
   L.push(`| ☐ | ${q.q.ne} | ${ok.label.ne} | ${rest} |`);
 }
+L.push('');
+
+// ── v0.4: sounds & phonics ──
+L.push('', '## 10. Sounds & pronunciation (ध्वनि, ए बी सी)', '');
+L.push('**Reviewer:** a Nepali teacher for 10a–10c, and someone who teaches English phonics (Jolly Phonics or similar) for 10d–10f.', '');
+L.push('### 10a. Where each Nepali sound is made (मुखको नक्सा)', '');
+L.push('| ✓ | Row | Letters | Name shown | How it is described |', '|---|---|---|---|---|');
+for (const v of VARGAS) L.push(`| ☐ | ${v.id} | ${v.letters.map((id) => LETTER_BY_ID[id].char).join(' ')} | ${v.name.ne} (${v.name.en}) | ${v.how.ne} — ${v.how.en} |`);
+L.push('', '| ✓ | Column | Air puff 🕯️ | Throat buzz 🐝 | Nose 👃 |', '|---|---|---|---|---|');
+COLUMN_FEATURES.forEach((f, i) => L.push(`| ☐ | ${i + 1}. ${f.name.ne} (${f.name.en}) | ${f.air ? 'yes' : ''} | ${f.buzz ? 'yes' : ''} | ${f.nose ? 'yes' : ''} |`));
+L.push('', '| ✓ | Other letter | Place shown | Air | Buzz |', '|---|---|---|---|---|');
+for (const id of ['ya', 'ra', 'la', 'wa', 'sha', 'ssa', 'sa', 'ha']) {
+  const i = soundInfo(id)!;
+  L.push(`| ☐ | ${LETTER_BY_ID[id].char} | ${i.place} | ${i.air ? 'yes' : ''} | ${i.buzz ? 'yes' : ''} |`);
+}
+L.push('', '⚠ **Descriptive, not textbook.** Places follow how Nepali is *spoken today*, not the Sanskrit उच्चारण-स्थान taught in school: श and ष are shown at the teeth with स because all three are said "sa"; र is shown at the teeth (it is a tongue-tip tap behind the teeth), where textbooks list it as मूर्धन्य. Decide whether to keep this, or show the textbook place with a "we say it like स" note.', '');
+for (const n of SAME_SOUND_NOTES) L.push(`- ☐ Same-sound note **${n.letters}**: ${n.note.ne} — ${n.note.en}`);
+L.push('');
+
+L.push('### 10b. Nepali minimal pairs (कान खोलेर सुन)', '');
+L.push('| ✓ | Word A | Picture | Word B | Picture | Hint after answering |', '|---|---|---|---|---|---|');
+for (const p of MINIMAL_PAIRS.filter((x) => x.lang === 'ne')) L.push(`| ☐ | ${p.a.word} (${p.a.en}) | ${p.a.pic} | ${p.b.word} (${p.b.en}) | ${p.b.pic} | ${p.feature.ne} — ${p.feature.en} |`);
+L.push('', '⚠ तीन/टिन: टिन is a loanword (tin can); confirm children know it. पुल/फूल also differs in ु/ू in writing, but not in sound.', '');
+
+L.push('### 10c. Nepali blend words (जोडेर पढौं — by अक्षर)', '');
+L.push('| ✓ | Word | Parts (age 5–6) | Chunks (age 3–4) | Picture | Meaning |', '|---|---|---|---|---|---|');
+for (const w of BLEND_WORDS.filter((x) => x.lang === 'ne')) L.push(`| ☐ | ${w.word} | ${w.phonemes.join(' + ')} | ${w.chunks.join(' + ')} | ${w.pic} | ${w.en} |`);
+L.push('');
+
+L.push('### 10d. English letter sounds (ए बी सी)', '');
+L.push('| ✓ | Group | Letter | Sound | Key word | Picture | Action (ne) | Nepali friend |', '|---|---|---|---|---|---|---|---|');
+for (const l of EN_LETTERS) {
+  const f = l.friend ? `${LETTER_BY_ID[l.friend].char} (${l.friendHow === 'same' ? '= same' : '≈ close'})` : '—';
+  L.push(`| ☐ | ${l.group} | **${l.upper} ${l.lower}** | ${l.ipa} "${l.soundSay}" | ${l.word}${l.pos === 'end' ? ' (sound at the END)' : ''} | ${l.pic} | ${l.action.ne} | ${f} |`);
+}
+L.push('', '⚠ The **sound** column is what text-to-speech is asked to say until real recordings exist ("tuh", "kuh"…). TTS cannot say a pure stop sound; recordings (docs/recording-script.csv, priority 3) fix this.', '');
+L.push('⚠ English **t** and **d** are marked only "close" to ट/ड: Nepali speakers hear English t/d as retroflex, but they are not identical. **f ≈ फ** and **v/w ≈ व** are also only close; that is exactly what the minimal pairs practise.', '');
+
+L.push('### 10e. English minimal pairs and blend words', '');
+L.push('| ✓ | Word A | Picture | Word B | Picture | Hint |', '|---|---|---|---|---|---|');
+for (const p of MINIMAL_PAIRS.filter((x) => x.lang === 'en')) L.push(`| ☐ | ${p.a.word} | ${p.a.pic} | ${p.b.word} | ${p.b.pic} | ${p.feature.ne} — ${p.feature.en} |`);
+L.push('', '⚠ **west 🧭** is too abstract for under-6s (a compass means nothing to most 4-year-olds). Replace with custom art (a signpost pointing to the setting sun) or swap the pair.', '');
+L.push('| ✓ | Blend word | Sounds | Onset + rime | Picture |', '|---|---|---|---|---|');
+for (const w of BLEND_WORDS.filter((x) => x.lang === 'en')) L.push(`| ☐ | ${w.word} | ${w.phonemes.join('-')} | ${w.chunks.join(' + ')} | ${w.pic} |`);
+L.push('');
+
+L.push('### 10f. "Only in one language" cards', '');
+for (const o of ONLY_IN) L.push(`- ☐ **${o.lang === 'en' ? 'Only English' : 'Only Nepali'}: ${o.sounds}** — ${o.note.ne} — ${o.note.en}`);
 L.push('');
 writeFileSync(new URL('../docs/CONTENT_REVIEW.md', import.meta.url), L.join('\n'));
 console.log('docs/CONTENT_REVIEW.md written');

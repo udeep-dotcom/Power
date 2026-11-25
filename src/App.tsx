@@ -22,6 +22,10 @@ import { StoryReader, StoryShelf } from './screens/stories/Stories';
 import { MusicScreen, PlayHub } from './screens/play/Music';
 import { ColourPage, ColourPicker } from './screens/play/Colouring';
 import { BedTime } from './screens/BedTime';
+import { MouthMap, SoundsHub } from './screens/sounds/Sounds';
+import { AbcHub, AbcLetter } from './screens/sounds/Abc';
+import { BlendGame } from './screens/sounds/Blend';
+import { FriendsGame, FriendsScreen, PairsGame, SoundHunt } from './screens/sounds/PhonicsGames';
 import { MusicDirector } from './lib/music';
 
 /*
@@ -39,6 +43,10 @@ import { MusicDirector } from './lib/music';
    /numbers, /numbers/game                       numerals १–१० + counting game
    /stories, /stories/:id                        narrated picture stories
    /play, /play/music, /play/colour[/:page]      instruments + colouring
+   /sounds, /sounds/mouth[/:letter]               Nepali phonetics: mouth map
+   /sounds/blend/:lang, /sounds/pairs/:lang       blending, minimal pairs (ne | en)
+   /sounds/friends[/game]                         English ↔ Nepali sound friends
+   /abc, /abc/:letter, /abc/hunt                  English letter sounds (phonics)
    /nepal, /nepal/map, /nepal/deck/:id, /nepal/quiz
    /stickers, /parents
 */
@@ -72,6 +80,15 @@ export function App() {
   else if (a === 'play' && b === 'colour' && c) screen = <ColourPage key={path} pageId={c} />;
   else if (a === 'play' && b === 'colour') screen = <ColourPicker />;
   else if (a === 'play') screen = <PlayHub />;
+  else if (a === 'sounds' && b === 'mouth') screen = <MouthMap key={path} initial={c} />;
+  else if (a === 'sounds' && b === 'blend') screen = <BlendGame key={path} lang={c === 'en' ? 'en' : 'ne'} />;
+  else if (a === 'sounds' && b === 'pairs') screen = <PairsGame key={path} lang={c === 'en' ? 'en' : 'ne'} />;
+  else if (a === 'sounds' && b === 'friends' && c === 'game') screen = <FriendsGame key={path} />;
+  else if (a === 'sounds' && b === 'friends') screen = <FriendsScreen />;
+  else if (a === 'sounds') screen = <SoundsHub />;
+  else if (a === 'abc' && b === 'hunt') screen = <SoundHunt key={path} />;
+  else if (a === 'abc' && b) screen = <AbcLetter key={path} id={b} />;
+  else if (a === 'abc') screen = <AbcHub />;
   else if (a === 'nepal' && b === 'map') screen = <MapScreen />;
   else if (a === 'nepal' && b === 'deck' && c) screen = <DeckScreen key={path} deckId={c} />;
   else if (a === 'nepal' && b === 'quiz') screen = <Quiz key={path} />;

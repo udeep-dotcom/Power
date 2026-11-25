@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from 'preact/hooks';
+import { PLACE_LABEL, soundInfo } from '../data/phonics';
+import { Echo } from '../components/Echo';
 import { level } from '../lib/level';
 import { Bi } from '../components/Bi';
 import { Icon, Pic } from '../components/Art';
@@ -8,7 +10,7 @@ import { Celebration, HabreSays, SpeakerButton, TopBar } from '../components/UI'
 import { speakLetter, speakWord, Word } from '../components/Word';
 import { LETTER_BY_ID, type Letter } from '../data/alphabet';
 import { UI } from '../data/i18n';
-import { goBack } from '../lib/router';
+import { goBack, navigate } from '../lib/router';
 import { sfx } from '../lib/sfx';
 import { completeNode, recordAnswer, update, useStore } from '../lib/store';
 import { distractors, haptic, shuffle, sleep, tr } from '../lib/util';
@@ -22,6 +24,7 @@ export function Lesson({ letterId }: { letterId: string; fromJourney?: boolean }
   const [step, setStep] = useState<Step>('learn');
   const [traceStars, setTraceStars] = useState(0);
   const [flipIn, setFlipIn] = useState(0);
+  const phon = l ? soundInfo(l.id) : null;
 
   useEffect(() => {
     if (!l) { goBack('/'); return; } // unknown letter id (old link) — leave quietly
@@ -41,7 +44,7 @@ export function Lesson({ letterId }: { letterId: string; fromJourney?: boolean }
       <Scenery kind="pahad" />
       <TopBar
         title={<span class="steps">{STEPS.map((st, i) => <span key={st} class={`step-dot ${st === step ? 'cur' : STEPS.indexOf(step) > i || step === 'done' ? 'on' : ''}`} />)}</span>}
-        right={<SpeakerButton onClick={() => { setFlipIn((n) => n + 1); void speakLetter(l); }} label={tr(UI.tapToHear)} />}
+        right={<span class="topbar-actions"><Echo model={() => speakLetter(l)} compact /><SpeakerButton onClick={() => { setFlipIn((n) => n + 1); void speakLetter(l); }} label={tr(UI.tapToHear)} /></span>}
       />
 
       {step === 'learn' && (
@@ -50,6 +53,15 @@ export function Lesson({ letterId }: { letterId: string; fromJourney?: boolean }
             <span class="big-letter deva" lang="ne">{l.char}</span>
             {s.roman && <span class="roman">{l.roman}</span>}
           </button>
+          {phon?.place && (
+            // ध्वनि: where the sound is made + feel-it cues; opens the mouth map
+            <button class="phon-chips" onClick={() => { sfx.tap(); navigate(`/sounds/mouth/${l.id}`); }}>
+              <span class="pc">👄 <Bi t={PLACE_LABEL[phon.place]} inline /></span>
+              {phon.air && <span class="pc">🕯️ <Bi t={UI.air} inline /></span>}
+              {phon.buzz && <span class="pc">🐝 <Bi t={UI.buzz} inline /></span>}
+              {phon.nose && <span class="pc">👃 <Bi t={UI.nose} inline /></span>}
+            </button>
+          )}
           <button class="word-card card" onClick={() => { sfx.tap(); void speakWord(l); }}>
             <Pic pic={l.pic} size={92} />
             <span class="word-col">

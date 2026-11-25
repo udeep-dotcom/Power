@@ -24,10 +24,20 @@ export const MATRAS: Matra[] = [
 
 export const MATRA_BY_ID: Record<string, Matra> = Object.fromEntries(MATRAS.map((m) => [m.id, m]));
 
-/** Pairs children mix up — always offered together in the game. */
+/** Signs children mix up when READING — offered together when the syllable is shown, not heard. */
 export const MATRA_CONFUSABLE: Record<string, string> = {
   i: 'ii', ii: 'i', u: 'uu', uu: 'u', e: 'ai', ai: 'e', o: 'au', au: 'o', aa: 'o', am: 'ah', ah: 'am',
 };
+
+/**
+ * Partners for LISTENING rounds. In spoken Nepali ि/ी and ु/ू sound the same (the length
+ * difference exists only in writing), so a child can't tell them apart by ear — listening
+ * rounds pair each sign with one that really sounds different, and never offer a same-sound twin.
+ */
+export const MATRA_AUDIO_PARTNER: Record<string, string> = {
+  i: 'e', ii: 'e', u: 'o', uu: 'o', e: 'ai', ai: 'e', o: 'au', au: 'o', aa: 'o', am: 'ah', ah: 'am',
+};
+export const SAME_SOUND_TWIN: Record<string, string> = { i: 'ii', ii: 'i', u: 'uu', uu: 'u' };
 
 export const BK_CONSONANTS: Letter[] = LETTERS.filter((l) => l.kind !== 'vowel');
 

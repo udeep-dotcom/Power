@@ -8,7 +8,7 @@ import type { T } from './i18n';
 export type Region = 'terai' | 'pahad' | 'himal';
 export type GameType = 'listen' | 'picture' | 'balloon' | 'memory';
 
-export type StickerGroup = 'journey' | 'letters' | 'words' | 'stories' | 'nepal' | 'play';
+export type StickerGroup = 'journey' | 'letters' | 'sounds' | 'words' | 'stories' | 'nepal' | 'play';
 export interface Sticker { id: string; pic: string; name: T; fact: T; group?: StickerGroup }
 export interface Unit { id: string; region: Region; letters: string[]; game: GameType; sticker: string }
 
@@ -92,6 +92,17 @@ export const STICKERS: Sticker[] = [
     fact: { ne: 'तिहारमा कुकुरलाई फूलको माला लगाइन्छ।', en: 'At Tihar dogs wear flower garlands.' } },
   { id: 's-flag', group: 'stories', pic: '🌙', name: { ne: 'जून र घाम', en: 'Moon and sun' },
     fact: { ne: 'हाम्रो झण्डामा जून र घाम छन्।', en: 'Our flag has the moon and the sun.' } },
+  // ध्वनि — phonics
+  { id: 'mouthmap', group: 'sounds', pic: '👄', name: { ne: 'मुखको नक्सा', en: 'Mouth map' },
+    fact: { ne: 'क घाँटीबाट, प ओठबाट आउँछ — हाम्रो वर्णमाला मुखको नक्सा हो!', en: 'क comes from the throat, प from the lips — our alphabet is a map of the mouth!' } },
+  { id: 'abc', group: 'sounds', pic: '🔤', name: { ne: 'पहिलो अङ्ग्रेजी आवाज', en: 'First English sounds' },
+    fact: { ne: 's, a, t, p, i, n — यी छ आवाजले धेरै शब्द बन्छन्!', en: 's, a, t, p, i, n — these six sounds make lots of words!' } },
+  { id: 'blend', group: 'sounds', pic: '🧩', name: { ne: 'जोडेर पढ्ने', en: 'Blender' },
+    fact: { ne: 'आवाज जोड्दा शब्द बन्छ: c-a-t = cat, क-म-ल = कमल!', en: 'Sounds join into words: c-a-t = cat, क-म-ल = कमल!' } },
+  { id: 'ears', group: 'sounds', pic: '👂', name: { ne: 'तेज कान', en: 'Sharp ears' },
+    fact: { ne: 'बात र भात — एउटै आवाज फरक, अर्थ नै फरक!', en: 'बात and भात — one sound changes the whole meaning!' } },
+  { id: 'friends', group: 'sounds', pic: '🤝', name: { ne: 'ध्वनि साथी', en: 'Sound friends' },
+    fact: { ne: 'अङ्ग्रेजी m र नेपाली म उस्तै सुनिन्छन्!', en: 'English m and Nepali म sound the same!' } },
   // खेल
   { id: 'counting', group: 'play', pic: 'txt:१२३', name: { ne: 'गन्ती', en: 'Counting' },
     fact: { ne: 'एक, दुई, तीन … तिमी नेपालीमा गन्न सक्छौ!', en: 'One, two, three … you can count in Nepali!' } },
@@ -111,6 +122,7 @@ export function stickerGroup(s: Sticker): StickerGroup {
 export const STICKER_GROUPS: { id: StickerGroup; title: T }[] = [
   { id: 'journey', title: { ne: 'यात्रा', en: 'Journey' } },
   { id: 'letters', title: { ne: 'अक्षर', en: 'Letters' } },
+  { id: 'sounds', title: { ne: 'ध्वनि', en: 'Sounds' } },
   { id: 'words', title: { ne: 'शब्द', en: 'Words' } },
   { id: 'stories', title: { ne: 'कथा', en: 'Stories' } },
   { id: 'nepal', title: { ne: 'मेरो नेपाल', en: 'My Nepal' } },

@@ -47,18 +47,27 @@ After changing web code, run `npm run android:sync` again before rebuilding.
 2. Create a **release keystore** (never commit it) and configure `signingConfigs` in Gradle, or use Play
    App Signing.
 3. Bump `versionCode` and `versionName` in `android/app/build.gradle` for every release.
-4. Enrol in **Designed for Families**: target audience 5–8 (and parents). No ads SDKs. The Data safety
-   form is "No data collected". The parent zone is already behind an adult gate.
-5. **Test TTS on a real low-end device.** Google's TTS engine includes Nepali, but the voice data may
+4. Enrol in **Designed for Families**: target age groups **"5 and under"** and **"6–8"** (and parents).
+   No ads SDKs. The Data safety form is "No data collected". The parent zone is already behind an adult
+   gate.
+5. **Microphone (v0.4).** `RECORD_AUDIO` and `MODIFY_AUDIO_SETTINGS` are declared for the "say it too"
+   (मेरो आवाज) practice. Capacitor's WebView asks for the runtime permission the first time a child taps
+   🎤. Audio is recorded into memory, played back once and discarded. It is never written to storage or
+   sent anywhere, and the mic is released after each 2-second clip. Parents can switch it off in the
+   Parent zone, and then the mic buttons disappear. **Before submitting,** re-check Google Play's
+   current Families policy on microphone use in child-directed apps, and describe the feature in the
+   listing and privacy policy. If the review objects, ship with `mic: false` as the default (one line
+   in `src/lib/store.ts`) or remove the two permissions; the app works fully without them.
+6. **Test TTS on a real low-end device.** Google's TTS engine includes Nepali, but the voice data may
    need downloading (Settings → System → Languages → Text-to-speech). The Parent zone shows which voice
    source is active and has a "Test voice" button. Recorded audio (see `AUDIO.md`) removes this
    dependency entirely.
-6. Optional: the app makes no network requests, so the `INTERNET` permission could be removed from the
+7. Optional: the app makes no network requests, so the `INTERNET` permission could be removed from the
    manifest to show "no internet access" on the Play listing. **Test thoroughly on devices first.**
 
 ## Verification status
 
-- ✅ The web build passes 10 Playwright end-to-end tests (every screen, every game played to the end)
+- ✅ The web build passes 29 Playwright end-to-end tests (every screen, every game played to the end, mic record-and-playback with a fake microphone)
   and was checked at 360×640, 390×844 and 768×1024.
 - ✅ The Android project was generated and synced (5 plugins, after removing `@capacitor/status-bar`), and
   icons and splash screens were generated.

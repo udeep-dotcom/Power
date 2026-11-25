@@ -1,36 +1,7 @@
 // End-to-end smoke tests: every screen renders without errors and every game can be played
 // to completion by a "perfect child". Run: npm run test:e2e  (builds first)
-import { expect, test, type Page } from '@playwright/test';
-
-const KEY = 'akshar-yatra:v1';
-
-async function boot(page: Page, state?: object, age = 6) {
-  const errors: string[] = [];
-  page.on('pageerror', (e) => errors.push(e.message));
-  page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
-  if (state) await page.addInitScript(([k, v]) => localStorage.setItem(k, v), [KEY, JSON.stringify(state)] as const);
-  await page.goto('/');
-  const start = page.locator('.start-play, .player').first();
-  await start.click({ force: true });
-  await pickAgeIfAsked(page, age);
-  await expect(page.locator('.home-grid')).toBeVisible();
-  return errors;
-}
-/** First time a player starts, Habre asks their age (3–6). Tests default to 6 = hardest. */
-async function pickAgeIfAsked(page: Page, age = 6) {
-  const btn = page.locator(`.age-btn[aria-label="${age}"]`);
-  try { await btn.waitFor({ timeout: 1500 }); await btn.click(); } catch { /* not asked */ }
-}
-const go = (page: Page, route: string) => page.evaluate((r) => { location.hash = r; }, route);
-const saved = (page: Page) => page.evaluate((k) => JSON.parse(localStorage.getItem(k) ?? '{}'), KEY);
-
-/** A player who has finished the first 6 letters (enough for practice/review features). */
-const veteran = {
-  v: 2,
-  nodes: { 'L:a': 3, 'L:aa': 2, 'L:i': 3, 'L:ii': 1, 'L:ka': 3, 'L:kha': 2 },
-  letters: Object.fromEntries(['a', 'aa', 'i', 'ii', 'ka', 'kha'].map((id) => [id, { trace: 2, correct: 3, wrong: 1, seen: true }])),
-  profiles: [{ id: 'p1', avatar: '🐯', name: '' }], active: 'p1',
-};
+import { expect, test } from '@playwright/test';
+import { boot, go, pickAgeIfAsked, saved, veteran } from './helpers';
 
 test('start screen → home, all main screens render without errors', async ({ page }) => {
   const errors = await boot(page);
@@ -201,7 +172,8 @@ test('exploring all 7 provinces earns the map sticker', async ({ page }) => {
 test('no horizontal page overflow on a 360×640 phone', async ({ page }) => {
   await page.setViewportSize({ width: 360, height: 640 });
   await boot(page, veteran);
-  for (const r of ['/', '/journey', '/learn/ka', '/letters', '/game/u1', '/barakhari', '/barakhari-game', '/nepal', '/nepal/map', '/stickers', '/practice']) {
+  for (const r of ['/', '/journey', '/learn/ka', '/letters', '/game/u1', '/barakhari', '/barakhari-game', '/nepal', '/nepal/map', '/stickers', '/practice',
+    '/sounds', '/sounds/mouth/bha', '/abc', '/abc/s', '/sounds/blend/en', '/sounds/pairs/ne', '/sounds/friends', '/abc/hunt']) {
     await go(page, r);
     await page.waitForTimeout(300);
     const w = await page.evaluate(() => [document.documentElement.scrollWidth, document.documentElement.clientWidth]);

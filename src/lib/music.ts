@@ -7,7 +7,7 @@ import { musicOut } from './sfx';
 import { currentRoute } from './router';
 import { getState, subscribe } from './store';
 
-const MENU_PATHS = new Set(['/', 'start', '/words', '/stories', '/nepal', '/play', '/stickers', '/letters', '/journey', '/numbers']);
+const MENU_PATHS = new Set(['/', 'start', '/words', '/stories', '/nepal', '/play', '/stickers', '/letters', '/journey', '/numbers', '/sounds', '/abc']);
 const VOLUME = 0.32;   // music bus level (sfx master is 0.5); notes themselves are quiet
 const DUCKED = 0.08;
 
