@@ -4,7 +4,7 @@
 import { describe, expect, it } from 'vitest';
 import { LETTERS, LETTER_BY_ID } from '../src/data/alphabet';
 import { EMOJI } from '../src/data/emoji.generated';
-import { BLEND_WORDS, COLUMN_FEATURES, EN_BY_ID, EN_LETTERS, MINIMAL_PAIRS, PLACE_LABEL, VARGAS, soundInfo } from '../src/data/phonics';
+import { BLEND_WORDS, COLUMN_FEATURES, EN_BY_ID, EN_LETTERS, MINIMAL_PAIRS, PLACE_LABEL, TEXTBOOK_PLACE, EXTRA_HOW, VARGAS, soundInfo } from '../src/data/phonics';
 import { FRIENDS, planFriends, planHunt } from '../src/screens/sounds/PhonicsGames';
 import { RIME_SAY } from '../src/screens/sounds/Blend';
 
@@ -70,6 +70,20 @@ describe('Nepali sound map (वर्ग)', () => {
     expect(soundInfo('sha')).toEqual(soundInfo('sa'));
     expect(soundInfo('ssa')).toEqual(soundInfo('sa'));
   });
+  it('school-book notes exist only where the spoken place differs, for real consonants', () => {
+    for (const [id, t] of Object.entries(TEXTBOOK_PLACE)) {
+      expect(LETTER_BY_ID[id]?.kind, id).toBe('consonant');
+      expect(t.ne).toMatch(/पाठ्यपुस्तक/);
+      expect(t.en).toMatch(/School books/);
+    }
+    // the five वर्ग rows match the textbook, so they never carry a note
+    for (const v of VARGAS) v.letters.forEach((id) => expect(TEXTBOOK_PLACE[id]).toBeUndefined());
+    expect(Object.keys(TEXTBOOK_PLACE).sort()).toEqual(['ra', 'sha', 'ssa', 'wa']);
+  });
+  it('letters outside the five rows get their own "how" (a row\'s description is wrong for स र ल)', () => {
+    const inRows = new Set(VARGAS.flatMap((v) => v.letters));
+    for (const l of LETTERS.filter((x) => x.kind === 'consonant' && !inRows.has(x.id))) expect(EXTRA_HOW[l.id], l.id).toBeDefined();
+  });
   it('vowels have no consonant place', () => {
     for (const l of LETTERS.filter((x) => x.kind === 'vowel')) expect(soundInfo(l.id)).toBeNull();
   });
@@ -85,6 +99,10 @@ describe('Minimal pairs', () => {
   });
   it('the two words are the same length ± one character (they differ in one sound)', () => {
     for (const p of MINIMAL_PAIRS) expect(Math.abs([...p.a.word].length - [...p.b.word].length), p.id).toBeLessThanOrEqual(1);
+  });
+  it('every word can be pictured by a 3-year-old (no abstract words like "west")', () => {
+    const abstract = ['west', 'east', 'north', 'south', 'very', 'wine'];
+    for (const p of MINIMAL_PAIRS) for (const x of [p.a, p.b]) expect(abstract, `${p.id}:${x.word}`).not.toContain(x.word);
   });
   it('has enough pairs in both languages for a 6-round game', () => {
     expect(MINIMAL_PAIRS.filter((p) => p.lang === 'ne').length).toBeGreaterThanOrEqual(4);

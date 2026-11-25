@@ -26,13 +26,14 @@ The last **125 clips** are for the sounds features. They need **two** people:
 |---|---|---|---|
 | `mp-<pair>-a/b` (e.g. `mp-bat-bhat-b` = भात) | the Nepali voice | one word of a minimal pair | Say **only** that word. Make the difference natural, not exaggerated: the child must learn to hear real speech. |
 | `w-blend-ne-*` | the Nepali voice | the blend word (कमल) | Natural speed; the app plays it slowed down itself. |
-| `en-s-<letter>` | a **native English** voice | the letter's **sound** | **No "uh"**: say "sss" not "suh", "mmm" not "muh". Stops (t p k b d g) short and crisp. This is the single most important English recording, because text-to-speech can't do it. |
-| `en-n-<letter>` | English voice | the letter's **name** ("bee") | — |
-| `en-w-<word>` | English voice | key words, blend words, minimal-pair words | — |
-| `en-r-<rime>` | English voice | the rime ("-at", "-og") | One syllable; never spelled out. |
+| `en-s-<letter>` | a **UK English** voice | the letter's **sound** | **No "uh"**: say "sss" not "suh", "mmm" not "muh". Stops (t p k b d g) short and crisp. This is the single most important English recording, because text-to-speech can't do it. |
+| `en-n-<letter>` | UK English voice | the letter's **name** ("bee") | UK names: **zed**, **aitch** |
+| `en-w-<word>` | UK English voice | key words, blend words, minimal-pair words | — |
+| `en-r-<rime>` | UK English voice | the rime ("-at", "-og") | One syllable; never spelled out. |
 
-Pick **one English accent**, the one used in the schools most of your families attend (UK, US or
-Australian), and keep it for every English clip. Ids are ASCII on purpose: Devanagari file names get
+**Accent: UK English** (decided): standard Southern British, as heard in UK primary-school phonics
+lessons. Keep the same speaker for every English clip. Watch the short vowels: *a* as in *apple* (not
+the *ah* of *father*), *o* as in *hot*. Ids are ASCII on purpose: Devanagari file names get
 mangled by some export tools and operating systems.
 
 ## How to add the files

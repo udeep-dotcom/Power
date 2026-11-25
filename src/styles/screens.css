@@ -652,6 +652,7 @@
 .mouth-letter { font-size: 64px; font-weight: 800; color: var(--crimson); line-height: 1.1; animation: pop-good 0.45s var(--ease-spring); padding: 0 6px; }
 .mouth-place { margin: 6px 0 0; text-align: center; font-size: 17px; font-weight: 700; display: flex; flex-direction: column; gap: 2px; align-items: center; }
 .mouth-place b { font-size: 20px; color: var(--ink); }
+.mouth-book { margin: 8px auto 0; max-width: 34em; text-align: center; font-size: 14px; font-weight: 700; color: var(--ink-2); background: rgba(29, 79, 176, 0.08); border-radius: 12px; padding: 6px 10px; }
 .feel-row { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-top: 8px; min-height: 8px; }
 .feel { padding: 6px 12px; border-radius: 999px; background: #f4edff; font-weight: 800; font-size: 16px; box-shadow: 0 3px 0 #d9c7f5; }
 .slow-btn.btn.round { width: 50px; height: 50px; }

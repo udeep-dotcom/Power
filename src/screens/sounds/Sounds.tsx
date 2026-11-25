@@ -8,7 +8,7 @@ import { Scenery } from '../../components/Scenery';
 import { HabreSays, TopBar } from '../../components/UI';
 import { LETTER_BY_ID } from '../../data/alphabet';
 import { UI, type T } from '../../data/i18n';
-import { COLUMN_FEATURES, SAME_SOUND_NOTES, soundInfo, VARGAS } from '../../data/phonics';
+import { COLUMN_FEATURES, EXTRA_HOW, SAME_SOUND_NOTES, soundInfo, TEXTBOOK_PLACE, VARGAS } from '../../data/phonics';
 import { navigate } from '../../lib/router';
 import { sfx } from '../../lib/sfx';
 import { instruct, say } from '../../lib/speech';
@@ -83,7 +83,8 @@ export function MouthMap({ initial }: { initial?: string }) {
             <Echo model={() => sayNeLetter(sel)} compact />
           </div>
         </div>
-        {varga && <p class="mouth-place"><b><Bi t={varga.name} /></b><Bi t={varga.how} /></p>}
+        {varga && <p class="mouth-place"><b><Bi t={varga.name} /></b><Bi t={EXTRA_HOW[sel] ?? varga.how} /></p>}
+        {TEXTBOOK_PLACE[sel] && <p class="mouth-book">📘 <Bi t={TEXTBOOK_PLACE[sel]} inline /></p>}
         <div class="feel-row">
           {info.air && <button class="feel on" onClick={feel(UI.feelAir)}>🕯️ <Bi t={UI.air} inline /></button>}
           {info.buzz && <button class="feel on" onClick={feel(UI.feelBuzz)}>🐝 <Bi t={UI.buzz} inline /></button>}

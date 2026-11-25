@@ -9,7 +9,7 @@ import { WORD_TOPICS } from '../src/data/words.ts';
 import { NUMBERS } from '../src/data/numbers.ts';
 import { KIND_LABEL, STORIES } from '../src/data/stories.ts';
 import { DECKS, PROVINCES, QUIZ } from '../src/data/nepal.ts';
-import { BLEND_WORDS, COLUMN_FEATURES, EN_LETTERS, MINIMAL_PAIRS, ONLY_IN, SAME_SOUND_NOTES, VARGAS, soundInfo } from '../src/data/phonics.ts';
+import { BLEND_WORDS, COLUMN_FEATURES, EN_LETTERS, EXTRA_HOW, MINIMAL_PAIRS, ONLY_IN, SAME_SOUND_NOTES, TEXTBOOK_PLACE, VARGAS, soundInfo } from '../src/data/phonics.ts';
 import { LETTER_BY_ID } from '../src/data/alphabet.ts';
 
 const L: string[] = [];
@@ -86,18 +86,20 @@ L.push('');
 
 // ── v0.4: sounds & phonics ──
 L.push('', '## 10. Sounds & pronunciation (ध्वनि, ए बी सी)', '');
-L.push('**Reviewer:** a Nepali teacher for 10a–10c, and someone who teaches English phonics (Jolly Phonics or similar) for 10d–10f.', '');
+L.push('**Reviewer:** a Nepali teacher for 10a–10c, and someone who teaches English phonics in a UK primary school (Jolly Phonics or similar) for 10d–10f. English is **UK English** throughout.', '');
 L.push('### 10a. Where each Nepali sound is made (मुखको नक्सा)', '');
 L.push('| ✓ | Row | Letters | Name shown | How it is described |', '|---|---|---|---|---|');
 for (const v of VARGAS) L.push(`| ☐ | ${v.id} | ${v.letters.map((id) => LETTER_BY_ID[id].char).join(' ')} | ${v.name.ne} (${v.name.en}) | ${v.how.ne} — ${v.how.en} |`);
 L.push('', '| ✓ | Column | Air puff 🕯️ | Throat buzz 🐝 | Nose 👃 |', '|---|---|---|---|---|');
 COLUMN_FEATURES.forEach((f, i) => L.push(`| ☐ | ${i + 1}. ${f.name.ne} (${f.name.en}) | ${f.air ? 'yes' : ''} | ${f.buzz ? 'yes' : ''} | ${f.nose ? 'yes' : ''} |`));
-L.push('', '| ✓ | Other letter | Place shown | Air | Buzz |', '|---|---|---|---|---|');
+L.push('', '| ✓ | Other letter | Place shown | Air | Buzz | How it is described |', '|---|---|---|---|---|---|');
 for (const id of ['ya', 'ra', 'la', 'wa', 'sha', 'ssa', 'sa', 'ha']) {
   const i = soundInfo(id)!;
-  L.push(`| ☐ | ${LETTER_BY_ID[id].char} | ${i.place} | ${i.air ? 'yes' : ''} | ${i.buzz ? 'yes' : ''} |`);
+  L.push(`| ☐ | ${LETTER_BY_ID[id].char} | ${i.place} | ${i.air ? 'yes' : ''} | ${i.buzz ? 'yes' : ''} | ${EXTRA_HOW[id].ne} — ${EXTRA_HOW[id].en} |`);
 }
-L.push('', '⚠ **Descriptive, not textbook.** Places follow how Nepali is *spoken today*, not the Sanskrit उच्चारण-स्थान taught in school: श and ष are shown at the teeth with स because all three are said "sa"; र is shown at the teeth (it is a tongue-tip tap behind the teeth), where textbooks list it as मूर्धन्य. Decide whether to keep this, or show the textbook place with a "we say it like स" note.', '');
+L.push('', '**Spoken and textbook places are both shown.** The mouth lights up where the sound is made *in today\'s speech*; where the Sanskrit उच्चारण-स्थान taught in school differs, a 📘 line says so. Check these lines:', '');
+for (const [id, t] of Object.entries(TEXTBOOK_PLACE)) L.push(`- ☐ **${LETTER_BY_ID[id].char}** 📘 ${t.ne} — ${t.en}`);
+L.push('');
 for (const n of SAME_SOUND_NOTES) L.push(`- ☐ Same-sound note **${n.letters}**: ${n.note.ne} — ${n.note.en}`);
 L.push('');
 
@@ -123,7 +125,7 @@ L.push('⚠ English **t** and **d** are marked only "close" to ट/ड: Nepali s
 L.push('### 10e. English minimal pairs and blend words', '');
 L.push('| ✓ | Word A | Picture | Word B | Picture | Hint |', '|---|---|---|---|---|---|');
 for (const p of MINIMAL_PAIRS.filter((x) => x.lang === 'en')) L.push(`| ☐ | ${p.a.word} | ${p.a.pic} | ${p.b.word} | ${p.b.pic} | ${p.feature.ne} — ${p.feature.en} |`);
-L.push('', '⚠ **west 🧭** is too abstract for under-6s (a compass means nothing to most 4-year-olds). Replace with custom art (a signpost pointing to the setting sun) or swap the pair.', '');
+L.push('', 'v0.4.1: *vest/west* was dropped ("west" can\'t be pictured for under-6s) and replaced by **pen/pan**: Nepali has no /æ/, so Nepali speakers often merge *e* and *a* (bed/bad). v vs w is still taught on the sound-friends screen (v ≈ व, w ≈ व) and by the letter actions.', '');
 L.push('| ✓ | Blend word | Sounds | Onset + rime | Picture |', '|---|---|---|---|---|');
 for (const w of BLEND_WORDS.filter((x) => x.lang === 'en')) L.push(`| ☐ | ${w.word} | ${w.phonemes.join('-')} | ${w.chunks.join(' + ')} | ${w.pic} |`);
 L.push('');

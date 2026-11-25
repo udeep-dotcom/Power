@@ -35,23 +35,32 @@ for (const p of MINIMAL_PAIRS.filter((x) => x.lang === 'ne')) {
   rows.push([`mp-${p.id}-b`, p.b.word, `Minimal pair "${p.a.word} / ${p.b.word}" — say only ${p.b.word} (${p.b.en}). Priority 3.`]);
 }
 for (const w of BLEND_WORDS.filter((x) => x.lang === 'ne')) rows.push([`w-blend-${w.id}`, w.word, `Blend word (${w.en}). Natural speed; the app slows it down itself. Priority 3.`]);
-// English: a DIFFERENT voice — a native English speaker (pick the accent of the schools your
-// families use: UK, US or Australian). Pure sounds must have NO "uh" after them: "sss" not "suh",
+// English: a DIFFERENT voice — a native speaker of standard Southern British English (the accent
+// of UK primary-school phonics). Pure sounds must have NO "uh" after them: "sss" not "suh",
 // "mmm" not "muh". Stop sounds (t p k b d g) as short and crisp as possible.
 const stop = new Set(['t', 'p', 'c', 'k', 'b', 'd', 'g', 'j', 'q', 'x']);
+// UK letter names that differ from US ones, and the short vowels text-to-speech gets wrong.
+const UK_NAME: Record<string, string> = { z: 'zed', h: 'aitch' };
+const VOWEL_NOTE: Record<string, string> = {
+  a: ' The short "a" of apple/cat (NOT the "ah" of father/bath).',
+  o: ' The short "o" of hot/dog (NOT "oh").',
+  u: ' The short "u" of cup/sun.',
+  e: ' The short "e" of egg/bed.',
+  i: ' The short "i" of insect/pig.',
+};
 for (const l of EN_LETTERS) {
-  rows.push([`en-s-${l.id}`, l.soundSay, `ENGLISH voice. The SOUND of "${l.id}" ${l.ipa}${stop.has(l.id) ? ' — short and crisp, as little "uh" as possible' : ' — hold it ~1 s, no "uh" after it'}. Priority 3.`]);
-  rows.push([`en-n-${l.id}`, l.upper, `ENGLISH voice. The letter NAME "${l.upper}". Priority 3.`]);
-  rows.push([`en-w-${l.word}`, l.word, `ENGLISH voice. Key word for ${l.id} (${l.word}). Priority 3.`]);
+  rows.push([`en-s-${l.id}`, `[sound of ${l.id}, as in ${l.word}]`, `UK ENGLISH voice. The SOUND of "${l.id}" ${l.ipa} as in "${l.word}"${stop.has(l.id) ? ' — short and crisp, as little "uh" as possible' : ' — hold it ~1 s, no "uh" after it'}.${VOWEL_NOTE[l.id] ?? ''} Priority 3.`]);
+  rows.push([`en-n-${l.id}`, UK_NAME[l.id] ?? l.upper, `UK ENGLISH voice. The letter NAME "${l.upper}"${UK_NAME[l.id] ? ` — UK: "${UK_NAME[l.id]}"` : ''}. Priority 3.`]);
+  rows.push([`en-w-${l.word}`, l.word, `UK ENGLISH voice. Key word for ${l.id} (${l.word}). Priority 3.`]);
 }
 const enWords = new Set(EN_LETTERS.map((l) => l.word));
 for (const w of BLEND_WORDS.filter((x) => x.lang === 'en')) {
-  if (!enWords.has(w.word)) { enWords.add(w.word); rows.push([`en-w-${w.word}`, w.word, `ENGLISH voice. Blend word. Priority 3.`]); }
+  if (!enWords.has(w.word)) { enWords.add(w.word); rows.push([`en-w-${w.word}`, w.word, `UK ENGLISH voice. Blend word. Priority 3.`]); }
   const rime = w.chunks[1];
-  rows.push([`en-r-${rime}`, rime, `ENGLISH voice. The rime "-${rime}" as in "${w.word}" — one syllable, not spelled out. Priority 3.`]);
+  rows.push([`en-r-${rime}`, rime, `UK ENGLISH voice. The rime "-${rime}" as in "${w.word}" — one syllable, not spelled out. Priority 3.`]);
 }
 for (const p of MINIMAL_PAIRS.filter((x) => x.lang === 'en')) {
-  for (const x of [p.a, p.b]) if (!enWords.has(x.word)) { enWords.add(x.word); rows.push([`en-w-${x.word}`, x.word, `ENGLISH voice. Minimal pair "${p.a.word} / ${p.b.word}". Priority 3.`]); }
+  for (const x of [p.a, p.b]) if (!enWords.has(x.word)) { enWords.add(x.word); rows.push([`en-w-${x.word}`, x.word, `UK ENGLISH voice. Minimal pair "${p.a.word} / ${p.b.word}". Priority 3.`]); }
 }
 // de-duplicate (a rime like "at" appears in several words)
 const seen = new Set<string>();

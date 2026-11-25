@@ -17,6 +17,10 @@ type NativeTts = { speak(o: object): Promise<void>; stop(): Promise<void>; getSu
 let nativeTts: NativeTts | null = null;
 let nativeLang = 'ne-NP';
 let nativeEnglish: NativeTts | null = null;
+/** English is UK English (the families' choice): phonics as taught in UK primary schools. */
+let nativeEnglishLang = 'en-GB';
+let englishVoice: SpeechSynthesisVoice | null = null;
+const UK = /^en[-_]GB/i;
 let currentAudio: HTMLAudioElement | null = null;
 let ready: Promise<void> | null = null;
 
@@ -44,6 +48,8 @@ async function initNative() {
     const ne = languages.find((l) => /^ne/i.test(l));
     const hi = languages.find((l) => /^hi/i.test(l));
     nativeEnglish = TextToSpeech as unknown as NativeTts;
+    // Google TTS normally has en-GB; if a phone lacks it, use whatever English it has.
+    nativeEnglishLang = languages.find((l) => UK.test(l)) ?? languages.find((l) => /^en/i.test(l)) ?? 'en-GB';
     if (!ne && !hi) return;
     nativeLang = ne ?? hi!;
     nativeTts = TextToSpeech as unknown as NativeTts;
@@ -56,6 +62,7 @@ function initWeb(): Promise<void> {
     const pick = () => {
       const vs = speechSynthesis.getVoices();
       webVoice = vs.find((v) => /^ne/i.test(v.lang)) ?? vs.find((v) => /^hi/i.test(v.lang)) ?? null;
+      englishVoice = vs.find((v) => UK.test(v.lang) && v.localService) ?? vs.find((v) => UK.test(v.lang)) ?? vs.find((v) => /^en/i.test(v.lang)) ?? null;
       return vs.length > 0;
     };
     if (pick()) return resolve();
@@ -154,11 +161,19 @@ async function speakEnglish(text: string, clip?: string, opts: SpeakOpts = {}): 
     } catch { /* fall through */ }
   }
   if (nativeEnglish) {
-    try { await nativeEnglish.speak({ text, lang: 'en-US', rate: opts.slow ? 0.5 : 0.95, pitch: 1.1, volume: 1, category: 'ambient' }); return true; } catch { /* fall through */ }
+    try { await nativeEnglish.speak({ text, lang: nativeEnglishLang, rate: opts.slow ? 0.5 : 0.95, pitch: 1.1, volume: 1, category: 'ambient' }); return true; } catch { /* fall through */ }
   }
   if (typeof speechSynthesis === 'undefined') return false;
-  const v = speechSynthesis.getVoices().find((x) => /^en/i.test(x.lang));
-  return speakWeb(text, v ?? null, 'en-US', opts.slow ? 0.5 : 0.95);
+  return speakWeb(text, englishVoice, 'en-GB', opts.slow ? 0.5 : 0.95);
+}
+
+export type EnglishVoice = 'recorded' | 'uk' | 'other' | 'none';
+/** Which English voice the ABC section will use (shown to parents: phonics should be UK English). */
+export function englishVoiceSource(): EnglishVoice {
+  if (manifest && [...manifest].some((c) => c.startsWith('en-s-'))) return 'recorded';
+  if (nativeEnglish) return UK.test(nativeEnglishLang) ? 'uk' : 'other';
+  if (englishVoice) return UK.test(englishVoice.lang) ? 'uk' : 'other';
+  return 'none';
 }
 
 function speakWeb(text: string, voice: SpeechSynthesisVoice | null, lang: string, rate: number): Promise<boolean> {
@@ -197,10 +212,3 @@ export async function instruct(t: { ne: string; en: string }, clip?: string): Pr
 
 export function isSpeaking(): boolean { return speaking > 0; }
 
-/** True if some English voice can speak (needed for the ABC section). */
-export function canSpeakEnglish(): boolean {
-  if (!getState().voice) return false;
-  if (manifest && [...manifest].some((c) => c.startsWith('en-'))) return true;
-  if (nativeEnglish) return true;
-  try { return typeof speechSynthesis !== 'undefined' && speechSynthesis.getVoices().some((v) => /^en/i.test(v.lang)); } catch { return false; }
-}

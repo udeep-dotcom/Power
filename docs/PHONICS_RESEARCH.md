@@ -41,8 +41,11 @@ studies and corpora, this says so; they are not directly comparable.
    so, rather than teaching three different sounds no one uses.
 6. **The final अ is dropped in speech:** क-म-ल is said *kamal*, not *kamala*. The blend game says
    the whole word after the parts so children hear the real form.
-7. **English sounds with no Nepali letter:** f, v, z, th. v and w both map to व, which is why
-   *vest/west* is a minimal pair. An "Only in English" card says this plainly. An "Only in Nepali"
+7. **English sounds with no Nepali letter:** f, v, z, th. v and w both map to व, so the
+   sound-friends screen shows v ≈ व and w ≈ व side by side. (A *vest/west* minimal pair was tried and
+   dropped: "west" can't be pictured for a 4-year-old.) An "Only in English" card says this plainly.
+8. **No /æ/ in Nepali:** Nepali speakers often merge English *e* and *a* (bed/bad), so **pen/pan** is a
+   minimal pair, alongside cap/cup. An "Only in Nepali"
    card names घ झ ढ ध भ and the two t's, so children abroad learn their Nepali has sounds English
    doesn't.
 
@@ -119,13 +122,19 @@ options has two correct answers, and the child is marked wrong for hearing corre
 1. **Text-to-speech can't say a pure sound.** Asked for *t*, TTS says "tuh" or "tee". Phonics
    teachers specifically warn against the added "uh", because it makes blending harder (*tuh-a-puh* ≠
    *tap*). **Until real recordings exist, the English sound buttons model stop consonants slightly
-   wrong.** This is the most important gap. Fix: the 125 priority-3 clips in
-   `docs/recording-script.csv`, read by a native English speaker following the notes ("no *uh*").
-2. **Which English accent?** Children in the UK, US and Australia learn different vowels. Record in
-   the accent of the schools most families use, or offer two.
-3. **Descriptive vs textbook places.** We show where sounds are made *in today's speech*: श/ष with स,
-   and र at the teeth. Nepali school books teach the Sanskrit उच्चारण-स्थान (ष मूर्धन्य, श तालव्य).
-   A teacher may object. The trade-off is flagged in `docs/CONTENT_REVIEW.md` §10a for a decision.
+   wrong**, and with a UK voice the short *a* ("ah") comes out as the *father* vowel, not the *apple*
+   one. This is the most important gap. Fix: the 125 priority-3 clips in `docs/recording-script.csv`,
+   read by a UK speaker following the notes ("no *uh*", "zed", short *a* as in *apple*). We looked
+   at generating them with an open neural voice instead. Those models are trained on whole sentences
+   and handle isolated sounds badly, and their download host is blocked here anyway, so a human
+   recording remains the fix.
+2. **Accent: decided — UK English.** The app asks every device for an `en-GB` voice (Android TTS and
+   browsers), falls back to any English voice, and the Parent zone says which one it found and how to
+   add a UK voice. The recording script is written for a standard Southern British speaker.
+3. **Descriptive vs textbook places: both are shown.** The mouth lights up where the sound is made in
+   today's speech (श/ष with स, र behind the teeth); a 📘 line gives the school-book उच्चारण-स्थान
+   (श तालव्य, ष र मूर्धन्य, व दन्तोष्ठ्य). A teacher should still check the wording (§10a of the
+   content review).
 4. **The mouth diagram is schematic** and hasn't been checked by a speech-language therapist.
 5. **The mic on the web** needs a permission prompt. It works in current Chrome, Edge, Firefox and
    Safari (MediaRecorder); on Android, `RECORD_AUDIO` is requested at first use. On devices without

@@ -158,6 +158,7 @@ export const UI = {
   resetConfirm: { ne: 'पक्का? सबै प्रगति मेटिन्छ।', en: 'Are you sure? All progress will be erased.' },
   voiceStatus: { ne: 'आवाज स्रोत', en: 'Voice source' },
   testVoice: { ne: 'आवाज जाँच', en: 'Test voice' },
+  englishVoice: { ne: 'अङ्ग्रेजी आवाज (ए बी सी)', en: 'English voice (ABC)' },
   needsAttention: { ne: 'अझ अभ्यास चाहिने अक्षर', en: 'Letters that need practice' },
   credits: { ne: 'श्रेय', en: 'Credits' },
   on: { ne: 'खुला', en: 'On' },

@@ -114,11 +114,10 @@ unit test enforces it.
 ### Pushback, honestly
 - **Until real recordings exist, the English sound buttons are slightly wrong.** TTS can't say a pure
   /t/; it says "tuh" or "tee", and that added "uh" is exactly what phonics teachers train out. The
-  125 priority-3 clips in `docs/recording-script.csv` are the fix, and they need a native English voice
-  in the accent families' schools use.
-- **Textbook vs real pronunciation.** The mouth map shows श ष स together and र at the teeth, because
-  that is how Nepali is spoken. School books teach the Sanskrit places. A Nepali teacher should
-  decide (flagged in `docs/CONTENT_REVIEW.md` §10a).
+  125 priority-3 clips in `docs/recording-script.csv` are the fix, read by a **UK English** speaker
+  (decided in v0.4.1; the app also asks every device for an `en-GB` voice).
+- **Textbook vs real pronunciation: both are shown.** The mouth map shows श ष स together and र behind
+  the teeth, because that is how Nepali is spoken, and a 📘 line gives the school-book place.
 - **Nothing here is validated with children yet.** Watch 5–10 children use the blend and minimal-pair
   games before paying for recordings.
 

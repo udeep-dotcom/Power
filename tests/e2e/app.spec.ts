@@ -145,6 +145,7 @@ test('players: add a sibling in the parent zone; each has separate progress', as
   const W = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine'];
   const [a, b] = q!.split('×').map((w) => W.indexOf(w.trim()));
   await page.locator('.gate-opts .btn', { hasText: new RegExp(`^${a * b}$`) }).click();
+  await expect(page.getByText('अङ्ग्रेजी आवाज (ए बी सी)', { exact: false })).toBeVisible(); // UK voice status
   await page.getByRole('button', { name: /Add player|खेलाडी थप्ने/ }).click();
   await expect(page.locator('.pz-player')).toHaveCount(2);
   await go(page, '/');

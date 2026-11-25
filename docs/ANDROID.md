@@ -71,5 +71,8 @@ After changing web code, run `npm run android:sync` again before rebuilding.
   and was checked at 360×640, 390×844 and 768×1024.
 - ✅ The Android project was generated and synced (5 plugins, after removing `@capacitor/status-bar`), and
   icons and splash screens were generated.
-- ⏳ **The APK compile has not yet run.** The Android SDK host was blocked in the environment that
-  produced this build. The CI workflow is the first place it will compile, so check the first run.
+- ✅ **The debug APK compiles in CI** (since v0.4.1; every earlier run failed before Gradle because
+  `setup-android` asked for the removed `tools` package). Download it from the run's
+  `akshar-yatra-debug-apk` artifact.
+- ⏳ **Not yet installed on a real phone.** Check on a low-end device: Nepali and UK English TTS, the
+  microphone permission prompt, the back button and edge-to-edge insets.

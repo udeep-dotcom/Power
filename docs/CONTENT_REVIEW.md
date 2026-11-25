@@ -372,7 +372,7 @@ Check each sentence for accuracy, cultural sensitivity and child-appropriateness
 
 ## 10. Sounds & pronunciation (ध्वनि, ए बी सी)
 
-**Reviewer:** a Nepali teacher for 10a–10c, and someone who teaches English phonics (Jolly Phonics or similar) for 10d–10f.
+**Reviewer:** a Nepali teacher for 10a–10c, and someone who teaches English phonics in a UK primary school (Jolly Phonics or similar) for 10d–10f. English is **UK English** throughout.
 
 ### 10a. Where each Nepali sound is made (मुखको नक्सा)
 
@@ -392,18 +392,23 @@ Check each sentence for accuracy, cultural sensitivity and child-appropriateness
 | ☐ | 4. घोष महाप्राण (buzz + puff) | yes | yes |  |
 | ☐ | 5. नासिक्य (through the nose) |  | yes | yes |
 
-| ✓ | Other letter | Place shown | Air | Buzz |
-|---|---|---|---|---|
-| ☐ | य | palate |  | yes |
-| ☐ | र | teeth |  | yes |
-| ☐ | ल | teeth |  | yes |
-| ☐ | व | lips |  | yes |
-| ☐ | श | teeth |  |  |
-| ☐ | ष | teeth |  |  |
-| ☐ | स | teeth |  |  |
-| ☐ | ह | throat | yes | yes |
+| ✓ | Other letter | Place shown | Air | Buzz | How it is described |
+|---|---|---|---|---|---|
+| ☐ | य | palate |  | yes | जिब्रो तालुतिर उठ्छ, तर छुँदैन। — The tongue rises towards the palate but does not touch it. |
+| ☐ | र | teeth |  | yes | जिब्रोको टुप्पोले दाँतको ठीक पछाडि छिटो एक पटक छुन्छ। — The tongue tip taps once, quickly, just behind the top teeth. |
+| ☐ | ल | teeth |  | yes | जिब्रोको टुप्पो दाँतको पछाडि छुन्छ; हावा जिब्रोको छेउबाट निस्कन्छ। — The tongue tip touches behind the teeth; air flows out at the sides. |
+| ☐ | व | lips |  | yes | दुवै ओठ गोलो हुन्छन्। — Both lips make a round shape. |
+| ☐ | श | teeth |  |  | जिब्रो दाँतको नजिक जान्छ तर छुँदैन — सर्पजस्तै "स्स्स्"। — The tongue comes close to the teeth without touching: a snake's "sss". |
+| ☐ | ष | teeth |  |  | जिब्रो दाँतको नजिक जान्छ तर छुँदैन — सर्पजस्तै "स्स्स्"। — The tongue comes close to the teeth without touching: a snake's "sss". |
+| ☐ | स | teeth |  |  | जिब्रो दाँतको नजिक जान्छ तर छुँदैन — सर्पजस्तै "स्स्स्"। — The tongue comes close to the teeth without touching: a snake's "sss". |
+| ☐ | ह | throat | yes | yes | मुख खुला रहन्छ; हावा घाँटीबाटै निस्कन्छ। — The mouth stays open; the air comes straight from the throat. |
 
-⚠ **Descriptive, not textbook.** Places follow how Nepali is *spoken today*, not the Sanskrit उच्चारण-स्थान taught in school: श and ष are shown at the teeth with स because all three are said "sa"; र is shown at the teeth (it is a tongue-tip tap behind the teeth), where textbooks list it as मूर्धन्य. Decide whether to keep this, or show the textbook place with a "we say it like स" note.
+**Spoken and textbook places are both shown.** The mouth lights up where the sound is made *in today's speech*; where the Sanskrit उच्चारण-स्थान taught in school differs, a 📘 line says so. Check these lines:
+
+- ☐ **श** 📘 पाठ्यपुस्तकमा: तालव्य (तालुबाट)। बोल्दा प्रायः "स" जस्तै। — School books: palatal. When we speak, usually like "sa".
+- ☐ **ष** 📘 पाठ्यपुस्तकमा: मूर्धन्य (जिब्रो फर्काएर)। बोल्दा प्रायः "स" जस्तै। — School books: retroflex. When we speak, usually like "sa".
+- ☐ **र** 📘 पाठ्यपुस्तकमा: मूर्धन्य। बोल्दा जिब्रोको टुप्पोले दाँतको ठीक पछाडि छुन्छ। — School books: retroflex. When we speak, the tongue tip taps just behind the teeth.
+- ☐ **व** 📘 पाठ्यपुस्तकमा: दन्तोष्ठ्य (दाँत र ओठ)। बोल्दा प्रायः गोलो ओठले "व" वा "ब"। — School books: teeth + lip. When we speak, usually round lips ("wa") or "ba".
 
 - ☐ Same-sound note **श ष स**: यी तीनै प्रायः "स" नै सुनिन्छन् — फरक लेख्दा मात्र। — All three usually sound like "sa" — they differ only in spelling.
 - ☐ Same-sound note **ि ी · ु ू**: ह्रस्व र दीर्घ उस्तै सुनिन्छन् — फरक लेख्दा मात्र। — Short and long i/u sound the same — the difference is only in spelling.
@@ -478,10 +483,10 @@ Check each sentence for accuracy, cultural sensitivity and child-appropriateness
 | ☐ | three | txt:3 | tree | 🌳 | th मा जिब्रो दाँतबीच 👅 — For th, the tongue goes between the teeth 👅 |
 | ☐ | sheep | 🐑 | ship | 🚢 | ee लामो, i छोटो — ee is long, i is short |
 | ☐ | bear | 🐻 | pear | 🍐 | b मा आवाज, p मा हावा — b buzzes, p puffs |
-| ☐ | vest | 🦺 | west | 🧭 | v मा दाँत र ओठ, w मा गोलो ओठ — v uses teeth and lip; w uses round lips |
+| ☐ | pen | 🖊️ | pan | 🍳 | e मा मुख अलिकति खुल्छ, a मा धेरै खुल्छ 😮 — For e the mouth opens a little; for a it opens wide 😮 |
 | ☐ | cap | 🧢 | cup | ☕ | a मुख ठूलो खोलेर, u छोटो "अ" — a opens wide; u is a short "uh" |
 
-⚠ **west 🧭** is too abstract for under-6s (a compass means nothing to most 4-year-olds). Replace with custom art (a signpost pointing to the setting sun) or swap the pair.
+v0.4.1: *vest/west* was dropped ("west" can't be pictured for under-6s) and replaced by **pen/pan**: Nepali has no /æ/, so Nepali speakers often merge *e* and *a* (bed/bad). v vs w is still taught on the sound-friends screen (v ≈ व, w ≈ व) and by the letter actions.
 
 | ✓ | Blend word | Sounds | Onset + rime | Picture |
 |---|---|---|---|---|

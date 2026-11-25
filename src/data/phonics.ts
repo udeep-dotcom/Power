@@ -68,6 +68,29 @@ export const PLACE_LABEL: Record<Place, T> = {
   teeth: { ne: 'दाँत', en: 'teeth' }, lips: { ne: 'ओठ', en: 'lips' },
 };
 
+/** How the letters outside the five वर्ग rows are made. Their row's description ("the tongue tip
+ *  touches the top teeth") is right for त but wrong for स, र or ल, so each gets its own. */
+export const EXTRA_HOW: Record<string, T> = {
+  ya: { ne: 'जिब्रो तालुतिर उठ्छ, तर छुँदैन।', en: 'The tongue rises towards the palate but does not touch it.' },
+  ra: { ne: 'जिब्रोको टुप्पोले दाँतको ठीक पछाडि छिटो एक पटक छुन्छ।', en: 'The tongue tip taps once, quickly, just behind the top teeth.' },
+  la: { ne: 'जिब्रोको टुप्पो दाँतको पछाडि छुन्छ; हावा जिब्रोको छेउबाट निस्कन्छ।', en: 'The tongue tip touches behind the teeth; air flows out at the sides.' },
+  wa: { ne: 'दुवै ओठ गोलो हुन्छन्।', en: 'Both lips make a round shape.' },
+  sha: { ne: 'जिब्रो दाँतको नजिक जान्छ तर छुँदैन — सर्पजस्तै "स्स्स्"।', en: 'The tongue comes close to the teeth without touching: a snake\'s "sss".' },
+  ssa: { ne: 'जिब्रो दाँतको नजिक जान्छ तर छुँदैन — सर्पजस्तै "स्स्स्"।', en: 'The tongue comes close to the teeth without touching: a snake\'s "sss".' },
+  sa: { ne: 'जिब्रो दाँतको नजिक जान्छ तर छुँदैन — सर्पजस्तै "स्स्स्"।', en: 'The tongue comes close to the teeth without touching: a snake\'s "sss".' },
+  ha: { ne: 'मुख खुला रहन्छ; हावा घाँटीबाटै निस्कन्छ।', en: 'The mouth stays open; the air comes straight from the throat.' },
+};
+
+/** Where school books (the Sanskrit उच्चारण-स्थान) place a letter, when that differs from how it
+ *  is said today. The mouth map shows the spoken place and adds this line, so a teacher and a
+ *  child abroad are both told the truth. */
+export const TEXTBOOK_PLACE: Record<string, T> = {
+  sha: { ne: 'पाठ्यपुस्तकमा: तालव्य (तालुबाट)। बोल्दा प्रायः "स" जस्तै।', en: 'School books: palatal. When we speak, usually like "sa".' },
+  ssa: { ne: 'पाठ्यपुस्तकमा: मूर्धन्य (जिब्रो फर्काएर)। बोल्दा प्रायः "स" जस्तै।', en: 'School books: retroflex. When we speak, usually like "sa".' },
+  ra: { ne: 'पाठ्यपुस्तकमा: मूर्धन्य। बोल्दा जिब्रोको टुप्पोले दाँतको ठीक पछाडि छुन्छ।', en: 'School books: retroflex. When we speak, the tongue tip taps just behind the teeth.' },
+  wa: { ne: 'पाठ्यपुस्तकमा: दन्तोष्ठ्य (दाँत र ओठ)। बोल्दा प्रायः गोलो ओठले "व" वा "ब"।', en: 'School books: teeth + lip. When we speak, usually round lips ("wa") or "ba".' },
+};
+
 /** Letters that are spelled differently but SOUND the same in Nepali (shown honestly in the app). */
 export const SAME_SOUND_NOTES: { letters: string; note: T }[] = [
   { letters: 'श ष स', note: { ne: 'यी तीनै प्रायः "स" नै सुनिन्छन् — फरक लेख्दा मात्र।', en: 'All three usually sound like "sa" — they differ only in spelling.' } },
@@ -184,6 +207,6 @@ export const MINIMAL_PAIRS: MinimalPair[] = [
   P('three-tree', 'en', w('three', 'txt:3', 'three'), w('tree', '🌳', 'tree'), { ne: 'th मा जिब्रो दाँतबीच 👅', en: 'For th, the tongue goes between the teeth 👅' }),
   P('sheep-ship', 'en', w('sheep', '🐑', 'sheep'), w('ship', '🚢', 'ship'), { ne: 'ee लामो, i छोटो', en: 'ee is long, i is short' }),
   P('bear-pear', 'en', w('bear', '🐻', 'bear'), w('pear', '🍐', 'pear'), { ne: 'b मा आवाज, p मा हावा', en: 'b buzzes, p puffs' }),
-  P('vest-west', 'en', w('vest', '🦺', 'vest'), w('west', '🧭', 'west'), { ne: 'v मा दाँत र ओठ, w मा गोलो ओठ', en: 'v uses teeth and lip; w uses round lips' }),
+  P('pen-pan', 'en', w('pen', '🖊️', 'pen'), w('pan', '🍳', 'pan'), { ne: 'e मा मुख अलिकति खुल्छ, a मा धेरै खुल्छ 😮', en: 'For e the mouth opens a little; for a it opens wide 😮' }),
   P('cap-cup', 'en', w('cap', '🧢', 'cap'), w('cup', '☕', 'cup'), { ne: 'a मुख ठूलो खोलेर, u छोटो "अ"', en: 'a opens wide; u is a short "uh"' }),
 ];

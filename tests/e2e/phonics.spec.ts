@@ -37,8 +37,12 @@ test('mouth map: tapping letters shows where the sound is made; one per row earn
   await expect(page.locator('.feel')).toHaveCount(2); // भ: air + buzz
   await expect(page.locator('.vt-row.active .vt-cell.sel')).toHaveText('भ');
   await expect.poll(async () => (await saved(page)).soundsHeard ?? []).toContain('ne:bha');
+  await expect(page.locator('.mouth-book')).toHaveCount(0); // भ: school books agree with speech
   for (const ch of ['क', 'च', 'ट', 'त']) await cell(ch).click();
   await expect.poll(async () => (await saved(page)).stickers ?? []).toContain('mouthmap');
+  // श: shown where it is said (with स), plus the school-book place
+  await page.locator('.vt-extra .vt-cell', { hasText: /^श$/ }).click();
+  await expect(page.locator('.mouth-book')).toContainText('तालव्य');
 });
 
 test('lesson shows how the letter is made and links to the mouth map', async ({ page }) => {

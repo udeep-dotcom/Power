@@ -1,7 +1,7 @@
 // Parent zone, behind a simple arithmetic gate (Google Play "Designed for Families" expects
 // adult-only areas to be gated). Shows real learning data per child, not vanity metrics.
 
-import { useMemo, useState } from 'preact/hooks';
+import { useEffect, useMemo, useState } from 'preact/hooks';
 import { Pic } from '../components/Art';
 import { Scenery } from '../components/Scenery';
 import { TopBar } from '../components/UI';
@@ -12,7 +12,7 @@ import { STICKERS } from '../data/journey';
 import { ALL_WORDS } from '../data/words';
 import { STORIES } from '../data/stories';
 import { sfx } from '../lib/sfx';
-import { initSpeech, say, voiceSource, type VoiceSource } from '../lib/speech';
+import { englishVoiceSource, initSpeech, say, sayEnglish, voiceSource, type EnglishVoice, type VoiceSource } from '../lib/speech';
 import {
   addProfile, AVATARS, editProfile, today, emptyProgress, learnedLetterIds, letterProgress, mastery, MAX_PROFILES,
   removeProfile, resetProgress, update, useStore, type Progress, type State,
@@ -58,6 +58,13 @@ const VOICE_LABEL: Record<VoiceSource, T> = {
   'web-ne': { ne: 'ब्राउजरको नेपाली आवाज', en: 'Browser Nepali voice' },
   'web-hi': { ne: 'हिन्दी आवाज (नेपाली उपलब्ध छैन)', en: 'Hindi voice (no Nepali voice found)' },
   none: { ne: 'आवाज उपलब्ध छैन — चित्र र शब्दले काम चल्छ', en: 'No voice available — games use pictures instead' },
+};
+
+const EN_VOICE_LABEL: Record<EnglishVoice, T> = {
+  recorded: { ne: 'रेकर्ड गरिएको UK आवाज ✓', en: 'Recorded UK voice ✓' },
+  uk: { ne: 'UK अङ्ग्रेजी (TTS) ✓', en: 'UK English text-to-speech ✓' },
+  other: { ne: 'UK आवाज भेटिएन — फोनको सेटिङमा "English (United Kingdom)" आवाज थप्नुहोस्', en: 'No UK voice found — add "English (United Kingdom)" in the device\'s text-to-speech settings' },
+  none: { ne: 'अङ्ग्रेजी आवाज छैन', en: 'No English voice on this device' },
 };
 
 function Toggle({ label, value, onChange }: { label: T; value: boolean; onChange: (v: boolean) => void }) {
@@ -160,6 +167,8 @@ function Report({ p, lang }: { p: Progress; lang: string }) {
 
 function Dashboard({ s }: { s: State }) {
   const [voice, setVoice] = useState<VoiceSource>(voiceSource());
+  const [enVoice, setEnVoice] = useState<EnglishVoice>(englishVoiceSource());
+  useEffect(() => { void initSpeech().then(() => { setVoice(voiceSource()); setEnVoice(englishVoiceSource()); }); }, []);
   const [confirm, setConfirm] = useState(false);
   const [viewing, setViewing] = useState(s.active);
   const viewed = useMemo(() => progressOf(s, viewing), [s, viewing]);
@@ -201,6 +210,10 @@ function Dashboard({ s }: { s: State }) {
         <div class="setting">
           <span>{tr(UI.voiceStatus)}: <b>{tr(VOICE_LABEL[voice])}</b></span>
           <button class="btn sky" onClick={async () => { await initSpeech(); setVoice(voiceSource()); void say('क, कमलको क', 'chant-ka'); }}>{tr(UI.testVoice)}</button>
+        </div>
+        <div class="setting">
+          <span>{tr(UI.englishVoice)}: <b>{tr(EN_VOICE_LABEL[enVoice])}</b></span>
+          <button class="btn sky" onClick={async () => { await initSpeech(); setEnVoice(englishVoiceSource()); void sayEnglish('s, sun. Zed.', 'en-w-sun'); }}>{tr(UI.testVoice)}</button>
         </div>
         <div class="setting">
           {!confirm ? (

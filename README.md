@@ -25,7 +25,7 @@ Capacitor so it runs fully offline.
   its *sound* before its name, a key word, an action, IPA and its Nepali "sound friend" (m = म, t ≈ ट).
 - **जोडेर पढौं (Blending):** slide a finger along the arrow and the sounds run together into a word.
   Onset + rime for ages 3–4, every sound for 5–6; Nepali blends by अक्षर.
-- **कान खोलेर सुन (Minimal pairs):** बात/भात, दाल/डाल, तीन/टिन; fan/van, sheep/ship, vest/west. Habre
+- **कान खोलेर सुन (Minimal pairs):** बात/भात, दाल/डाल, तीन/टिन; fan/van, sheep/ship, pen/pan. Habre
   names the difference after each answer.
 - **आवाज खोज and ध्वनि साथी:** find the picture that starts with a sound; match English sounds to Nepali
   ones, and see which sounds exist in only one language.
@@ -33,6 +33,8 @@ Capacitor so it runs fully offline.
   pronunciation "scores": speech recognition is unreliable for under-6s (see the research doc).
   Parents can turn the mic off.
 - **🐢 Slow** button wherever a sound plays.
+- **UK English:** English is spoken with a UK voice wherever the device has one; the Parent zone
+  shows whether it does, and the recording script is written for a UK speaker ("zed", short *a* as in *apple*).
 - **Fixed:** the बाह्रखरी listening game no longer asks children to hear ि vs ी (they sound the same).
 
 ## Also in the app (v0.1–v0.3)

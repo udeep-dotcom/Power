@@ -1,7 +1,7 @@
 {
   "name": "akshar-yatra",
   "private": true,
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Akshar Yatra (अक्षर यात्रा) — a Nepali alphabet and Nepal-discovery game for kids. Web first, Android via Capacitor.",
   "type": "module",
   "scripts": {
