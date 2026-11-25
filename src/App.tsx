@@ -27,6 +27,9 @@ import { AbcHub, AbcLetter } from './screens/sounds/Abc';
 import { BlendGame } from './screens/sounds/Blend';
 import { FriendsGame, FriendsScreen, PairsGame, SoundHunt } from './screens/sounds/PhonicsGames';
 import { MusicDirector } from './lib/music';
+import { RequireSounds } from './components/RequireSounds';
+import { IdleHand } from './components/IdleHand';
+import { PHONICS_NEEDS } from './data/clips';
 
 /*
  Routes
@@ -57,7 +60,7 @@ export function App() {
   useEffect(() => () => stopSpeech(), [path]);
   const [a, b, c] = parts;
 
-  if (!started) return <div class="app-root"><Start onStart={() => setStarted(true)} /><MusicDirector route="start" /></div>;
+  if (!started) return <div class="app-root"><Start onStart={() => setStarted(true)} /><MusicDirector route="start" /><IdleHand path="start" /></div>;
 
   let screen;
   if (!a) screen = <Home onSwitchPlayer={() => { navigate('/', { replace: true }); setStarted(false); }} />;
@@ -81,12 +84,13 @@ export function App() {
   else if (a === 'play' && b === 'colour') screen = <ColourPicker />;
   else if (a === 'play') screen = <PlayHub />;
   else if (a === 'sounds' && b === 'mouth') screen = <MouthMap key={path} initial={c} />;
-  else if (a === 'sounds' && b === 'blend') screen = <BlendGame key={path} lang={c === 'en' ? 'en' : 'ne'} />;
+  else if (a === 'sounds' && b === 'blend' && c === 'en') screen = <RequireSounds ids={PHONICS_NEEDS.blendEn} back="/abc"><BlendGame key={path} lang="en" /></RequireSounds>;
+  else if (a === 'sounds' && b === 'blend') screen = <BlendGame key={path} lang="ne" />;
   else if (a === 'sounds' && b === 'pairs') screen = <PairsGame key={path} lang={c === 'en' ? 'en' : 'ne'} />;
-  else if (a === 'sounds' && b === 'friends' && c === 'game') screen = <FriendsGame key={path} />;
+  else if (a === 'sounds' && b === 'friends' && c === 'game') screen = <RequireSounds ids={PHONICS_NEEDS.friends} back="/sounds/friends"><FriendsGame key={path} /></RequireSounds>;
   else if (a === 'sounds' && b === 'friends') screen = <FriendsScreen />;
   else if (a === 'sounds') screen = <SoundsHub />;
-  else if (a === 'abc' && b === 'hunt') screen = <SoundHunt key={path} />;
+  else if (a === 'abc' && b === 'hunt') screen = <RequireSounds ids={PHONICS_NEEDS.hunt} back="/abc"><SoundHunt key={path} /></RequireSounds>;
   else if (a === 'abc' && b) screen = <AbcLetter key={path} id={b} />;
   else if (a === 'abc') screen = <AbcHub />;
   else if (a === 'nepal' && b === 'map') screen = <MapScreen />;
@@ -101,6 +105,7 @@ export function App() {
     <>
       <div class="app-root" key={a ?? 'home'}>{screen}</div>
       <MusicDirector route={a ?? ''} />
+      <IdleHand path={path} />
       <BedTime />
     </>
   );

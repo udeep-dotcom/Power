@@ -58,6 +58,9 @@ After changing web code, run `npm run android:sync` again before rebuilding.
    current Families policy on microphone use in child-directed apps, and describe the feature in the
    listing and privacy policy. If the review objects, ship with `mic: false` as the default (one line
    in `src/lib/store.ts`) or remove the two permissions; the app works fully without them.
+   The **Voice Studio** (v0.5) also uses the mic, behind the parent gate. Its recordings stay in the
+   app's storage on that phone. Exporting them needs `@capacitor/share` + `@capacitor/filesystem`
+   (not added yet), so for now families export from the web version.
 6. **Test TTS on a real low-end device.** Google's TTS engine includes Nepali, but the voice data may
    need downloading (Settings → System → Languages → Text-to-speech). The Parent zone shows which voice
    source is active and has a "Test voice" button. Recorded audio (see `AUDIO.md`) removes this

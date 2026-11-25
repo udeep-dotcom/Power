@@ -1,7 +1,10 @@
 // v0.4 phonics & pronunciation: every new screen renders, every game can be finished by a
 // "perfect child", and the mic practice really records and plays back (Chromium's fake mic).
 import { expect, test, type Page } from '@playwright/test';
-import { boot, go, saved } from './helpers';
+import { boot, go, saved, seedRecordings } from './helpers';
+
+/** All 26 English letter sounds, as if recorded in the Voice Studio. */
+const EN_SOUNDS = 'abcdefghijklmnopqrstuvwxyz'.split('').map((l) => `en-s-${l}`);
 
 // the fake microphone flags live in playwright.config.ts
 test.use({ permissions: ['microphone'] });
@@ -74,6 +77,7 @@ test('ABC: letter pages step through a–z; hearing s a t p i n earns the sticke
 for (const lang of ['en', 'ne'] as const) {
   test(`blend (${lang}): run the sounds together, pick the picture, finish`, async ({ page }) => {
     await boot(page);
+    if (lang === 'en') await seedRecordings(page, EN_SOUNDS); // English blending needs real sounds
     await go(page, `/sounds/blend/${lang}`);
     for (let k = 0; k < 5; k++) {
       await expect(page.locator('.round-dots span.on')).toHaveCount(k, { timeout: 8000 });
@@ -90,6 +94,7 @@ for (const lang of ['en', 'ne'] as const) {
 
 test('blend: dragging along the arrow lights every sound in order', async ({ page }) => {
   await boot(page, undefined, 6);
+  await seedRecordings(page, EN_SOUNDS);
   await go(page, '/sounds/blend/en');
   const track = page.locator('.blend-track');
   const box = (await track.boundingBox())!;
@@ -104,6 +109,7 @@ test('blend: dragging along the arrow lights every sound in order', async ({ pag
 
 test('age 3 blends bigger chunks (onset + rime) before single sounds', async ({ page }) => {
   await boot(page, undefined, 3);
+  await seedRecordings(page, EN_SOUNDS);
   await go(page, '/sounds/blend/en');
   await expect(page.locator('.blend-part')).toHaveCount(2);
 });
@@ -121,18 +127,21 @@ test('minimal pairs (English) and sound hunt can be completed', async ({ page })
   await boot(page);
   await go(page, '/sounds/pairs/en');
   await playPick(page, 6);
+  await expect.poll(async () => (await saved(page)).nodes?.['SP:en']).toBe(3); // saves are debounced
+  await seedRecordings(page, EN_SOUNDS);
   await go(page, '/abc/hunt');
   await playPick(page, 6);
-  const st = await saved(page);
-  expect(st.nodes?.['SP:en']).toBe(3);
-  expect(st.nodes?.['SH:en']).toBe(3);
+  await expect.poll(async () => (await saved(page)).nodes?.['SH:en']).toBe(3);
+  expect((await saved(page)).nodes?.['SP:en']).toBe(3);
 });
 
 test('sound friends: the table and the game', async ({ page }) => {
   await boot(page);
   await go(page, '/sounds/friends');
   await expect(page.locator('.friend-pair').first()).toBeVisible();
-  await expect(page.locator('.only-card')).toHaveCount(3);
+  await expect(page.locator('.only-card')).toHaveCount(3); // folded under "For grown-ups"
+  await seedRecordings(page, EN_SOUNDS);
+  await go(page, '/sounds/friends');
   await page.locator('.words-play').click();
   await playPick(page, 6);
   await expect.poll(async () => (await saved(page)).stickers ?? []).toContain('friends');
@@ -156,4 +165,61 @@ test('parents can switch the microphone off: no mic buttons anywhere', async ({ 
     await expect(page.locator('.screen').first()).toBeVisible();
     await expect(page.locator('.echo-mic')).toHaveCount(0);
   }
+});
+
+test('without recorded English sounds, the sound games are locked (never a wrong "tuh")', async ({ page }) => {
+  await boot(page);
+  await go(page, '/abc');
+  await expect(page.locator('.hub-tile.locked')).toHaveCount(2); // sound hunt + English blending
+  for (const r of ['/abc/hunt', '/sounds/blend/en', '/sounds/friends/game']) {
+    await go(page, r);
+    await expect(page.locator('.needs-voice')).toBeVisible();
+    await expect(page.locator('.choice')).toHaveCount(0);
+  }
+  // Nepali blending and the minimal-pair games don't need pure sounds: still open
+  await go(page, '/sounds/blend/ne');
+  await expect(page.locator('.blend-track')).toBeVisible();
+  // recording the sounds unlocks them at once
+  await seedRecordings(page, EN_SOUNDS);
+  await go(page, '/abc');
+  await expect(page.locator('.hub-tile.locked')).toHaveCount(0);
+  await go(page, '/abc/hunt');
+  await expect(page.locator('.pick-prompt')).toBeVisible();
+});
+
+test('Voice Studio: a grown-up records a line, it is kept on the device, and it can be exported', async ({ page }) => {
+  await boot(page);
+  await go(page, '/parents');
+  const q = await page.locator('.gate p b').textContent();
+  const W = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine'];
+  const [a, b] = q!.split('×').map((w) => W.indexOf(w.trim()));
+  await page.locator('.gate-opts .btn', { hasText: new RegExp(`^${a * b}$`) }).click();
+  await page.locator('.studio-entry .btn').click();
+  await expect(page.locator('.studio-card')).toBeVisible();
+  const id = await page.locator('.studio-card').getAttribute('data-clip');
+  expect(id).toBe('ui-hello');
+  await page.locator('.rec-btn').click();
+  await expect(page.locator('.rec-btn.rec')).toBeVisible({ timeout: 5000 });
+  await page.waitForTimeout(1600); // Chromium's fake microphone plays a beep each second
+  await page.locator('.rec-btn').click();
+  await expect(page.locator('.studio-row.done')).toHaveCount(1, { timeout: 10000 });
+  await expect(page.locator('.studio-tab.on small')).toHaveText(/^1\//);
+  // saved in IndexedDB as a cleaned WAV
+  const stored = await page.evaluate(async (id) => {
+    const db: IDBDatabase = await new Promise((res) => { const r = indexedDB.open('akshar-yatra-voice', 1); r.onsuccess = () => res(r.result); });
+    const rec = await new Promise<{ blob: Blob; ms: number }>((res) => { const g = db.transaction('clips').objectStore('clips').get(id!); g.onsuccess = () => res(g.result); });
+    const head = new Uint8Array(await rec.blob.arrayBuffer()).slice(0, 4);
+    return { type: rec.blob.type, ms: rec.ms, riff: String.fromCharCode(...head) };
+  }, id);
+  expect(stored.riff).toBe('RIFF');
+  expect(stored.type).toBe('audio/wav');
+  expect(stored.ms).toBeGreaterThan(50);
+  // export: a zip with the clip and a manifest
+  const [dl] = await Promise.all([page.waitForEvent('download'), page.locator('.studio-foot .btn.sky').click()]);
+  expect(dl.suggestedFilename()).toMatch(/^akshar-yatra-voices-\d{4}-\d{2}-\d{2}\.zip$/);
+  const chunks: Uint8Array[] = await (await dl.createReadStream()).toArray();
+  const zip = new TextDecoder('latin1').decode(new Uint8Array(chunks.flatMap((c) => [...c])));
+  expect(zip.startsWith('PK')).toBe(true);
+  expect(zip).toContain('ui-hello.wav');
+  expect(zip).toContain('manifest.json');
 });

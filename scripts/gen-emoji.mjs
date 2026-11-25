@@ -19,7 +19,8 @@ function walk(dir) {
   });
 }
 
-const RE = /\p{Extended_Pictographic}️?(?:‍\p{Extended_Pictographic}️?)*/gu;
+// pictographs (with ZWJ sequences), plus flags: a pair of regional-indicator letters (🇳🇵 🇬🇧)
+const RE = /\p{Extended_Pictographic}️?(?:‍\p{Extended_Pictographic}️?)*|\p{Regional_Indicator}{2}/gu;
 const found = new Set();
 for (const file of walk(resolve(root, 'src'))) {
   for (const m of readFileSync(file, 'utf8').matchAll(RE)) found.add(m[0]);

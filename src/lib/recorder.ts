@@ -20,15 +20,27 @@ function micAllowedHere(): boolean {
   try { return policy ? policy.allowsFeature('microphone') : true; } catch { return true; }
 }
 
-export function canRecord(): boolean {
+/** `grownUp`: the Voice Studio, which ignores the children's mic switch (a parent opened it). */
+export function canRecord(grownUp = false): boolean {
   try {
-    return getState().mic && !!navigator.mediaDevices?.getUserMedia && typeof MediaRecorder !== 'undefined' && micAllowedHere();
+    return (grownUp || getState().mic) && !!navigator.mediaDevices?.getUserMedia && typeof MediaRecorder !== 'undefined' && micAllowedHere();
   } catch { return false; }
 }
 
 /** Record for `ms` milliseconds. Calls onLevel(0..1) ~20×/s for a live meter. Returns an object URL. */
 export async function recordClip(ms: number, onLevel?: (v: number) => void): Promise<string> {
-  stream ??= await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } });
+  const r = await startRecording({ maxMs: ms, onLevel });
+  return URL.createObjectURL(await r.done);
+}
+
+/** Start recording; resolves once the mic is live. `stop()` (or `maxMs`) ends it and yields the audio.
+ *  The Voice Studio turns echo cancellation and auto-gain off (they pump and colour a voice); it keeps
+ *  noise suppression, because most families record at home, not in a booth. */
+export async function startRecording(o: { maxMs: number; onLevel?: (v: number) => void; studio?: boolean }): Promise<{ stop: () => void; done: Promise<Blob> }> {
+  const { onLevel } = o;
+  stream ??= await navigator.mediaDevices.getUserMedia({
+    audio: o.studio ? { echoCancellation: false, noiseSuppression: true, autoGainControl: false } : { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
+  });
   const rec = new MediaRecorder(stream);
   const chunks: Blob[] = [];
   rec.ondataavailable = (e) => { if (e.data.size) chunks.push(e.data); };
@@ -51,16 +63,20 @@ export async function recordClip(ms: number, onLevel?: (v: number) => void): Pro
     } catch { /* level meter is optional */ }
   }
 
-  const done = new Promise<void>((r) => { rec.onstop = () => r(); });
+  const stopped = new Promise<void>((r) => { rec.onstop = () => r(); });
   rec.start();
-  await new Promise((r) => setTimeout(r, ms));
-  rec.stop();
-  await done;
-  clearInterval(timer);
-  void ctx?.close();
-  onLevel?.(0);
-  releaseMic(); // the mic is on only while the red dot shows — never between clips
-  return URL.createObjectURL(new Blob(chunks, { type: rec.mimeType || 'audio/webm' }));
+  let ended = false;
+  const stop = () => { if (!ended) { ended = true; try { rec.stop(); } catch { /* already stopped */ } } };
+  const cap = setTimeout(stop, o.maxMs);
+  const done = stopped.then(() => {
+    clearTimeout(cap);
+    clearInterval(timer);
+    void ctx?.close();
+    onLevel?.(0);
+    releaseMic(); // the mic is on only while the red dot shows — never between clips
+    return new Blob(chunks, { type: rec.mimeType || 'audio/webm' });
+  });
+  return { stop, done };
 }
 
 export async function playUrl(url: string): Promise<void> {

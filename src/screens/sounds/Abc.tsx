@@ -3,6 +3,7 @@ import { useEffect } from 'preact/hooks';
 import { Bi } from '../../components/Bi';
 import { Icon, Pic } from '../../components/Art';
 import { Echo } from '../../components/Echo';
+import { GrownUp } from '../../components/GrownUp';
 import { Scenery } from '../../components/Scenery';
 import { HabreSays, TopBar } from '../../components/UI';
 import { LETTER_BY_ID } from '../../data/alphabet';
@@ -10,17 +11,31 @@ import { UI, toNeDigits } from '../../data/i18n';
 import { EN_BY_ID, EN_GROUPS, EN_LETTERS, type EnLetter } from '../../data/phonics';
 import { navigate } from '../../lib/router';
 import { sfx } from '../../lib/sfx';
-import { say, sayEnglish } from '../../lib/speech';
+import { hasClip, loadClips, say, sayEnglish } from '../../lib/speech';
+import { PHONICS_NEEDS } from '../../data/clips';
+import { useHasClips } from '../../components/RequireSounds';
 import { awardSticker, getState, markSeen, useStore } from '../../lib/store';
 import { haptic } from '../../lib/util';
 import { HubTiles } from './Sounds';
 
-export const sayEnSound = (l: EnLetter, slow = false) => sayEnglish(l.soundSay, `en-s-${l.id}`, { slow });
 export const sayEnName = (l: EnLetter) => sayEnglish(l.upper, `en-n-${l.id}`);
 export const sayEnWord = (word: string, slow = false) => sayEnglish(word, `en-w-${word}`, { slow });
+/** The letter's pure sound — only from a real recording. Text-to-speech says "tuh" for /t/ and
+ *  "ah" for the a of apple, so without one we play the key word (correct audio) instead. */
+export const sayEnSound = async (l: EnLetter, slow = false) => {
+  await loadClips();
+  return hasClip(`en-s-${l.id}`) ? sayEnglish(l.soundSay, `en-s-${l.id}`, { slow }) : sayEnWord(l.word, slow);
+};
+/** Sound then word ("s … sun"); just the word when the sound isn't recorded yet. */
+export const sayEnSoundAndWord = async (l: EnLetter) => {
+  await loadClips();
+  if (hasClip(`en-s-${l.id}`)) await sayEnSound(l);
+  return sayEnWord(l.word);
+};
 
 export function AbcHub() {
   const s = useStore();
+  const hunt = useHasClips(PHONICS_NEEDS.hunt), blend = useHasClips(PHONICS_NEEDS.blendEn);
   return (
     <div class="screen scroll abc-hub">
       <Scenery kind="home" />
@@ -41,8 +56,8 @@ export function AbcHub() {
         </section>
       ))}
       <HubTiles tiles={[
-        { path: '/abc/hunt', pic: '🔎', title: UI.hunt, color: '#ff9f1c', done: !!s.nodes['SH:en'] },
-        { path: '/sounds/blend/en', pic: '🧩', title: UI.blend, color: '#2fa36b', done: !!s.nodes['SB:en'] },
+        { path: '/abc/hunt', pic: '🔎', title: UI.hunt, color: '#ff9f1c', done: !!s.nodes['SH:en'], locked: hunt === false },
+        { path: '/sounds/blend/en', pic: '🧩', title: UI.blend, color: '#2fa36b', done: !!s.nodes['SB:en'], locked: blend === false },
         { path: '/sounds/pairs/en', pic: '👂', title: UI.pairs, color: '#8e5bd6', done: !!s.nodes['SP:en'] },
         { path: '/sounds/friends', pic: '🤝', title: UI.friends, color: '#1d4fb0', done: !!s.nodes['SF'] },
       ]} />
@@ -66,7 +81,7 @@ export function AbcLetter({ id }: { id: string }) {
     markSeen('soundsHeard', `en:${l.id}`);
     const heard = new Set([...getState().soundsHeard, `en:${l.id}`]);
     if (EN_LETTERS.filter((x) => x.group === 1).every((x) => heard.has(`en:${x.id}`))) awardSticker('abc');
-    const t = setTimeout(async () => { await sayEnSound(l); await sayEnWord(l.word); }, 400);
+    const t = setTimeout(() => void sayEnSoundAndWord(l), 400);
     return () => clearTimeout(t);
   }, [l.id]);
 
@@ -81,7 +96,6 @@ export function AbcLetter({ id }: { id: string }) {
           <button class="btn white" onClick={() => { sfx.tap(); void sayEnName(l); }}><span class="abc-name">{l.upper}</span> <Bi t={UI.letterName} /></button>
           <button class="btn white round slow-btn" aria-label="slow" onClick={() => { sfx.tap(); void sayEnSound(l, true); }}><Pic pic="🐢" size={28} /></button>
         </div>
-        <p class="abc-ipa">{l.ipa}</p>
       </div>
       <button class="word-card card abc-word" onClick={() => { sfx.tap(); void sayEnWord(l.word); }}>
         <Pic pic={l.pic} size={80} />
@@ -97,8 +111,12 @@ export function AbcLetter({ id }: { id: string }) {
             <small><Bi t={l.friendHow === 'same' ? UI.sameSound : UI.closeSound} /></small>
           </button>
         )}
-        <Echo model={async () => { await sayEnSound(l); await sayEnWord(l.word); }} />
+        <Echo model={() => sayEnSoundAndWord(l)} />
       </div>
+      <GrownUp>
+        <p class="abc-ipa">{l.ipa} · UK English</p>
+        {!hasClip(`en-s-${l.id}`) && <p><Bi t={{ ne: 'यो अक्षरको शुद्ध ध्वनि अझै रेकर्ड भएको छैन, त्यसैले "आवाज" थिच्दा शब्द सुनिन्छ। अभिभावक क्षेत्र → आवाज स्टुडियो।', en: 'This letter\'s pure sound isn\'t recorded yet, so the sound button plays the key word. Parent zone → Voice Studio.' }} /></p>}
+      </GrownUp>
       <div class="abc-nav">
         <button class="btn white round big-arrow" disabled={!prev} onClick={() => prev && navigate(`/abc/${prev.id}`, { replace: true })} aria-label="previous"><Icon name="back" /></button>
         <span class="abc-pos">{toNeDigits(idx + 1)}/{toNeDigits(EN_LETTERS.length)}</span>

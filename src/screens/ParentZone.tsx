@@ -11,11 +11,14 @@ import { UI, type T } from '../data/i18n';
 import { STICKERS } from '../data/journey';
 import { ALL_WORDS } from '../data/words';
 import { STORIES } from '../data/stories';
+import { CLIPS } from '../data/clips';
+import { localIds } from '../lib/voicebank';
+import { VoiceStudio } from './VoiceStudio';
 import { sfx } from '../lib/sfx';
 import { englishVoiceSource, initSpeech, say, sayEnglish, voiceSource, type EnglishVoice, type VoiceSource } from '../lib/speech';
 import {
   addProfile, AVATARS, editProfile, today, emptyProgress, learnedLetterIds, letterProgress, mastery, MAX_PROFILES,
-  removeProfile, resetProgress, update, useStore, type Progress, type State,
+  removeProfile, resetProgress, setTalk, update, useStore, type Progress, type State,
 } from '../lib/store';
 import { shuffle, tr } from '../lib/util';
 
@@ -174,8 +177,19 @@ function Dashboard({ s }: { s: State }) {
   const viewed = useMemo(() => progressOf(s, viewing), [s, viewing]);
   const viewedProfile = s.profiles.find((p) => p.id === viewing) ?? s.profiles[0];
 
+  const [studio, setStudio] = useState(false);
+  const [recCount, setRecCount] = useState(0);
+  useEffect(() => { void localIds().then((ids) => setRecCount(ids.length)); }, [studio]);
+  if (studio) return <div class="parent-body"><VoiceStudio onClose={() => setStudio(false)} /></div>;
+
   return (
     <div class="parent-body">
+      <section class="card pz-section studio-entry">
+        <h3>🎙️ {tr(UI.studio)}</h3>
+        <p class="pz-hint">{tr(UI.studioIntro)}</p>
+        <p class="pz-hint"><b>{recCount}/{CLIPS.length}</b> {tr(UI.recorded)} · {CLIPS.filter((c) => c.group === 'en-sounds').length} English sounds unlock the English phonics games.</p>
+        <button class="btn crimson" onClick={() => setStudio(true)}>🎙️ {tr(UI.studio)}</button>
+      </section>
       <Players s={s} viewing={viewing} setViewing={setViewing} />
       {s.profiles.length > 1 && (
         <p class="pz-viewing"><Pic pic={viewedProfile.avatar} size={26} /> {tr(UI.viewing)}: <b>{viewedProfile.name || `${tr(UI.player)} ${s.profiles.indexOf(viewedProfile) + 1}`}</b></p>
@@ -185,12 +199,13 @@ function Dashboard({ s }: { s: State }) {
       <section class="card pz-section">
         <h3>{tr(UI.settings)}</h3>
         <div class="setting">
-          <span>{tr(UI.language)}</span>
+          <span>{tr(UI.talkSetting)}</span>
           <span class="seg">
-            <button class={s.lang === 'ne' ? 'on' : ''} onClick={() => update((st) => { st.lang = 'ne'; })}>नेपाली</button>
-            <button class={s.lang === 'en' ? 'on' : ''} onClick={() => update((st) => { st.lang = 'en'; })}>नेपाली + English</button>
+            <button class={s.talk === 'ne' ? 'on' : ''} onClick={() => setTalk('ne')}>नेपाली</button>
+            <button class={s.talk === 'both' ? 'on' : ''} onClick={() => setTalk('both')}>नेपाली + English</button>
+            <button class={s.talk === 'en' ? 'on' : ''} onClick={() => setTalk('en')}>English</button>
           </span>
-          <small class="pz-hint">{tr(UI.langHint)}</small>
+          <small class="pz-hint">{tr(UI.talkHint)}</small>
         </div>
         <Toggle label={UI.sound} value={s.sound} onChange={(v) => update((st) => { st.sound = v; })} />
         <Toggle label={UI.music} value={s.music} onChange={(v) => update((st) => { st.music = v; })} />

@@ -1,11 +1,31 @@
-# Recorded audio (strongly recommended before launch)
+# Recorded audio (required for a premium app)
+
+## Two ways to get real voices
+1. **The Voice Studio (in the app).** Parent zone → 🎙️ Voice Studio. A family member records line by
+   line, in priority order. Each take is trimmed, levelled and faded on the device and **used in the
+   app on that phone at once** (stored in IndexedDB, never uploaded). **Export** downloads a zip of
+   WAVs plus a manifest. *(Inside the Android app, export isn't available yet: record in the web
+   version to export.)*
+2. **A professional voice artist** reads `docs/recording-script.csv` (897 lines: voice, priority,
+   group, text, direction for each).
+
+Either way, bundle the files for every family:
+```bash
+node scripts/import-voices.mjs akshar-yatra-voices-2026-11-25.zip   # or a folder of <clip_id>.wav/.mp3/.m4a
+```
+It converts each clip with ffmpeg to mono MP3 (64 kbps, loudness −18 LUFS), writes
+`public/audio/<clip_id>.mp3`, updates `public/audio/manifest.json`, and skips ids that aren't in
+`src/data/clips.ts`. Order of use at runtime: **this device's studio recording → bundled recording →
+text-to-speech**. English phonics sounds (`en-s-*`) never fall back to text-to-speech. Without them
+the sound button plays the key word, and the games that need pure sounds stay locked.
+
 
 Text-to-speech for Nepali is serviceable at best. Letter names spoken alone ("ङ", "अः") are where TTS
 is weakest, and those are exactly the sounds children must learn. A native speaker's voice is the
 single biggest quality upgrade available.
 
 ## What to record
-`docs/recording-script.csv` lists **236 priority clips**: 49 letters × 3 (the letter name, the example
+`docs/recording-script.csv` (generated from `src/data/clips.ts`, 897 lines) starts with Habre's 37 spoken lines, then **236 letter/word/number/story clips**: 49 letters × 3 (the letter name, the example
 word, and the chart chant "क, कमलको क"), 48 first words, 10 numbers and all 31 story pages (ids like
 `story-valley-1`, read in a slow, warm storyteller voice). They are followed by **432 optional बाह्रखरी
 syllables** (36 consonants ×
@@ -46,7 +66,7 @@ mangled by some export tools and operating systems.
 4. Rebuild. Any clip in the manifest is played instead of TTS. Missing clips still fall back to TTS,
    so you can add them gradually.
 
-Size: the 236 priority clips at 64 kbps come to about 2.5–3.5 MB; all 793 come to about 8–11 MB. Both are fine inside the APK.
+Size: the ~300 priority-1 clips at 64 kbps come to about 3–4 MB; all 897 come to about 10–13 MB. Both are fine inside the APK.
 
 ## Fallback order (for reference)
 recorded clip → Android native TTS (`ne-NP`, then `hi-IN`) → browser `speechSynthesis` with a Nepali or

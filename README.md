@@ -14,10 +14,23 @@ Capacitor so it runs fully offline.
 | 📖 Design document | [`docs/GAME_DESIGN.md`](docs/GAME_DESIGN.md): audience, learning goals, activities, rewards, art, roadmap, a critique of the brief, the v0.2 audit (§0b) and the v0.4 phonics decisions (§0d) |
 | 👄 Phonics research | [`docs/PHONICS_RESEARCH.md`](docs/PHONICS_RESEARCH.md): what Jolly Phonics, Google Read Along and ELSA do, what we adopted and rejected, Nepali-specific findings, sources |
 | 🤖 Android | [`docs/ANDROID.md`](docs/ANDROID.md): build, publish, what is Android-specific |
-| 🎙️ Audio | [`docs/AUDIO.md`](docs/AUDIO.md) + [`docs/recording-script.csv`](docs/recording-script.csv): 236 priority clips, 432 optional बाह्रखरी syllables and 125 phonics clips (Nepali and English voices) |
+| 🎙️ Audio | [`docs/AUDIO.md`](docs/AUDIO.md) + [`docs/recording-script.csv`](docs/recording-script.csv): 897 lines in priority order (Nepali and UK English voices), recordable in the app's Voice Studio |
 | ✅ Content review | [`docs/CONTENT_REVIEW.md`](docs/CONTENT_REVIEW.md): every word and fact, as a checklist for a Nepali teacher |
 
-## What's in v0.4
+## What's new in v0.5
+- **🎙️ Voice Studio (Parent zone).** Record a grandparent's or parent's voice line by line. Takes are
+  trimmed and levelled on the device and used in the app straight away. Export them as a zip, and
+  `scripts/import-voices.mjs` bundles them for everyone. The same 897-line list is a script for a
+  professional voice artist.
+- **No wrong phonics sounds.** Text-to-speech can't say a pure /t/. Without a recording, the sound
+  button plays the key word instead, and the three games that need pure sounds show 🎙️ until they're
+  recorded (about 5 minutes for all 26).
+- **Habre speaks your child's language.** A grown-up picks नेपाली, नेपाली + English or English once.
+  Only the instructions change: letters, words and stories stay Nepali.
+- **A hand shows what to do.** If a child hesitates, a 👆 mimes the next step. Explanations for
+  adults are folded under 👪.
+
+## v0.4
 - **ध्वनि (Sounds) — मुखको नक्सा:** the वर्ग table as a living mouth map. Tap a letter: the head lights up
   where it is made, a 🕯️ flame blows for महाप्राण, a 🐝 buzzes for घोष, 👃 for नासिक्य. Every letter lesson
   links to it.
@@ -75,8 +88,8 @@ Capacitor so it runs fully offline.
 ```bash
 npm ci
 npm run dev            # http://localhost:5173
-npm test               # 214 unit tests (content, phonics data, trace scoring, saves/players, age levels, Nepali-first)
-npm run test:e2e       # 29 Playwright end-to-end tests against the production build (incl. a fake mic)
+npm test               # 232 unit tests (content, phonics data, trace scoring, saves/players, age levels, Nepali-first)
+npm run test:e2e       # 33 Playwright end-to-end tests against the production build (incl. a fake mic)
 npm run build          # dist/ (PWA)
 npm run build:single   # dist-single/index.html — one self-contained file to share
 npm run android:sync   # build + copy into android/ (then open in Android Studio)
@@ -87,6 +100,7 @@ Regenerate the derived files after editing content:
 npm run gen                              # emoji subset + map paths
 node scripts/gen-content-review.ts       # docs/CONTENT_REVIEW.md
 node scripts/gen-recording-script.ts     # docs/recording-script.csv
+node scripts/import-voices.mjs <zip>     # bundle recorded voices into public/audio/
 ```
 
 ## Credits

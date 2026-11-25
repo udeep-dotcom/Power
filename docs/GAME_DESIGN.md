@@ -1,6 +1,6 @@
 # अक्षर यात्रा · Akshar Yatra — Game Design Document
 
-*Version 0.4 · November 2026 · Status: playable web build + Android project · Audience: children under 6, in Nepal and abroad (see §0c); phonics and pronunciation in §0d*
+*Version 0.5 · November 2026 · Status: playable web build + Android APK (CI) · Audience: children under 6, in Nepal and abroad (§0c); phonics (§0d); real voices and pre-reader navigation (§0e)*
 
 A game in which Nepali children climb from the Terai to the top of Sagarmatha by learning the
 49 letters of the Nepali alphabet, collecting stickers of real Nepali places, animals and festivals on
@@ -120,6 +120,46 @@ unit test enforces it.
   the teeth, because that is how Nepali is spoken, and a 📘 line gives the school-book place.
 - **Nothing here is validated with children yet.** Watch 5–10 children use the blend and minimal-pair
   games before paying for recordings.
+
+## 0e. v0.5 — "the sounds aren't correct or premium" and "kids can't navigate it alone"
+
+Both criticisms were right, and both came from the same mistake: **the app was built on top of
+text-to-speech and on-screen words, and pre-schoolers can use neither.**
+
+**What was actually wrong with the sound.** On most phones and computers there is no Nepali voice,
+so a *Hindi* voice read the Nepali. No text-to-speech can make a clean phonics sound: /t/ comes out as
+"tuh", and a UK voice says the *a* of *apple* as the *ah* of *father*. v0.4 called this the biggest gap
+but still played those sounds as a fallback. For a phonics product, teaching a wrong sound is worse
+than silence.
+
+**What was actually wrong with navigation.** It isn't really "too much Nepali". Children under 6
+can't read *any* text. They navigate by pictures, by a voice they understand, and by being shown. A
+child abroad who doesn't follow spoken Nepali got instructions they couldn't understand, and on a
+device with no voice they got nothing at all.
+
+| Decision | What was built |
+|---|---|
+| **Real voices, made easy to get.** Every premium children's app uses recorded human voices. | **आवाज स्टुडियो (Voice Studio)** in the Parent zone. A grandparent or parent records line by line (897 lines in a sensible order: Habre's 37 lines first, then letters, English sounds, words…). Each take is trimmed, levelled and faded on the device, played back at once, and **used in the app straight away on that phone**. **Export** makes a zip, and `scripts/import-voices.mjs` turns it into MP3s bundled for every family. The same list is `docs/recording-script.csv` for a professional voice artist. |
+| **Never play a wrong phonics sound.** | Without a recording, the English sound button plays the **key word** (correct audio) instead of a fake sound. The three games that need pure sounds (sound hunt, English blending, sound-friends game) show 🎙️ and a short grown-up note until those sounds are recorded. Recording the 26 sounds takes about 5 minutes and unlocks them at once. |
+| **Habre speaks the child's language; the content stays Nepali.** | On first run a **grown-up** chooses: नेपाली, नेपाली + English, or English. The phone's language suggests one. This changes only how Habre *explains*. Letters, words and stories are always Nepali. Changeable in the Parent zone. |
+| **Show, don't tell.** | **A demonstrating hand.** After about 6 seconds without a touch, a 👆 appears over the next thing to do on that screen and mimes it (tap, or slide for blending). The second time, Habre repeats the instruction. It never points at an answer and stops after three times. |
+| **Children's screens are pictures, not paragraphs.** | Explanations for adults (how a sound is made, textbook places, IPA, the "only in English" cards) are folded under **👪 For grown-ups**. |
+
+### Pushback, honestly
+- **Family recordings are a feature, not "premium".** Grandma's voice is precious to a family abroad,
+  and a strong differentiator. It won't sound like a studio voice, though, and it varies from family
+  to family. For the default voice every family hears, **hire professionals**: a Nepali voice artist
+  for the about 300 priority-1 lines (roughly a 2-hour session), and a UK English voice for the 26
+  sounds and about 145 English lines (about an hour). The studio, script and import pipeline mean
+  those sessions plug straight in.
+- **"Premium" is also sound design and art.** The sound effects and music are synthesised in code.
+  A sound designer (or a licensed library) and an illustrator are the other two premium passes. Code
+  can't do them.
+- **English instructions could reduce Nepali exposure.** That's why the content never switches, and
+  why abroad the suggestion is *both* rather than English. Watch whether children in "English" mode
+  still pick up the letters.
+- **Locking games is a trade-off.** A family that never records sees 🎙️ on three games. That's
+  better than teaching "tuh" for /t/, and the lock tells the grown-up exactly how to fix it.
 
 ---
 
@@ -384,10 +424,11 @@ android/       Capacitor project (bundles dist/ — fully offline)
 | 0.1 | 49 letters, trace, 4 mini-games, journey, map, 3 fact decks, quiz, stickers, parent zone, Android project |
 | 0.2 | Audit fixes (§0b), start screen, sibling profiles, Today's practice, बाह्रखरी explorer + vowel-sign game, live trace meter, tablet scaling, e2e tests |
 | 0.3 | Under-6 focus (§0c): age levels, Nepali-first bilingual mode, शब्द (48 words), अङ्क (१–१०), कथा (6 stories), खेल (4 instruments, 4 colouring pages), music, play-time limit, new home |
-| **0.4 (this build)** | Phonics and pronunciation (§0d): मुखको नक्सा, ए बी सी (26 letters), blending, minimal pairs, sound hunt, sound friends, record-and-compare mic, slow speech; ि/ी listening fix |
-| 0.5 — Phonics II | English digraphs (sh ch th ng ai ee oa…), Nepali conjunct sounds (क्ष त्र ज्ञ), 3-syllable blends, recorded English and Nepali phonics clips |
+| 0.4 | Phonics and pronunciation (§0d): मुखको नक्सा, ए बी सी (26 letters), blending, minimal pairs, sound hunt, sound friends, record-and-compare mic, slow speech; ि/ी listening fix |
+| **0.5 (this build)** | Real voices (Voice Studio, export/import, 897-line catalogue), no wrong phonics sounds, "Habre speaks" language choice, demonstrating hand, grown-up text folded away (§0e) |
+| 0.6 — Phonics II | English digraphs (sh ch th ng ai ee oa…), Nepali conjunct sounds (क्ष त्र ज्ञ), 3-syllable blends, recorded English and Nepali phonics clips |
 | "Premium pass" (any time) | Recorded voice, custom illustrations, stroke-order animation, music, play-test fixes. *Needs people and budget, not code.* |
-| 0.6 — Reading and writing | बाह्रखरी tracing, reading 2–3-letter words (घर, कलम, माछा) with the blend engine |
+| 0.7 — Reading and writing | बाह्रखरी tracing, reading 2–3-letter words (घर, कलम, माछा) with the blend engine |
 | 1.0 — Launch | Google Play (Designed for Families), web PWA, a school/NGO edition |
 
 ---

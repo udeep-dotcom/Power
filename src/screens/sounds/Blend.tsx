@@ -108,7 +108,7 @@ export function BlendGame({ lang }: { lang: 'ne' | 'en' }) {
       <div class="game-body">
         <HabreSays text={UI.blendHow} size={60} speakOnMount={false} />
         <RoundDots total={words.length} done={i} />
-        <div class="blend-card card" key={i} data-word={w.id}>
+        <div class={`blend-card card ${joined ? 'done' : ''}`} key={i} data-word={w.id}>
           <div class={`blend-parts ${joined ? 'joined' : ''} ${lang === 'ne' ? 'deva' : 'latin'}`} lang={lang}>
             {parts.map((p, k) => (
               <button key={k} class={`blend-part ${k <= lit ? 'lit' : ''}`} onClick={() => { sfx.tap(); setLit((x) => Math.max(x, k)); void sayPart(w, p); }}>

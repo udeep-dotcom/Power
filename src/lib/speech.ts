@@ -7,11 +7,16 @@
 //   4. Nothing — callers fall back to visual cues (picture + word)
 // Note: Android System WebView does NOT implement speechSynthesis, which is why (2) exists.
 
-import { getState } from './store';
+import { lineClip } from '../data/clips';
+import { getState, type Talk } from './store';
+import { getLocal, localIds } from './voicebank';
 
 export type VoiceSource = 'recorded' | 'native' | 'web-ne' | 'web-hi' | 'none';
 
 let manifest: Set<string> | null = null;
+/** Clips recorded on this device in the Voice Studio (IndexedDB); they win over bundled ones. */
+let local = new Set<string>();
+const localUrls = new Map<string, string>();
 let webVoice: SpeechSynthesisVoice | null = null;
 type NativeTts = { speak(o: object): Promise<void>; stop(): Promise<void>; getSupportedLanguages(): Promise<{ languages: string[] }> };
 let nativeTts: NativeTts | null = null;
@@ -26,9 +31,66 @@ let ready: Promise<void> | null = null;
 
 export function initSpeech(): Promise<void> {
   ready ??= (async () => {
-    await Promise.all([loadManifest(), initNative(), initWeb()]);
+    await Promise.all([loadClips(), initNative(), initWeb()]);
   })();
   return ready;
+}
+
+async function loadLocal() {
+  local = new Set(await localIds());
+}
+
+let clipsLoaded: Promise<void> | null = null;
+/** Resolves once we know which recordings exist (fast: doesn't wait for text-to-speech voices). */
+export function loadClips(): Promise<void> {
+  clipsLoaded ??= Promise.all([loadManifest(), loadLocal()]).then(() => clipsChanged());
+  return clipsLoaded;
+}
+
+function clipsChanged() {
+  try { window.dispatchEvent(new CustomEvent('akshar:clips')); } catch { /* not in a browser */ }
+}
+
+/** True if a real recording exists for this clip (on this device or bundled with the app). */
+export function hasClip(id: string): boolean {
+  return local.has(id) || !!manifest?.has(id);
+}
+export function hasClips(ids: string[]): boolean { return ids.every(hasClip); }
+
+/** The Voice Studio calls these as recordings are saved or deleted. */
+export function setLocalClip(id: string, present: boolean): void {
+  const u = localUrls.get(id);
+  if (u) { URL.revokeObjectURL(u); localUrls.delete(id); }
+  if (present) local.add(id); else local.delete(id);
+  clipsChanged();
+}
+
+async function clipUrl(id: string): Promise<string | null> {
+  if (local.has(id)) {
+    const cached = localUrls.get(id);
+    if (cached) return cached;
+    const c = await getLocal(id);
+    if (c) { const u = URL.createObjectURL(c.blob); localUrls.set(id, u); return u; }
+  }
+  return manifest?.has(id) ? `./audio/${id}.mp3` : null;
+}
+
+/** Play a recorded clip. Resolves true when it played, false if there is no usable recording. */
+async function playClip(id: string | undefined, opts: SpeakOpts = {}): Promise<boolean> {
+  if (!id) return false;
+  const url = await clipUrl(id);
+  if (!url) return false;
+  try {
+    const a = new Audio(url);
+    if (opts.slow) a.playbackRate = 0.7; // browsers keep the pitch when slowing down
+    currentAudio = a;
+    // "pause" too: stopSpeech() pauses a clip when something else starts talking, and a paused
+    // clip never fires "ended" — without this, whoever awaited it (a game round) waits forever.
+    const ended = new Promise((r) => { a.onended = r; a.onerror = r; a.onpause = r; });
+    await a.play();
+    await ended;
+    return true;
+  } catch { return false; }
 }
 
 async function loadManifest() {
@@ -72,7 +134,7 @@ function initWeb(): Promise<void> {
 }
 
 export function voiceSource(): VoiceSource {
-  if (manifest && manifest.size) return 'recorded';
+  if ((manifest && manifest.size) || local.size) return 'recorded';
   if (nativeTts) return 'native';
   if (webVoice) return /^ne/i.test(webVoice.lang) ? 'web-ne' : 'web-hi';
   return 'none';
@@ -118,17 +180,7 @@ export async function say(text: string, clip?: string, opts: SpeakOpts = {}): Pr
 }
 
 async function speakNepali(text: string, clip?: string, opts: SpeakOpts = {}): Promise<boolean> {
-
-  if (clip && manifest?.has(clip)) {
-    try {
-      const a = new Audio(`./audio/${clip}.mp3`);
-      if (opts.slow) a.playbackRate = 0.7; // browsers keep the pitch when slowing down
-      currentAudio = a;
-      await a.play();
-      await new Promise((r) => { a.onended = r; a.onerror = r; });
-      return true;
-    } catch { /* fall through */ }
-  }
+  if (await playClip(clip, opts)) return true;
 
   if (nativeTts) {
     try {
@@ -150,16 +202,7 @@ export async function sayEnglish(text: string, clip?: string, opts: SpeakOpts = 
 }
 
 async function speakEnglish(text: string, clip?: string, opts: SpeakOpts = {}): Promise<boolean> {
-  if (clip && manifest?.has(clip)) {
-    try {
-      const a = new Audio(`./audio/${clip}.mp3`);
-      if (opts.slow) a.playbackRate = 0.7;
-      currentAudio = a;
-      await a.play();
-      await new Promise((r) => { a.onended = r; a.onerror = r; });
-      return true;
-    } catch { /* fall through */ }
-  }
+  if (await playClip(clip, opts)) return true;
   if (nativeEnglish) {
     try { await nativeEnglish.speak({ text, lang: nativeEnglishLang, rate: opts.slow ? 0.5 : 0.95, pitch: 1.1, volume: 1, category: 'ambient' }); return true; } catch { /* fall through */ }
   }
@@ -170,7 +213,7 @@ async function speakEnglish(text: string, clip?: string, opts: SpeakOpts = {}): 
 export type EnglishVoice = 'recorded' | 'uk' | 'other' | 'none';
 /** Which English voice the ABC section will use (shown to parents: phonics should be UK English). */
 export function englishVoiceSource(): EnglishVoice {
-  if (manifest && [...manifest].some((c) => c.startsWith('en-s-'))) return 'recorded';
+  if ([...local, ...(manifest ?? [])].some((c) => c.startsWith('en-s-'))) return 'recorded';
   if (nativeEnglish) return UK.test(nativeEnglishLang) ? 'uk' : 'other';
   if (englishVoice) return UK.test(englishVoice.lang) ? 'uk' : 'other';
   return 'none';
@@ -194,20 +237,38 @@ function speakWeb(text: string, voice: SpeechSynthesisVoice | null, lang: string
 }
 
 /**
- * Speak an instruction. Nepali always comes first — the app exists so children hear Nepali.
- * In bilingual mode ("नेपाली + English", for families abroad) the English line follows, unless
- * something else started speaking in between.
+ * Speak an instruction in the language Habre uses with this child (Parent zone → "Habre speaks"):
+ *  - 'ne'   Nepali only;
+ *  - 'both' Nepali, then English (unless something else started speaking in between);
+ *  - 'en'   English only — for children abroad who don't understand spoken Nepali yet. Letters,
+ *           words and stories stay Nepali (they use say()); only the *instructions* change.
+ * Habre's lines play their recording when one exists (clip id found from the Nepali text).
  */
-export async function instruct(t: { ne: string; en: string }, clip?: string): Promise<unknown> {
+export async function instruct(t: { ne: string; en: string }, clip?: string, talkOverride?: Talk): Promise<unknown> {
   if (!getState().voice) return false;
   await initSpeech();
   stopSpeech();
   const my = gen;
-  const spokeNepali = await tracked(speakNepali(t.ne, clip));
-  if (getState().lang !== 'en' || my !== gen) return spokeNepali;
+  const talk = talkOverride ?? getState().talk;
+  const neClip = clip ?? lineClip(t);
+  const enClip = neClip ? `${neClip}-en` : undefined;
+  if (talk === 'en') {
+    const ok = await tracked(speakEnglish(t.en, enClip));
+    // no English voice at all on this device: Nepali is better than silence
+    return ok || my !== gen ? ok : tracked(speakNepali(t.ne, neClip));
+  }
+  const spokeNepali = await tracked(speakNepali(t.ne, neClip));
+  if (talk !== 'both' || my !== gen) return spokeNepali;
   if (spokeNepali) await new Promise((r) => setTimeout(r, 250));
   if (my !== gen) return spokeNepali;
-  return tracked(speakEnglish(t.en));
+  return tracked(speakEnglish(t.en, enClip));
+}
+
+/** Play one recording by id (Voice Studio preview). */
+export async function playRecording(id: string): Promise<boolean> {
+  await initSpeech();
+  stopSpeech();
+  return tracked(playClip(id));
 }
 
 export function isSpeaking(): boolean { return speaking > 0; }

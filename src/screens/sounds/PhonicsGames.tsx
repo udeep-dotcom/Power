@@ -7,6 +7,7 @@
 
 import { useMemo, useState } from 'preact/hooks';
 import { Bi } from '../../components/Bi';
+import { GrownUp } from '../../components/GrownUp';
 import { Pic } from '../../components/Art';
 import { PickGame, type PickRound } from '../../components/PickGame';
 import { Scenery } from '../../components/Scenery';
@@ -22,6 +23,8 @@ import { say, sayEnglish } from '../../lib/speech';
 import { awardSticker, completeNode } from '../../lib/store';
 import { shuffle, starsFromMistakes } from '../../lib/util';
 import { sayEnSound } from './Abc';
+import { PHONICS_NEEDS } from '../../data/clips';
+import { useHasClips } from '../../components/RequireSounds';
 
 function Done({ title, sticker, stars, back }: { title: typeof UI.gameDone; sticker: string | null; stars: number; back: string }) {
   return (
@@ -100,6 +103,7 @@ export function SoundHunt() {
 export const FRIENDS = EN_LETTERS.filter((l) => l.friend && LETTER_BY_ID[l.friend].kind !== 'vowel');
 
 export function FriendsScreen() {
+  const ready = useHasClips(PHONICS_NEEDS.friends);
   return (
     <div class="screen scroll friends-screen">
       <Scenery kind="terai" />
@@ -119,6 +123,7 @@ export function FriendsScreen() {
         })}
       </div>
       <p class="friends-legend"><b>=</b> <Bi t={UI.sameSound} inline /> · <b>≈</b> <Bi t={UI.closeSound} inline /></p>
+      <GrownUp>
       <div class="only-cards">
         {ONLY_IN.map((o) => (
           <div key={o.sounds} class={`only-card card ${o.lang}`}>
@@ -128,7 +133,8 @@ export function FriendsScreen() {
           </div>
         ))}
       </div>
-      <button class="btn big crimson words-play" onClick={() => { sfx.whoosh(); navigate('/sounds/friends/game'); }}>🤝 <Bi t={UI.friends} inline /></button>
+      </GrownUp>
+      <button class="btn big crimson words-play" onClick={() => { sfx.whoosh(); navigate('/sounds/friends/game'); }}>{ready === false ? '🎙️' : '🤝'} <Bi t={UI.friends} inline /></button>
     </div>
   );
 }

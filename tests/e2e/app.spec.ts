@@ -1,7 +1,7 @@
 // End-to-end smoke tests: every screen renders without errors and every game can be played
 // to completion by a "perfect child". Run: npm run test:e2e  (builds first)
 import { expect, test } from '@playwright/test';
-import { boot, go, pickAgeIfAsked, saved, veteran } from './helpers';
+import { boot, go, pickAgeIfAsked, pickTalkIfAsked, saved, veteran } from './helpers';
 
 test('start screen → home, all main screens render without errors', async ({ page }) => {
   const errors = await boot(page);
@@ -259,8 +259,39 @@ test('instruments play without errors', async ({ page }) => {
 });
 
 test('bilingual mode keeps Nepali first and adds small English', async ({ page }) => {
-  await boot(page, { v: 2, lang: 'en', profiles: [{ id: 'p1', avatar: '🐯', name: '', age: 5 }], active: 'p1' });
+  await boot(page, { v: 2, lang: 'en', talk: 'both', talkSet: true, profiles: [{ id: 'p1', avatar: '🐯', name: '', age: 5 }], active: 'p1' });
   const label = page.locator('.home-tile').first();
   await expect(label.locator('.bi-ne')).toHaveText('अक्षर');
   await expect(label.locator('.bi-en')).toHaveText('Letters');
+});
+
+test('first run: a grown-up chooses the language Habre speaks; letters stay Nepali', async ({ page }) => {
+  await page.goto('/');
+  await page.locator('.start-play').click({ force: true });
+  await expect(page.locator('.talk-btn')).toHaveCount(3);
+  await pickTalkIfAsked(page, 'en');
+  await pickAgeIfAsked(page, 4);
+  await expect(page.locator('.home-grid')).toBeVisible();
+  await expect.poll(async () => (await saved(page)).talk).toBe('en'); // saves are debounced
+  expect((await saved(page)).talkSet).toBe(true);
+  // English support appears under the Nepali labels; the content itself stays Nepali
+  await expect(page.locator('.home-tile').first().locator('.bi-ne')).toHaveText('अक्षर');
+  await expect(page.locator('.home-tile').first().locator('.bi-en')).toHaveText('Letters');
+  // asked once only
+  await page.reload();
+  await page.locator('.start-play').click({ force: true });
+  await expect(page.locator('.home-grid')).toBeVisible();
+  await expect(page.locator('.talk-btn')).toHaveCount(0);
+});
+
+test('a hand shows what to do when a child hesitates, and goes away when they touch', async ({ page }) => {
+  await boot(page);
+  await expect(page.locator('.idle-hand')).toHaveCount(0);
+  await expect(page.locator('.idle-hand .ih-finger')).toBeVisible({ timeout: 9000 });
+  const hand = (await page.locator('.idle-hand .ih-finger').boundingBox())!;
+  const hero = (await page.locator('.journey-hero').boundingBox())!;
+  expect(hand.x).toBeGreaterThan(hero.x);
+  expect(hand.x).toBeLessThan(hero.x + hero.width);
+  await page.mouse.click(5, 5);
+  await expect(page.locator('.idle-hand')).toHaveCount(0);
 });

@@ -1,7 +1,9 @@
-// First screen of every session. Two jobs:
+// First screen of every session. Jobs:
 //  1. Get the first tap. Browsers and Android block sound until the user touches the screen,
 //     so without this Habre's greeting — the most important line in the app — is silent.
 //  2. Let siblings on a shared phone pick who's playing.
+//  3. Once per install, ask the GROWN-UP which language the child understands, so Habre explains
+//     things in words the child knows. Letters, words and stories stay Nepali regardless.
 
 import { Habre } from '../components/Habre';
 import { Bi } from '../components/Bi';
@@ -12,7 +14,7 @@ import { LETTERS } from '../data/alphabet';
 import { unlockAudio, sfx } from '../lib/sfx';
 import { initSpeech, instruct } from '../lib/speech';
 import { useState } from 'preact/hooks';
-import { editProfile, getState, learnedLetterIds, switchProfile, useStore, type Profile } from '../lib/store';
+import { editProfile, getState, learnedLetterIds, setTalk, switchProfile, useStore, type Profile, type Talk } from '../lib/store';
 import { DEFAULT_AGE } from '../lib/level';
 import { toNeDigits } from '../data/i18n';
 import { haptic, tr } from '../lib/util';
@@ -22,6 +24,9 @@ export function Start({ onStart }: { onStart: () => void }) {
   const many = s.profiles.length > 1;
 
   const [askAge, setAskAge] = useState<Profile | null>(null);
+  const [askTalk, setAskTalk] = useState<Profile | null>(null);
+  // a phone set to Nepali (or Hindi) suggests Nepali; anything else suggests both languages
+  const suggested: Talk = /^(ne|hi)/i.test(navigator.language || '') ? 'ne' : 'both';
 
   const finish = () => {
     onStart();
@@ -31,13 +36,25 @@ export function Start({ onStart }: { onStart: () => void }) {
     });
   };
 
+  const askAgeOf = (p: Profile) => { setAskAge(p); void initSpeech().then(() => instruct(UI.howOld)); };
+
   const go = (p: Profile) => {
     unlockAudio();
     sfx.unlock(); haptic('success');
     switchProfile(p.id);
+    // Once per install: which language does this family's child understand? (a grown-up answers)
+    if (!getState().talkSet) { setAskTalk(p); void initSpeech().then(() => instruct(UI.talkQ, undefined, 'both')); return; }
     // First time for this child: ask their age once — it sets how hard every game is.
-    if (!p.age) { setAskAge(p); void initSpeech().then(() => instruct(UI.howOld)); return; }
+    if (!p.age) { askAgeOf(p); return; }
     finish();
+  };
+
+  const pickTalk = (t: Talk) => {
+    sfx.correct(); haptic('success');
+    setTalk(t);
+    const p = askTalk!;
+    setAskTalk(null);
+    if (!p.age) askAgeOf(p); else finish();
   };
 
   const pickAge = (age: number) => {
@@ -46,6 +63,34 @@ export function Start({ onStart }: { onStart: () => void }) {
     setAskAge(null);
     finish();
   };
+
+  if (askTalk) {
+    const opts: { t: Talk; flag: string; label: string }[] = [
+      { t: 'ne', flag: '🇳🇵', label: 'नेपाली' },
+      { t: 'both', flag: '🇳🇵 🇬🇧', label: 'नेपाली + English' },
+      { t: 'en', flag: '🇬🇧', label: 'English' },
+    ];
+    return (
+      <div class="screen start">
+        <Scenery kind="home" />
+        <PrayerFlags />
+        <div class="start-col">
+          <div class="start-habre"><Habre size={110} mood="think" /></div>
+          <p class="talk-who">👪 {UI.talkForGrownUp.ne} · {UI.talkForGrownUp.en}</p>
+          <p class="start-q talk-q"><span class="deva" lang="ne">{UI.talkQ.ne}</span><small>{UI.talkQ.en}</small></p>
+          <div class="talk-opts">
+            {opts.map((o, i) => (
+              <button key={o.t} data-talk={o.t} class={`talk-btn ${o.t === suggested ? 'suggested' : ''}`} style={{ animationDelay: `${i * 0.07}s` }} onClick={() => pickTalk(o.t)}>
+                <span class="talk-flag">{o.flag.split(' ').map((f) => <Pic key={f} pic={f} size={40} />)}</span>
+                <span class={`talk-label ${o.t !== 'en' ? 'deva' : ''}`}>{o.label}</span>
+              </button>
+            ))}
+          </div>
+          <p class="talk-hint"><span class="deva" lang="ne">{UI.talkHint.ne}</span><br /><small>{UI.talkHint.en}</small></p>
+        </div>
+      </div>
+    );
+  }
 
   if (askAge) {
     return (

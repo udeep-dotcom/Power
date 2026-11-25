@@ -1,6 +1,7 @@
 // ध्वनि (Nepali phonetics) hub + मुखको नक्सा (mouth map).
 import { useState } from 'preact/hooks';
 import { Bi } from '../../components/Bi';
+import { GrownUp } from '../../components/GrownUp';
 import { Pic } from '../../components/Art';
 import { Echo } from '../../components/Echo';
 import { Mouth } from '../../components/Mouth';
@@ -20,15 +21,16 @@ export const sayNeLetter = (id: string, slow = false) => {
   return say(l.say ?? l.char, `letter-${id}`, { slow });
 };
 
-export function HubTiles({ tiles }: { tiles: { path: string; pic: string; title: T; color: string; done?: boolean }[] }) {
+export function HubTiles({ tiles }: { tiles: { path: string; pic: string; title: T; color: string; done?: boolean; locked?: boolean }[] }) {
   return (
     <div class="hub-grid">
       {tiles.map((t, i) => (
-        <button key={t.path} class="hub-tile" style={{ ...tileVars('tc', t.color), animationDelay: `${i * 0.05}s` } as never}
+        <button key={t.path} class={`hub-tile ${t.locked ? 'locked' : ''}`} style={{ ...tileVars('tc', t.color), animationDelay: `${i * 0.05}s` } as never}
           onClick={() => { sfx.tap(); haptic(); navigate(t.path); }}>
           <span class="hub-pic"><Pic pic={t.pic} size={60} /></span>
           <span class="hub-title"><Bi t={t.title} /></span>
           {t.done && <span class="hub-progress">✓</span>}
+          {t.locked && <span class="hub-lock" aria-label="needs recording">🎙️</span>}
         </button>
       ))}
     </div>
@@ -83,13 +85,18 @@ export function MouthMap({ initial }: { initial?: string }) {
             <Echo model={() => sayNeLetter(sel)} compact />
           </div>
         </div>
-        {varga && <p class="mouth-place"><b><Bi t={varga.name} /></b><Bi t={EXTRA_HOW[sel] ?? varga.how} /></p>}
-        {TEXTBOOK_PLACE[sel] && <p class="mouth-book">📘 <Bi t={TEXTBOOK_PLACE[sel]} inline /></p>}
+        {varga && <p class="mouth-place"><b><Bi t={varga.name} /></b></p>}
         <div class="feel-row">
           {info.air && <button class="feel on" onClick={feel(UI.feelAir)}>🕯️ <Bi t={UI.air} inline /></button>}
           {info.buzz && <button class="feel on" onClick={feel(UI.feelBuzz)}>🐝 <Bi t={UI.buzz} inline /></button>}
           {info.nose && <button class="feel on" onClick={feel(UI.feelNose)}>👃 <Bi t={UI.nose} inline /></button>}
         </div>
+        {varga && (
+          <GrownUp>
+            <p class="mouth-how"><Bi t={EXTRA_HOW[sel] ?? varga.how} /></p>
+            {TEXTBOOK_PLACE[sel] && <p class="mouth-book">📘 <Bi t={TEXTBOOK_PLACE[sel]} inline /></p>}
+              </GrownUp>
+        )}
       </div>
 
       <div class="varga-table card" role="grid">

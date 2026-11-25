@@ -36,12 +36,18 @@ export interface Progress {
   soundsHeard: string[];
 }
 
+export type Talk = 'ne' | 'both' | 'en';
+
 /** `age` (3–6) tunes difficulty; undefined until the child (or parent) answers once. */
 export interface Profile { id: string; avatar: string; name: string; age?: number; data?: Progress }
 
 export interface State extends Progress {
   v: 2;
   lang: Lang;
+  /** the language Habre uses for instructions: content (letters, words, stories) is always Nepali */
+  talk: Talk;
+  /** true once a grown-up has answered "which language does your child understand?" */
+  talkSet: boolean;
   sound: boolean;
   voice: boolean;
   roman: boolean;
@@ -75,7 +81,7 @@ export function emptyProgress(): Progress {
 
 export function defaultState(): State {
   return {
-    v: 2, lang: 'ne', sound: true, voice: true, roman: false, unlockAll: false, music: true, mic: true, playLimit: 0, playDay: '', playDaySeconds: 0, playExtra: 0,
+    v: 2, lang: 'ne', talk: 'ne', talkSet: false, sound: true, voice: true, roman: false, unlockAll: false, music: true, mic: true, playLimit: 0, playDay: '', playDaySeconds: 0, playExtra: 0,
     ...emptyProgress(),
     profiles: [{ id: 'p1', avatar: AVATARS[0], name: '' }], active: 'p1', lastPlayed: 0,
   };
@@ -97,6 +103,9 @@ export function migrate(raw: unknown): State {
     merged.active = 'p1';
   }
   if (!merged.profiles.some((p) => p.id === merged.active)) merged.active = merged.profiles[0].id;
+  // before v0.5 there was only `lang`: bilingual mode meant Nepali + English speech
+  if (r.talk === undefined) merged.talk = r.lang === 'en' ? 'both' : 'ne';
+  merged.lang = merged.talk === 'ne' ? 'ne' : 'en';
   for (const k of PROGRESS_KEYS) if (merged[k] === undefined) (merged as unknown as Record<string, unknown>)[k] = emptyProgress()[k];
   return merged;
 }
@@ -153,6 +162,7 @@ function flush() {
 // Don't lose the last 150 ms of progress when the app is backgrounded or closed.
 if (typeof document !== 'undefined') {
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') { clearTimeout(saveTimer); flush(); } });
+  window.addEventListener('pagehide', () => { clearTimeout(saveTimer); flush(); });
 }
 
 function emit() { listeners.forEach((l) => l()); }
@@ -166,6 +176,11 @@ export function update(fn: (s: State) => void): void {
   state = next;
   persist();
   emit();
+}
+
+/** Set the language Habre speaks to the child; on-screen English support follows it. */
+export function setTalk(talk: Talk): void {
+  update((s) => { s.talk = talk; s.lang = talk === 'ne' ? 'ne' : 'en'; s.talkSet = true; });
 }
 
 export function subscribe(fn: () => void): () => void {
